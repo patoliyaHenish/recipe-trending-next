@@ -23,6 +23,14 @@ import {
   Switch,
   Pagination,
   Autocomplete,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
 } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -68,10 +76,10 @@ import { useGetAllKeywordsQuery } from '../../../features/api/keywordApi';
 import { useGetRecipeCategoryDropdownQuery } from '../../../features/api/categoryApi';
 import ViewRecipeDialog from './ViewRecipeDialog';
 import RecipeNotesDialog from './RecipeNotesDialog';
-import { AgGridReact } from 'ag-grid-react';
-import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
-ModuleRegistry.registerModules([AllCommunityModule]);
+
+
+
+
 const CustomPickerDay = (props) => {
   const { day, selected, outsideCurrentMonth, rangeStart, rangeEnd, isDarkMode, ...other } = props;
   
@@ -1384,7 +1392,7 @@ const Recipe = () => {
                             fontSize: { xs: '1.25rem', sm: '1.5rem' }
                         }}
                     >
-                        {`${pagination.totalPages > 1 ? pagination.total : allRecipes.length} Recipes ${!isAdmin ? `| My Recipes: ${data?.myRecipeCount || 0} (${data?.myAdminApprovedCount || 0} Approved)` : `| Total Approved: ${data?.totalAdminApprovedCount || 0}`}`}
+                        {`${pagination.totalPages > 1 ? pagination.total : allRecipes.length} Recipes ${!isAdmin ? `| My Recipes: ${data?.myRecipeCount || 0} (${data?.myAdminApprovedCount || 0} Approved)` : `| Total Approved - ${data?.totalAdminApprovedCount || 0}`}`}
                     </Typography>
                     <Typography
                         variant="body2"
@@ -2815,38 +2823,340 @@ const Recipe = () => {
                     '& .ag-pinned-left-header': { backgroundColor: isDarkMode ? '#283046' : '#f3f2f7', borderRight: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` },
                 }}
             >
-                <AgGridReact
-                        enableCellTextSelection={true}
-                        ensureDomOrder={true}
-                    rowData={displayedRecipes}
-                    columnDefs={columnDefs}
-                    defaultColDef={defaultColDef}
-                    domLayout="autoHeight"
-                    rowHeight={60}
-                    headerHeight={48}
-                    animateRows={false}
-                    loading={isLoading || isFetching}
-                    suppressNoRowsOverlay={isLoading || isFetching || !data}
-                    overlayLoadingTemplate='<span class="ag-overlay-loading-center">Loading...</span>'
-                    overlayNoRowsTemplate={'<span class="ag-overlay-no-rows-center">No recipes found</span>'}
-                    getRowStyle={(params) => {
-                        if (params.data && params.data.has_pending_notes) {
-                            return { backgroundColor: isDarkMode ? 'rgba(253, 224, 71, 0.15)' : '#fef9c3' };
-                        }
-                        return null;
-                    }}
-                    rowSelection={selectionMode ? "multiple" : undefined}
-                    suppressRowClickSelection={true}
-                    isRowSelectable={(rowNode) => {
-                        return rowNode.data ? rowNode.data.is_admin_approved && !rowNode.data.public_approved : false;
-                    }}
-                    onSelectionChanged={(params) => {
-                        setSelectedRows(params.api.getSelectedRows());
-                    }}
-                />
+                
+{/* ── Table ───────────────────────────────────────────────── */}
+<TableContainer 
+    component={Paper} 
+    elevation={0}
+    sx={{
+        flex: 1,
+        backgroundColor: 'transparent',
+        backgroundImage: 'none',
+        boxShadow: 'none',
+        borderRadius: 0,
+        overflowX: 'auto',
+    }}
+>
+    <Table stickyHeader sx={{ minWidth: 1500, borderCollapse: 'separate', borderSpacing: 0 }}>
+        <TableHead>
+            <TableRow sx={{ 
+                'height': '48px',
+                '& th': { 
+                    backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
+                    color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+                    fontWeight: 600,
+                    fontSize: '0.8rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                    borderTop: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                    py: 0,
+                    px: 2,
+                    whiteSpace: 'nowrap'
+                } 
+            }}>
+                <TableCell align="center" width={70}>#</TableCell>
+                <TableCell align="center">Image</TableCell>
+                <TableCell align="center">YT Image</TableCell>
+                <TableCell>Title</TableCell>
+                <TableCell align="center">Category</TableCell>
+                <TableCell align="center">Sub Category</TableCell>
+                <TableCell align="center">Food Type</TableCell>
+                {(isAdmin || canPublish || canPublishAll) && (
+                    <>
+                        <TableCell align="center">
+                            {selectionMode && (
+                                <Checkbox
+                                    size="small"
+                                    checked={displayedRecipes.length > 0 && selectedRows.length === displayedRecipes.filter(r => r.is_admin_approved && !r.public_approved).length}
+                                    onChange={handleSelectAll}
+                                    sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}
+                                />
+                            )}
+                            Public Approved
+                        </TableCell>
+                        <TableCell align="center">Approved Date</TableCell>
+                    </>
+                )}
+                {isAdmin && (
+                    <TableCell align="center">Admin Approved</TableCell>
+                )}
+                <TableCell align="center">Admin Approved Time</TableCell>
+                <TableCell align="center">Created Date</TableCell>
+                <TableCell align="center">Updated Date</TableCell>
+                <TableCell align="center">Created By</TableCell>
+                {showAnalyticsColumns && (
+                    <>
+                        <TableCell align="center">Badge</TableCell>
+                        {canViewAnalytics && (
+                            <>
+                                <TableCell align="center">Total Views</TableCell>
+                                <TableCell align="center">Views (24h)</TableCell>
+                                <TableCell align="center">Views (7d)</TableCell>
+                            </>
+                        )}
+                        <TableCell align="center">Rank</TableCell>
+                    </>
+                )}
+                <TableCell align="center">Actions</TableCell>
+            </TableRow>
+        </TableHead>
+        <TableBody>
+            {isLoading || isFetching ? (
+                <TableRow>
+                    <TableCell colSpan={20} align="center" sx={{ py: 8, borderBottom: 'none' }}>
+                        <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                    </TableCell>
+                </TableRow>
+            ) : displayedRecipes.length === 0 ? (
+                <TableRow>
+                    <TableCell colSpan={20} align="center" sx={{ py: 8, borderBottom: 'none' }}>
+                        <Typography variant="body1" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                            No recipes found
+                        </Typography>
+                    </TableCell>
+                </TableRow>
+            ) : (
+                displayedRecipes.map((recipe, index) => {
+                    const rowBgColor = recipe.has_pending_notes ? (isDarkMode ? 'rgba(253, 224, 71, 0.15)' : '#fef9c3') : 'transparent';
+                    
+                    const canModifyEdit = isAdmin || canUpdateAll || Number(recipe.created_by) === Number(user?.user_id);
+                    const canModifyDelete = isAdmin || canDeleteAll || Number(recipe.created_by) === Number(user?.user_id);
+                    const canModifyPublic = isAdmin || canPublishAll || Number(recipe.created_by) === Number(user?.user_id);
+
+                    const foodTypeColor = recipe.food_type === 'veg' ? '#10b981' : recipe.food_type === 'egg' ? '#f59e0b' : '#ef4444';
+                    
+                    const badgeColors = {
+                        'Popular': '#ef4444',
+                        'Trending': '#3b82f6',
+                        'Beginner': '#10b981',
+                        'Quick': '#f59e0b'
+                    };
+                    const badgeColor = badgeColors[recipe.badge] || '#f97316';
+
+                    return (
+                        <TableRow 
+                            key={recipe.recipe_id}
+                            sx={{ 
+                                backgroundColor: rowBgColor,
+                                '&:hover': {
+                                    backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
+                                },
+                                '& td': {
+                                    borderColor: isDarkMode ? '#3b4253' : '#ebe9f1',
+                                    color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                    py: 1,
+                                    px: 2
+                                }
+                            }}
+                        >
+                            <TableCell align="center">{(page - 1) * limit + index + 1}</TableCell>
+                            <TableCell align="center">
+                                {recipe.image && recipe.image.toLowerCase() !== 'null' ? (
+                                    <img src={getImage(recipe.image)} alt={recipe.title} style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 4 }} />
+                                ) : (
+                                    <span className="text-gray-400">No Image</span>
+                                )}
+                            </TableCell>
+                            <TableCell align="center">
+                                {recipe.video_url && getYouTubeThumbnail(recipe.video_url) ? (
+                                    <Box
+                                        sx={{
+                                            width: 72,
+                                            aspectRatio: '16 / 9',
+                                            overflow: 'hidden',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            backgroundColor: isDarkMode ? '#1f2937' : '#e5e7eb',
+                                            mx: 'auto'
+                                        }}
+                                    >
+                                        <img src={getYouTubeThumbnail(recipe.video_url).replace('/hqdefault.jpg', '/mqdefault.jpg')} alt="YT Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                    </Box>
+                                ) : (
+                                    <span className="text-gray-400">-</span>
+                                )}
+                            </TableCell>
+                            <TableCell>{recipe.title}</TableCell>
+                            <TableCell align="center">{recipe.category_name}</TableCell>
+                            <TableCell align="center">{recipe.sub_category_name || '-'}</TableCell>
+                            <TableCell align="center">
+                                {recipe.food_type ? (
+                                    <Typography variant="body2" sx={{ color: foodTypeColor, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem' }}>
+                                        {recipe.food_type.replace('_', '-')}
+                                    </Typography>
+                                ) : '-'}
+                            </TableCell>
+                            
+                            {(isAdmin || canPublish || canPublishAll) && (
+                                <>
+                                    <TableCell align="center">
+                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                                            {selectionMode && recipe.is_admin_approved && !recipe.public_approved && (
+                                                <Checkbox
+                                                    size="small"
+                                                    checked={selectedRows.some(r => r.recipe_id === recipe.recipe_id)}
+                                                    onChange={(e) => handleSelectRow(e, recipe)}
+                                                    sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', p: 0, mr: 1 }}
+                                                />
+                                            )}
+                                            {recipe.is_admin_approved ? (
+                                                <Switch
+                                                    checked={!!recipe.public_approved}
+                                                    onChange={() => setPublicToggleItem(recipe)}
+                                                    size="small"
+                                                    color="success"
+                                                    disabled={recipe.isLoading || !canModifyPublic || (!canPublish && !canPublishAll && !isAdmin)}
+                                                />
+                                            ) : (
+                                                <span style={{ color: isDarkMode ? '#6b7280' : '#9ca3af' }}>-</span>
+                                            )}
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        {recipe.public_approved && recipe.public_approved_time ? (
+                                            <span style={{ color: isDarkMode ? '#fef08a' : '#2563eb', fontWeight: 500 }}>
+                                                {new Date(recipe.public_approved_time).toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}
+                                            </span>
+                                        ) : '-'}
+                                    </TableCell>
+                                </>
+                            )}
+                            
+                            {isAdmin && (
+                                <TableCell align="center">
+                                    <Switch
+                                        checked={!!recipe.is_admin_approved}
+                                        onChange={() => setAdminToggleItem(recipe)}
+                                        size="small"
+                                        color="primary"
+                                        disabled
+                                    />
+                                </TableCell>
+                            )}
+                            
+                            <TableCell align="center">
+                                {recipe.is_admin_approved && recipe.admin_approved_time ? (
+                                    <span style={{ color: isDarkMode ? '#f9a8d4' : '#db2777', fontWeight: 500 }}>
+                                        {new Date(recipe.admin_approved_time).toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}
+                                    </span>
+                                ) : '-'}
+                            </TableCell>
+                            
+                            <TableCell align="center">
+                                {recipe.created_at ? (
+                                    <span style={{ color: isDarkMode ? '#9ca3af' : '#4b5563', fontWeight: 500 }}>
+                                        {new Date(recipe.created_at).toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}
+                                    </span>
+                                ) : '-'}
+                            </TableCell>
+                            
+                            <TableCell align="center">
+                                {recipe.updated_at ? (
+                                    <span style={{ color: isDarkMode ? '#9ca3af' : '#4b5563', fontWeight: 500 }}>
+                                        {new Date(recipe.updated_at).toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}
+                                    </span>
+                                ) : '-'}
+                            </TableCell>
+                            
+                            <TableCell align="center">
+                                <span style={{ fontWeight: 500, color: isDarkMode ? '#9ca3af' : '#4b5563' }}>
+                                    {recipe.created_by_name || '-'}
+                                </span>
+                            </TableCell>
+                            
+                            {showAnalyticsColumns && (
+                                <>
+                                    <TableCell align="center">
+                                        {recipe.badge ? (
+                                            <Chip
+                                                label={recipe.badge}
+                                                size="small"
+                                                sx={{ backgroundColor: badgeColor, color: '#fff', fontWeight: 'bold', fontSize: '0.75rem', height: '22px', borderRadius: 0, px: 0.5 }}
+                                            />
+                                        ) : '-'}
+                                    </TableCell>
+                                    
+                                    {canViewAnalytics && (
+                                        <>
+                                            <TableCell align="center"><Typography variant="body2" sx={{ fontWeight: 600 }}>{recipe.total_views?.toLocaleString() || 0}</Typography></TableCell>
+                                            <TableCell align="center"><Typography variant="body2" sx={{ fontWeight: 600 }}>{recipe.views_last_24h?.toLocaleString() || 0}</Typography></TableCell>
+                                            <TableCell align="center"><Typography variant="body2" sx={{ fontWeight: 600 }}>{recipe.views_last_7d?.toLocaleString() || 0}</Typography></TableCell>
+                                        </>
+                                    )}
+                                    
+                                    <TableCell align="center">
+                                        <Box sx={{
+                                            bgcolor: recipe.view_rank <= 3 ? (isDarkMode ? '#059669' : '#dcfce7') : 'transparent',
+                                            color: recipe.view_rank <= 3 ? (isDarkMode ? '#fff' : '#166534') : 'inherit',
+                                            px: 1, py: 0, borderRadius: 0.5, fontWeight: 700, fontSize: '0.7rem', lineHeight: 1.2,
+                                            border: recipe.view_rank <= 3 ? 'none' : `1px solid ${isDarkMode ? '#4b5563' : '#d1d5db'}`,
+                                            display: 'inline-block'
+                                        }}>
+                                            #{recipe.view_rank || '-'}
+                                        </Box>
+                                    </TableCell>
+                                </>
+                            )}
+                            
+                            <TableCell align="center">
+                                <Box className="flex gap-2 justify-center items-center h-full">
+                                    <ActionButtons
+                                        onView={() => setViewId(recipe.recipe_id)}
+                                        onEdit={() => navigate('/admin/manage-recipes/edit/' + recipe.recipe_id, { state: { returnTo: location.search } })}
+                                        onDelete={() => setDeleteId(recipe.recipe_id)}
+                                        showView={canView}
+                                        showEdit={canUpdate && canModifyEdit}
+                                        showDelete={canDelete && canModifyDelete}
+                                    />
+                                    {canNotesList && (
+                                        <IconButton
+                                            onClick={() => setNoteRecipeId(recipe.recipe_id)}
+                                            size="small"
+                                            title="Notes"
+                                            sx={{ color: isDarkMode ? '#f59e0b' : '#d97706', backgroundColor: 'transparent', borderRadius: 0, border: 'none', '&:hover': { color: isDarkMode ? '#fbbf24' : '#b45309' }, transition: 'all 0.3s ease' }}
+                                        >
+                                            <NoteAltOutlinedIcon fontSize="small" />
+                                        </IconButton>
+                                    )}
+                                    {recipe.has_updates_after_pending_notes && (
+                                        <IconButton
+                                            size="small"
+                                            title="Recipe has been updated since notes were added"
+                                            disableRipple
+                                            sx={{ color: isDarkMode ? '#10b981' : '#059669', backgroundColor: 'transparent', borderRadius: 0, border: 'none', cursor: 'default', '&:hover': { color: isDarkMode ? '#34d399' : '#10b981' }, transition: 'all 0.3s ease' }}
+                                        >
+                                            <UpdateIcon fontSize="small" />
+                                        </IconButton>
+                                    )}
+                                    {isAdmin && showAnalyticsColumns && (
+                                        <IconButton
+                                            onClick={() => {
+                                                setBadgeDialogRecipeId(recipe.recipe_id);
+                                                setBadgeDialogRecipeData(recipe);
+                                                setBadgeDialogOpen(true);
+                                            }}
+                                            size="small"
+                                            title="Update Badge"
+                                            sx={{ color: isDarkMode ? '#8b5cf6' : '#7c3aed', backgroundColor: 'transparent', borderRadius: 0, border: 'none', '&:hover': { color: isDarkMode ? '#a78bfa' : '#a855f7' }, transition: 'all 0.3s ease' }}
+                                        >
+                                            <EmojiEventsIcon fontSize="small" />
+                                        </IconButton>
+                                    )}
+                                </Box>
+                            </TableCell>
+                        </TableRow>
+                    );
+                })
+            )}
+        </TableBody>
+    </Table>
+</TableContainer>
+
             </Box>
 
-            {/* ── Pagination ────────────────────────────────────────────── */}
+            {/* ── Pagination ────────────────────────────────────────── */}
             <Box
                 className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0"
                 sx={{
@@ -2861,7 +3171,7 @@ const Recipe = () => {
                         freeSolo
                         size="small"
                         options={[10, 25, 50, 100, 150, 200, 250, 300, 350]}
-                        value={limit}
+                        value={limit || 10}
                         onChange={(event, newValue) => {
                             if (newValue) {
                                 handleLimitChange({ target: { value: Number(newValue) } });
@@ -2875,9 +3185,15 @@ const Recipe = () => {
                         }}
                         sx={{
                             width: 100,
-                            '& .MuiAutocomplete-inputRoot': { paddingRight: '30px !important' },
-                            '& .MuiAutocomplete-clearIndicator': { color: isDarkMode ? '#b4b7bd' : '#6e6b7b' },
-                            '& .MuiAutocomplete-popupIndicator': { color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }
+                            '& .MuiAutocomplete-inputRoot': {
+                                paddingRight: '30px !important'
+                            },
+                            '& .MuiAutocomplete-clearIndicator': {
+                                color: isDarkMode ? '#b4b7bd' : '#6e6b7b'
+                            },
+                            '& .MuiAutocomplete-popupIndicator': {
+                                color: isDarkMode ? '#b4b7bd' : '#6e6b7b'
+                            }
                         }}
                         ListboxProps={{
                             sx: {
@@ -2922,20 +3238,22 @@ const Recipe = () => {
                                 }}
                             />
                         )}
-                        disableClearable
                     />
                     <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                        Showing {Math.min((pagination.page - 1) * limit + 1, pagination.total || 0)} to {Math.min(pagination.page * limit, pagination.total || 0)} of {pagination.total || 0} entries
+                        Entries per page
+                    </Typography>
+                </Box>
+
+                <Box className="flex items-center gap-4">
+                    <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                        Showing {Math.min((page - 1) * limit + 1, pagination.total || 0)} to {Math.min(page * limit, pagination.total || 0)} of {pagination.total || 0} entries
                     </Typography>
                 </Box>
 
                 <Pagination
                     count={pagination.totalPages || 1}
-                    page={pagination.page || 1}
-                    onChange={(event, value) => {
-                        setPage(value);
-                        syncUrlParams(value, limit);
-                    }}
+                    page={page || 1}
+                    onChange={(e, value) => setPage(value)}
                     shape="rounded"
                     showFirstButton
                     showLastButton
@@ -2966,7 +3284,10 @@ const Recipe = () => {
                     }}
                 />
             </Box>
+
         </Box>
+
+        
 
 
 
@@ -2975,7 +3296,25 @@ const Recipe = () => {
         const viewData = viewRecipeData?.data;
         const canModifyEdit = isAdmin || canUpdateAll || Number(viewData?.created_by) === Number(user?.user_id);
         const canModifyDelete = isAdmin || canDeleteAll || Number(viewData?.created_by) === Number(user?.user_id);
-        return (
+      
+  const handleSelectAll = (event) => {
+    if (event.target.checked) {
+      const selectable = displayedRecipes.filter(row => row.is_admin_approved && !row.public_approved);
+      setSelectedRows(selectable);
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const handleSelectRow = (event, row) => {
+    if (event.target.checked) {
+      setSelectedRows(prev => [...prev, row]);
+    } else {
+      setSelectedRows(prev => prev.filter(r => r.recipe_id !== row.recipe_id));
+    }
+  };
+
+  return (
           <ViewRecipeDialog
             open={!!viewId}
             onClose={() => setViewId(null)}
