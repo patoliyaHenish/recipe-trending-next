@@ -54,7 +54,7 @@ export default function AdminRouter() {
         <Route path="manage-recipes" element={<Recipe />} />
         <Route path="manage-recipes/add" element={<AddEditRecipePage />} />
         <Route path="manage-recipes/edit/:id" element={<AddEditRecipePage />} />
-        <Route path="assigned-recipes" element={<AssignedRecipes />} />
+        <Route path="manage-assigned-recipes" element={<AssignedRecipes />} />
         <Route path="recipe-notes" element={<RecipeNotes />} />
         
         {/* RBAC */}
