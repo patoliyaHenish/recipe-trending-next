@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /reset-password/
+Disallow: /forgot-password/
+Disallow: /verify-email/
+Disallow: /not-authenticated
+Disallow: /not-authenticated
+Disallow: /about-us
+Disallow: /contact-us
+Disallow: /privacy
+Disallow: /terms
+
+Sitemap: https://recipetrending.com/sitemap.xml
