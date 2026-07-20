@@ -15,13 +15,16 @@ import {
   Select,
   FormControl,
   Tooltip,
-  Autocomplete
+  Autocomplete,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
 } from '@mui/material'
 import { toast } from '../../../utils/toast';
-import { AgGridReact } from 'ag-grid-react'
-import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community'
-import 'ag-grid-community/styles/ag-grid.css'
-import 'ag-grid-community/styles/ag-theme-alpine.css'
 import CloseIcon from '@mui/icons-material/Close'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -32,8 +35,6 @@ import { useGetAllUsersQuery } from '../../../features/api/authApi'
 import { useGetPaymentSlipsQuery, useDeletePaymentSlipByIdMutation } from '../../../features/api/paymentSlipApi'
 import AddPaymentSlipDialog from './AddPaymentSlipDialog'
 import ViewPayrollDialog from './ViewPayrollDialog'
-
-ModuleRegistry.registerModules([AllCommunityModule])
 
 const statusOptions = ['pending', 'approved', 'rejected', 'paid']
 
@@ -181,177 +182,23 @@ const PayrollManagement = () => {
     setPage(1)
   }
 
-  const columnDefs = useMemo(
-    () => {
-      const getRoleLabel = (row) => {
-        const rawRole = row?.user_role_name || row?.user_role || row?.role_name || row?.role || usersById[row?.user_id]?.role_name || usersById[row?.user_id]?.role
-        if (!rawRole) return '-'
-        return String(rawRole)
-          .replace(/_/g, ' ')
-          .replace(/\b\w/g, (char) => char.toUpperCase())
-      }
+  const getRoleLabel = (row) => {
+    const rawRole = row?.user_role_name || row?.user_role || row?.role_name || row?.role || usersById[row?.user_id]?.role_name || usersById[row?.user_id]?.role
+    if (!rawRole) return '-'
+    return String(rawRole)
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase())
+  }
 
-      return [
-        {
-          headerName: '#',
-          valueGetter: (params) => (pagination.page - 1) * pagination.limit + params.node.rowIndex + 1,
-          width: 70,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-        },
-        {
-          headerName: 'User',
-          field: 'user_name',
-          minWidth: 220,
-          flex: 1,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (params) => (
-            <Box sx={{ textAlign: 'center', lineHeight: 1.35 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                {params.data?.user_name || `User #${params.data?.user_id}`}
-              </Typography>
-              <Typography variant="caption" sx={{ display: 'block', opacity: 0.8 }}>
-                {params.data?.user_email || `ID: ${params.data?.user_id}`}
-              </Typography>
-            </Box>
-          ),
-        },
-        {
-          headerName: 'Role',
-          field: 'user_role_name',
-          width: 140,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (params) => (
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {getRoleLabel(params.data)}
-            </Typography>
-          ),
-        },
-        {
-          headerName: 'Rate',
-          field: 'rate',
-          width: 120,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (params) => moneyFormatter.format(Number(params.value || 0)),
-        },
-        {
-          headerName: 'Total Amount',
-          field: 'total_amount',
-          width: 130,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (params) => moneyFormatter.format(Number(params.value || 0)),
-        },
-        {
-          headerName: 'Approved Count',
-          field: 'admin_approved_count',
-          width: 135,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-        },
-        {
-          headerName: 'Payment Date',
-          field: 'payment_date',
-          width: 120,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (params) => formatDateOnly(params.value),
-        },
-        {
-          headerName: 'Status',
-          field: 'status',
-          width: 120,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (params) => {
-            const value = params.value || 'pending'
-            const colors = {
-              pending: isDarkMode ? '#f59e0b' : '#d97706',
-              approved: isDarkMode ? '#10b981' : '#059669',
-              rejected: isDarkMode ? '#ef4444' : '#dc2626',
-              paid: isDarkMode ? '#3b82f6' : '#2563eb',
-            }
-            return (
-              <Typography variant="body2" sx={{ color: colors[value] || (isDarkMode ? '#e5e7eb' : '#374151'), fontWeight: 700, textTransform: 'capitalize' }}>
-                {value}
-              </Typography>
-            )
-          },
-        },
-        {
-          headerName: 'Payment Mode',
-          field: 'payment_mode',
-          minWidth: 140,
-          flex: 1,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (params) => params.value || '-',
-        },
-        {
-          headerName: 'Actions',
-          width: 160,
-          hide: !(canView || canUpdate || canDelete),
-          cellStyle: { textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (params) => (
-            <Box className="flex gap-2 justify-center items-center h-full">
-              {canView && (
-                <Tooltip title="View" arrow>
-                  <IconButton
-                    size="small"
-                    onClick={() => setViewSlip(params.data)}
-                    sx={{
-                      color: isDarkMode ? '#10b981' : '#059669',
-                      '&:hover': { backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5' },
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                  </IconButton>
-                </Tooltip>
-              )}
-              {canUpdate && (
-                <Tooltip title="Edit" arrow>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleOpenEdit(params.data)}
-                    sx={{
-                      color: isDarkMode ? '#3b82f6' : '#2563eb',
-                      '&:hover': { backgroundColor: isDarkMode ? '#1e3a8a' : '#dbeafe' },
-                    }}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
-              {canDelete && (
-                <Tooltip title="Delete" arrow>
-                  <IconButton
-                    size="small"
-                    onClick={() => setDeleteId(params.data.id)}
-                    sx={{
-                      color: isDarkMode ? '#ef4444' : '#dc2626',
-                      '&:hover': { backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2' },
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </Box>
-          ),
-        },
-      ]
-    },
-    [canDelete, canUpdate, canView, isDarkMode, pagination.limit, pagination.page, usersById]
-  )
+  const statusColors = {
+    pending: isDarkMode ? '#f59e0b' : '#d97706',
+    approved: isDarkMode ? '#10b981' : '#059669',
+    rejected: isDarkMode ? '#ef4444' : '#dc2626',
+    paid: isDarkMode ? '#3b82f6' : '#2563eb',
+  }
 
-  const defaultColDef = useMemo(() => ({ sortable: true, resizable: true }), [])
+  const showActions = canView || canUpdate || canDelete
+  const colSpan = showActions ? 10 : 9
 
   const selectStyles = {
     height: 38,
@@ -490,76 +337,183 @@ const PayrollManagement = () => {
           </Box>
         </Box>
 
-        {/* ── AG Grid ───────────────────────────────────────────────── */}
-        <Box
-          className={`${isDarkMode ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'} w-full xl:max-w-none`}
+        {/* ── Native Table ──────────────────────────────────────────── */}
+        <TableContainer
           sx={{
             flex: 1,
-            width: '100%',
-            height: 'auto',
             minHeight: 400,
-            display: 'flex',
-            flexDirection: 'column',
-            '& .ag-root-wrapper': {
-              backgroundColor: 'transparent',
-              border: 'none',
-              borderRadius: 0,
-              width: '100%',
-              height: '100%',
+            overflow: 'auto',
+            backgroundColor: 'transparent',
+            '&::-webkit-scrollbar': { width: '8px', height: '8px' },
+            '&::-webkit-scrollbar-track': { background: 'transparent' },
+            '&::-webkit-scrollbar-thumb': {
+              background: isDarkMode ? '#404656' : '#c1c1c1',
+              borderRadius: '4px',
             },
-            '& .ag-root': { backgroundColor: 'transparent' },
-            '& .ag-header': {
-              backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
-              borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
-              borderTop: 'none',
-            },
-            '& .ag-header-cell': {
-              color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
-              fontWeight: 600,
-              fontSize: '0.8rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            },
-            '& .ag-row': {
-              borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'} !important`,
-              backgroundColor: isDarkMode ? '#283046' : '#ffffff',
-              color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-              transition: 'background-color 0.2s ease',
-            },
-            '& .ag-row:hover': {
-              backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
-            },
-            '& .ag-header-cell-label': { justifyContent: 'center' },
-            '& .ag-header-center .ag-header-cell-label': { justifyContent: 'center' },
-            '& .ag-body-viewport': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-center-cols-viewport': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-center-cols-container': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-root-wrapper-body': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-body-horizontal-scroll': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-row-even': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-row-odd': { backgroundColor: isDarkMode ? '#283046' : '#fafbfc' },
-            '& .ag-cell': {
-              display: 'flex',
-              alignItems: 'center',
-              border: 'none',
+            '&::-webkit-scrollbar-thumb:hover': {
+              background: isDarkMode ? '#505666' : '#a8a8a8',
             },
           }}
         >
-          <AgGridReact
-            enableCellTextSelection={true}
-            ensureDomOrder={true}
-            rowData={slips}
-            columnDefs={columnDefs}
-            defaultColDef={defaultColDef}
-            domLayout="autoHeight"
-            rowHeight={70}
-            headerHeight={48}
-            pagination={false}
-            suppressCellFocus={true}
-            animateRows={true}
-            overlayNoRowsTemplate="<span>No payment slips found</span>"
-          />
-        </Box>
+          <Table stickyHeader sx={{ minWidth: 1200, borderCollapse: 'separate', borderSpacing: 0 }}>
+            <TableHead>
+              <TableRow>
+                {['#', 'User', 'Role', 'Rate', 'Total Amount', 'Approved Count', 'Payment Date', 'Status', 'Payment Mode', ...(showActions ? ['Actions'] : [])].map((headCell, index) => (
+                  <TableCell
+                    key={index}
+                    align="center"
+                    sx={{
+                      backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
+                      color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                      py: 2,
+                    }}
+                  >
+                    {headCell}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {isLoading || isFetching ? (
+                <TableRow>
+                  <TableCell colSpan={colSpan} align="center" sx={{ py: 8 }}>
+                    <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                    <Typography sx={{ mt: 2, color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>Loading...</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : slips.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={colSpan} align="center" sx={{ py: 8 }}>
+                    <Typography sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>No payment slips found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                slips.map((slip, index) => {
+                  const statusVal = slip.status || 'pending'
+                  return (
+                    <TableRow
+                      key={slip.id || index}
+                      sx={{
+                        backgroundColor: index % 2 === 0 ? (isDarkMode ? '#283046' : '#ffffff') : (isDarkMode ? '#283046' : '#fafbfc'),
+                        transition: 'background-color 0.2s ease',
+                        '&:hover': {
+                          backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
+                        },
+                        '& td': {
+                          borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                          color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                          py: 1.5,
+                        },
+                      }}
+                    >
+                      <TableCell align="center">
+                        {(pagination.page - 1) * pagination.limit + index + 1}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Box sx={{ textAlign: 'center', lineHeight: 1.35 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                            {slip.user_name || `User #${slip.user_id}`}
+                          </Typography>
+                          <Typography variant="caption" sx={{ display: 'block', opacity: 0.8 }}>
+                            {slip.user_email || `ID: ${slip.user_id}`}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {getRoleLabel(slip)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        {moneyFormatter.format(Number(slip.rate || 0))}
+                      </TableCell>
+                      <TableCell align="center">
+                        {moneyFormatter.format(Number(slip.total_amount || 0))}
+                      </TableCell>
+                      <TableCell align="center">
+                        {slip.admin_approved_count ?? '-'}
+                      </TableCell>
+                      <TableCell align="center">
+                        {formatDateOnly(slip.payment_date)}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: statusColors[statusVal] || (isDarkMode ? '#e5e7eb' : '#374151'),
+                            fontWeight: 700,
+                            textTransform: 'capitalize',
+                          }}
+                        >
+                          {statusVal}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        {slip.payment_mode || '-'}
+                      </TableCell>
+                      {showActions && (
+                        <TableCell align="center">
+                          <Box className="flex gap-2 justify-center items-center h-full">
+                            {canView && (
+                              <Tooltip title="View" arrow>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => setViewSlip(slip)}
+                                  sx={{
+                                    color: isDarkMode ? '#10b981' : '#059669',
+                                    '&:hover': { backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5' },
+                                  }}
+                                >
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                  </svg>
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {canUpdate && (
+                              <Tooltip title="Edit" arrow>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleOpenEdit(slip)}
+                                  sx={{
+                                    color: isDarkMode ? '#3b82f6' : '#2563eb',
+                                    '&:hover': { backgroundColor: isDarkMode ? '#1e3a8a' : '#dbeafe' },
+                                  }}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {canDelete && (
+                              <Tooltip title="Delete" arrow>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => setDeleteId(slip.id)}
+                                  sx={{
+                                    color: isDarkMode ? '#ef4444' : '#dc2626',
+                                    '&:hover': { backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2' },
+                                  }}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </Box>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
         {/* ── Custom Pagination ─────────────────────────────────────── */}
         <Box

@@ -1,22 +1,15 @@
 "use client";
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Box, Typography, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, Select, MenuItem, Autocomplete, TextField, Pagination, Tooltip } from '@mui/material';
+import { Box, Typography, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, Select, MenuItem, Autocomplete, TextField, Pagination, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Delete, Close as CloseIcon, Visibility } from '@mui/icons-material';
-import { AgGridReact } from 'ag-grid-react';
-import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 import moment from 'moment';
 import { toast } from '../../utils/toast';
 import { useTheme } from '../../context/ThemeContext';
 import { useGetAllCronLogsQuery, useDeleteCronLogMutation } from '../../features/api/cronLogApi';
-
-
-ModuleRegistry.registerModules([AllCommunityModule]);
 
 import { useSelector } from 'react-redux';
 import { AccessDenied, ConfirmDialog } from '../../components/common';
@@ -326,106 +319,8 @@ const CronLogs = () => {
 
     const logs = logsData?.data || [];
     const pagination = logsData?.pagination || { total: 0, page: 1, limit, totalPages: 1 };
-
-    const columnDefs = useMemo(() => [
-        {
-            headerName: '#',
-            valueGetter: (params) => (page - 1) * limit + params.node.rowIndex + 1,
-            width: 70,
-            cellStyle: { justifyContent: 'center' },
-            headerClass: 'ag-header-center',
-        },
-        {
-            headerName: 'Job Name',
-            field: 'job_name',
-            flex: 1.5,
-            minWidth: 200,
-            cellStyle: { justifyContent: 'center' },
-            headerClass: 'ag-header-center',
-        },
-        {
-            headerName: 'Status',
-            field: 'status',
-            width: 140,
-            cellRenderer: (params) => (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: params.value === 'SUCCESS' ? '#10b981' : '#ef4444',
-                            fontWeight: 'bold',
-                            backgroundColor: params.value === 'SUCCESS' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                            padding: '4px 12px',
-                            borderRadius: '20px',
-                            fontSize: '0.75rem',
-                            letterSpacing: '0.5px'
-                        }}
-                    >
-                        {params.value}
-                    </Typography>
-                </div>
-            ),
-            headerClass: 'ag-header-center',
-        },
-        {
-            headerName: 'Created At',
-            field: 'created_at',
-            width: 200,
-            valueFormatter: (params) => moment(params.value).format('MMM D, YYYY h:mm A'),
-            cellStyle: { justifyContent: 'center' },
-            headerClass: 'ag-header-center',
-        },
-        ...(canViewDetail || canDelete ? [{
-            headerName: 'Actions',
-            width: 120,
-            cellStyle: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
-            headerClass: 'ag-header-center',
-            cellRenderer: (params) => (
-                <Box className="flex gap-2 justify-center items-center h-full">
-                    {canViewDetail && (
-                        <Tooltip title="View" arrow>
-                            <IconButton
-                                size="small"
-                                onClick={() => setViewLog(params.data)}
-                                sx={{
-                                    color: isDarkMode ? "#10b981" : "#059669",
-                                    "&:hover": {
-                                        backgroundColor: isDarkMode ? "#064e3b" : "#d1fae5",
-                                    },
-                                }}
-                            >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                            </IconButton>
-                        </Tooltip>
-                    )}
-                    {canDelete && (
-                        <Tooltip title="Delete" arrow>
-                            <IconButton
-                                size="small"
-                                onClick={() => handleDeleteClick(params.data.id)}
-                                sx={{
-                                    color: isDarkMode ? '#ef4444' : '#dc2626',
-                                    '&:hover': {
-                                        backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2',
-                                    },
-                                }}
-                            >
-                                <Delete fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    )}
-                </Box>
-            ),
-        }] : [])
-    ], [page, limit, isDarkMode, canViewDetail, canDelete]);
-
-    const defaultColDef = useMemo(() => ({
-        sortable: true,
-        resizable: true,
-    }), []);
+    const colCount = canViewDetail || canDelete ? 5 : 4;
+    const headerCells = ['#', 'Job Name', 'Status', 'Created At', ...(canViewDetail || canDelete ? ['Actions'] : [])];
 
     return (
         <Box className="transition-all duration-200 flex flex-col pt-0 md:pt-4 pb-4 px-3 mt-[64px] md:mt-[74px] min-h-[calc(100vh-74px)] h-auto w-full">
@@ -608,75 +503,146 @@ const CronLogs = () => {
                     </Box>
                 </Box>
 
-                <Box
-                    className={`${isDarkMode ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'} w-full`}
+                <TableContainer
                     sx={{
                         flex: 1,
-                        width: '100%',
-                        height: 'auto',
                         minHeight: 0,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        '& .ag-root-wrapper': {
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            borderRadius: 0,
-                            width: '100%',
-                            height: '100%',
+                        overflow: 'auto',
+                        backgroundColor: 'transparent',
+                        '&::-webkit-scrollbar': { width: '8px', height: '8px' },
+                        '&::-webkit-scrollbar-track': { background: 'transparent' },
+                        '&::-webkit-scrollbar-thumb': {
+                            background: isDarkMode ? '#404656' : '#c1c1c1',
+                            borderRadius: '4px',
                         },
-                        '& .ag-root': { backgroundColor: 'transparent' },
-                        '& .ag-header': {
-                            backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
-                            borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
-                            borderTop: 'none',
-                        },
-                        '& .ag-header-cell': {
-                            color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
-                            fontWeight: 600,
-                            fontSize: '0.8rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px',
-                        },
-                        '& .ag-row': {
-                            borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'} !important`,
-                            backgroundColor: isDarkMode ? '#283046' : '#ffffff',
-                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                            transition: 'background-color 0.2s ease',
-                        },
-                        '& .ag-row:hover': {
-                            backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
-                        },
-                        '& .ag-header-cell-label': { justifyContent: 'center' },
-                        '& .ag-header-center .ag-header-cell-label': { justifyContent: 'center' },
-                        '& .ag-body-viewport': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                        '& .ag-center-cols-viewport': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                        '& .ag-center-cols-container': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                        '& .ag-root-wrapper-body': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                        '& .ag-body-horizontal-scroll': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                        '& .ag-row-even': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                        '& .ag-row-odd': { backgroundColor: isDarkMode ? '#283046' : '#fafbfc' },
-                        '& .ag-cell': {
-                            display: 'flex',
-                            alignItems: 'center',
-                            border: 'none',
+                        '&::-webkit-scrollbar-thumb:hover': {
+                            background: isDarkMode ? '#505666' : '#a8a8a8',
                         },
                     }}
                 >
-                    <AgGridReact
-                        enableCellTextSelection={true}
-                        ensureDomOrder={true}
-                        rowData={logs}
-                        columnDefs={columnDefs}
-                        defaultColDef={defaultColDef}
-                        domLayout="autoHeight"
-                        rowHeight={60}
-                        headerHeight={48}
-                        animateRows={false}
-                        loading={isLoading}
-                        overlayLoadingTemplate='<span class="ag-overlay-loading-center">Loading...</span>'
-                        overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">No logs found</span>'
-                    />
-                </Box>
+                    <Table stickyHeader sx={{ minWidth: 800, borderCollapse: 'separate', borderSpacing: 0 }}>
+                        <TableHead>
+                            <TableRow>
+                                {headerCells.map((headCell, index) => (
+                                    <TableCell
+                                        key={index}
+                                        align="center"
+                                        sx={{
+                                            backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
+                                            color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+                                            fontWeight: 600,
+                                            fontSize: '0.8rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.5px',
+                                            borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                                            py: 2,
+                                        }}
+                                    >
+                                        {headCell}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={colCount} align="center" sx={{ py: 8 }}>
+                                        <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                                        <Typography sx={{ mt: 2, color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>Loading...</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            ) : logs.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={colCount} align="center" sx={{ py: 8 }}>
+                                        <Typography sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>No logs found</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                logs.map((row, index) => (
+                                    <TableRow
+                                        key={row.id || index}
+                                        sx={{
+                                            backgroundColor: index % 2 === 0 ? (isDarkMode ? '#283046' : '#ffffff') : (isDarkMode ? '#283046' : '#fafbfc'),
+                                            transition: 'background-color 0.2s ease',
+                                            '&:hover': {
+                                                backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
+                                            },
+                                            '& td': {
+                                                borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                py: 1.5,
+                                            },
+                                        }}
+                                    >
+                                        <TableCell align="center">{(page - 1) * limit + index + 1}</TableCell>
+                                        <TableCell align="center">{row.job_name || '-'}</TableCell>
+                                        <TableCell align="center">
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: row.status === 'SUCCESS' ? '#10b981' : '#ef4444',
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: row.status === 'SUCCESS' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                                    padding: '4px 12px',
+                                                    borderRadius: '20px',
+                                                    fontSize: '0.75rem',
+                                                    letterSpacing: '0.5px',
+                                                    display: 'inline-block',
+                                                }}
+                                            >
+                                                {row.status}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            {row.created_at ? moment(row.created_at).format('MMM D, YYYY h:mm A') : '-'}
+                                        </TableCell>
+                                        {(canViewDetail || canDelete) && (
+                                            <TableCell align="center">
+                                                <Box className="flex gap-2 justify-center items-center h-full">
+                                                    {canViewDetail && (
+                                                        <Tooltip title="View" arrow>
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => setViewLog(row)}
+                                                                sx={{
+                                                                    color: isDarkMode ? '#10b981' : '#059669',
+                                                                    '&:hover': {
+                                                                        backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5',
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                                </svg>
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    )}
+                                                    {canDelete && (
+                                                        <Tooltip title="Delete" arrow>
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleDeleteClick(row.id)}
+                                                                sx={{
+                                                                    color: isDarkMode ? '#ef4444' : '#dc2626',
+                                                                    '&:hover': {
+                                                                        backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2',
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <Delete fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    )}
+                                                </Box>
+                                            </TableCell>
+                                        )}
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
 
                 <Box
                     className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0"

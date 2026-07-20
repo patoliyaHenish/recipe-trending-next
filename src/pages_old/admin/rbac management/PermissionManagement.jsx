@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   Box,
@@ -14,20 +14,21 @@ import {
   FormControl,
   Select,
   MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
 } from '@mui/material'
 import { toast } from '../../../utils/toast';
 import { useTheme } from '../../../context/ThemeContext'
 import { 
     useGetAllPermissionsQuery
 } from '../../../features/api/rbacApi'
-import { AgGridReact } from 'ag-grid-react'
-import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community'
-import 'ag-grid-community/styles/ag-grid.css'
-import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { PageHeader, SearchBar } from '../../../components/common'
 import CloseIcon from '@mui/icons-material/Close'
-
-ModuleRegistry.registerModules([AllCommunityModule])
 
 import { useSelector } from 'react-redux';
 import { AccessDenied } from '../../../components/common'
@@ -91,58 +92,6 @@ const PermissionManagement = () => {
     setPage(1)
   }
 
-  const columnDefs = useMemo(
-    () => [
-      {
-        headerName: '#',
-        valueGetter: 'node.rowIndex + 1',
-        width: 70,
-        cellStyle: {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-        },
-        headerClass: 'ag-header-center',
-      },
-      {
-        headerName: 'Permission Name',
-        field: 'name',
-        flex: 1,
-        minWidth: 180,
-        cellStyle: {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-        },
-        headerClass: 'ag-header-center',
-      },
-      {
-        headerName: 'Description',
-        field: 'description',
-        flex: 2,
-        minWidth: 250,
-        cellStyle: {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-        },
-        headerClass: 'ag-header-center',
-      },
-    ],
-    [isDarkMode]
-  )
-
-  const defaultColDef = useMemo(
-    () => ({
-      sortable: true,
-      resizable: true,
-    }),
-    []
-  )
-
   return (
     <Box className="transition-all duration-200 flex flex-col pt-0 md:pt-4 pb-4 px-3 mt-[64px] md:mt-[74px] min-h-[calc(100vh-74px)] h-auto w-full">
       <Box
@@ -178,78 +127,87 @@ const PermissionManagement = () => {
           </Box>
         </Box>
 
-        {/* ── AG Grid ───────────────────────────────────────────────── */}
-        <Box
-          className={`${isDarkMode ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'} w-full xl:max-w-none`}
+        {/* ── Native Table ──────────────────────────────────────────── */}
+        <TableContainer
           sx={{
             flex: 1,
-            width: '100%',
-            height: 'auto',
             minHeight: 400,
-            display: 'flex',
-            flexDirection: 'column',
-            '& .ag-root-wrapper': {
-              backgroundColor: 'transparent',
-              border: 'none',
-              borderRadius: 0,
-              width: '100%',
-              height: '100%',
+            overflow: 'auto',
+            backgroundColor: 'transparent',
+            '&::-webkit-scrollbar': { width: '8px', height: '8px' },
+            '&::-webkit-scrollbar-track': { background: 'transparent' },
+            '&::-webkit-scrollbar-thumb': {
+              background: isDarkMode ? '#404656' : '#c1c1c1',
+              borderRadius: '4px',
             },
-            '& .ag-root': { backgroundColor: 'transparent' },
-            '& .ag-header': {
-              backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
-              borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
-              borderTop: 'none',
-            },
-            '& .ag-header-cell': {
-              color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
-              fontWeight: 600,
-              fontSize: '0.8rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            },
-            '& .ag-row': {
-              borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'} !important`,
-              backgroundColor: isDarkMode ? '#283046' : '#ffffff',
-              color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-              transition: 'background-color 0.2s ease',
-            },
-            '& .ag-row:hover': {
-              backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
-            },
-            '& .ag-header-cell-label': { justifyContent: 'center' },
-            '& .ag-header-center .ag-header-cell-label': { justifyContent: 'center' },
-            '& .ag-body-viewport': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-center-cols-viewport': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-center-cols-container': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-root-wrapper-body': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-body-horizontal-scroll': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-row-even': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-            '& .ag-row-odd': { backgroundColor: isDarkMode ? '#283046' : '#fafbfc' },
-            '& .ag-cell': {
-              display: 'flex',
-              alignItems: 'center',
-              border: 'none',
+            '&::-webkit-scrollbar-thumb:hover': {
+              background: isDarkMode ? '#505666' : '#a8a8a8',
             },
           }}
         >
-          <AgGridReact
-            enableCellTextSelection={true}
-            ensureDomOrder={true}
-            rowData={permissions}
-            columnDefs={columnDefs}
-            defaultColDef={defaultColDef}
-            domLayout="autoHeight"
-            rowHeight={70}
-            headerHeight={48}
-            pagination={false}
-            suppressCellFocus={true}
-            animateRows={true}
-            loading={isLoading || isFetching}
-            overlayLoadingTemplate='<span class="ag-overlay-loading-center">Loading...</span>'
-            overlayNoRowsTemplate='<span>No permissions found</span>'
-          />
-        </Box>
+          <Table stickyHeader sx={{ minWidth: 600, borderCollapse: 'separate', borderSpacing: 0 }}>
+            <TableHead>
+              <TableRow>
+                {['#', 'Permission Name', 'Description'].map((headCell, index) => (
+                  <TableCell
+                    key={index}
+                    align="center"
+                    sx={{
+                      backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
+                      color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                      py: 2,
+                    }}
+                  >
+                    {headCell}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {isLoading || isFetching ? (
+                <TableRow>
+                  <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
+                    <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                    <Typography sx={{ mt: 2, color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>Loading...</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : permissions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
+                    <Typography sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>No permissions found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                permissions.map((permission, index) => (
+                  <TableRow
+                    key={permission.permission_id || permission.name || index}
+                    sx={{
+                      backgroundColor: index % 2 === 0 ? (isDarkMode ? '#283046' : '#ffffff') : (isDarkMode ? '#283046' : '#fafbfc'),
+                      transition: 'background-color 0.2s ease',
+                      '&:hover': {
+                        backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
+                      },
+                      '& td': {
+                        borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                        py: 1.5,
+                      },
+                    }}
+                  >
+                    <TableCell align="center">{index + 1}</TableCell>
+                    <TableCell align="center">{permission.name || '-'}</TableCell>
+                    <TableCell align="center">{permission.description || '-'}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
     </Box>
   )

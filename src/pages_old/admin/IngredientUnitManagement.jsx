@@ -1,17 +1,13 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField, Typography, FormControl, Select, MenuItem, Tooltip, Autocomplete, Pagination, useMediaQuery } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField, Typography, FormControl, Select, MenuItem, Tooltip, Autocomplete, Pagination, useMediaQuery, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
 import { useTheme as useMuiTheme } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from '../../utils/toast';
-import { AgGridReact } from 'ag-grid-react';
-import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useTheme } from '../../context/ThemeContext';
@@ -23,8 +19,6 @@ import {
   useDeleteIngredientUnitMutation,
   useLazyGetIngredientUnitByIdQuery,
 } from '../../features/api/ingredientUnitApi';
-
-ModuleRegistry.registerModules([AllCommunityModule]);
 
 const validationSchema = Yup.object().shape({
   name: Yup.string()
@@ -307,117 +301,9 @@ const IngredientUnitManagement = () => {
     }, 400);
   };
 
-  const columnDefs = useMemo(() => {
-    const defs = [
-      {
-        headerName: '#',
-        valueGetter: 'node.rowIndex + 1',
-        width: 70,
-        cellStyle: { 
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-         },
-        headerClass: 'ag-header-center',
-      },
-      {
-        headerName: 'Unit Name',
-        field: 'name',
-        flex: 1,
-        minWidth: 200,
-        cellStyle: {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-        },
-        headerClass: 'ag-header-center',
-      },
-      {
-        headerName: 'Usage',
-        field: 'usage_count',
-        width: 140,
-        cellStyle: {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-        },
-        headerClass: 'ag-header-center',
-        valueFormatter: (params) => `${params.value != null ? Number(params.value) : 0} Recipes`,
-      },
-    ];
-
-    if (canList || canUpdate || canDelete) {
-      defs.push({
-        headerName: 'Actions',
-        width: 140,
-        cellStyle: { textAlign: 'center' },
-        headerClass: 'ag-header-center',
-        cellRenderer: (params) => {
-          const unit = params.data;
-          return (
-            <Box className="flex gap-2 justify-center items-center h-full">
-              <Tooltip title="View" arrow>
-                <IconButton
-                  size="small"
-                  onClick={() => handleOpenView(unit)}
-                  sx={{
-                    color: isDarkMode ? '#10b981' : '#059669',
-                    '&:hover': {
-                      backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5',
-                    },
-                  }}
-                >
-                  <VisibilityIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              {canUpdate && (
-                <Tooltip title="Edit" arrow>
-                  <IconButton
-                    size="small"
-                    onClick={() => onEditClick(unit)}
-                    sx={{
-                      color: isDarkMode ? '#3b82f6' : '#2563eb',
-                      '&:hover': {
-                        backgroundColor: isDarkMode ? '#1e3a8a' : '#dbeafe',
-                      },
-                    }}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
-              {canDelete && (
-                <Tooltip title="Delete" arrow>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleOpenDeleteConfirm(unit)}
-                    sx={{
-                      color: isDarkMode ? '#ef4444' : '#dc2626',
-                      '&:hover': {
-                        backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2',
-                      },
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </Box>
-          );
-        },
-      });
-    }
-
-    return defs;
-  }, [isDarkMode, canUpdate, canDelete, onEditClick, handleOpenDeleteConfirm]);
-
-  const defaultColDef = useMemo(() => ({
-    sortable: true,
-    resizable: true,
-  }), []);
+  const showActionsCol = canList || canUpdate || canDelete;
+  const tableColCount = showActionsCol ? 4 : 3;
+  const headerCells = ['#', 'Unit Name', 'Usage', ...(showActionsCol ? ['Actions'] : [])];
 
   const syncUrlParams = (newPage, newLimit) => {
       setSearchParams((prev) => {
@@ -548,76 +434,145 @@ const IngredientUnitManagement = () => {
           </Box>
       </Box>
 
-      {/* ── AG Grid ───────────────────────────────────────────────── */}
-      {/* Outer box allows horizontal scroll on narrow screens */}
-      <Box sx={{ overflowX: 'auto', width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Box
-          className={`${isDarkMode ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'}`}
-          sx={{
-            minWidth: '550px', // total col widths: 70 + 200 + 140 + 140 = 550
-            width: '100%',
-            backgroundColor: isDarkMode ? '#283046 !important' : '#ffffff !important',
-            '& .ag-root-wrapper': {
-              backgroundColor: 'transparent !important',
-              border: 'none',
-              borderRadius: 0,
-              width: '100%',
-            },
-            '& .ag-root': { backgroundColor: 'transparent !important' },
-            '& .ag-header': {
-              backgroundColor: isDarkMode ? '#283046 !important' : '#f3f2f7 !important',
-              borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
-              borderTop: 'none',
-            },
-            '& .ag-header-cell': {
-              color: isDarkMode ? '#b4b7bd !important' : '#6e6b7b !important',
-              fontWeight: 600,
-              fontSize: '0.8rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            },
-            '& .ag-row': {
-              borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'} !important`,
-              backgroundColor: isDarkMode ? '#283046 !important' : '#ffffff !important',
-              color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
-              transition: 'background-color 0.2s ease',
-            },
-            '& .ag-row:hover': {
-              backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
-            },
-            '& .ag-header-cell-label': { justifyContent: 'center' },
-            '& .ag-header-center .ag-header-cell-label': { justifyContent: 'center' },
-            '& .ag-body-viewport': { backgroundColor: isDarkMode ? '#283046 !important' : '#ffffff !important' },
-            '& .ag-center-cols-viewport': { backgroundColor: isDarkMode ? '#283046 !important' : '#ffffff !important' },
-            '& .ag-center-cols-container': { backgroundColor: isDarkMode ? '#283046 !important' : '#ffffff !important' },
-            '& .ag-root-wrapper-body': { backgroundColor: isDarkMode ? '#283046 !important' : '#ffffff !important' },
-            '& .ag-body-horizontal-scroll': { backgroundColor: isDarkMode ? '#283046 !important' : '#ffffff !important' },
-            '& .ag-row-even': { backgroundColor: isDarkMode ? '#283046 !important' : '#ffffff !important' },
-            '& .ag-row-odd': { backgroundColor: isDarkMode ? '#283046 !important' : '#fafbfc !important' },
-            '& .ag-cell': {
-              display: 'flex',
-              alignItems: 'center',
-              border: 'none',
-              color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
-            },
-          }}
-        >
-          <AgGridReact
-            enableCellTextSelection={true}
-            ensureDomOrder={true}
-            rowData={units}
-            columnDefs={columnDefs}
-            defaultColDef={defaultColDef}
-            domLayout="autoHeight"
-            rowHeight={60}
-            headerHeight={48}
-            animateRows={false}
-            loading={isLoading}
-            overlayLoadingTemplate='<span class="ag-overlay-loading-center">Loading...</span>'
-            overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">No units found</span>'
-          />
-        </Box>
-      </Box>
+      {/* ── Native Table ───────────────────────────────────────────────── */}
+      <TableContainer
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          overflow: 'auto',
+          backgroundColor: 'transparent',
+          '&::-webkit-scrollbar': { width: '8px', height: '8px' },
+          '&::-webkit-scrollbar-track': { background: 'transparent' },
+          '&::-webkit-scrollbar-thumb': {
+            background: isDarkMode ? '#404656' : '#c1c1c1',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: isDarkMode ? '#505666' : '#a8a8a8',
+          },
+        }}
+      >
+        <Table stickyHeader sx={{ minWidth: 550, borderCollapse: 'separate', borderSpacing: 0 }}>
+          <TableHead>
+            <TableRow>
+              {headerCells.map((headCell, index) => (
+                <TableCell
+                  key={index}
+                  align="center"
+                  sx={{
+                    backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
+                    color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+                    fontWeight: 600,
+                    fontSize: '0.8rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                    py: 2,
+                  }}
+                >
+                  {headCell}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={tableColCount} align="center" sx={{ py: 8 }}>
+                  <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                  <Typography sx={{ mt: 2, color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>Loading...</Typography>
+                </TableCell>
+              </TableRow>
+            ) : units.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={tableColCount} align="center" sx={{ py: 8 }}>
+                  <Typography sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>No units found</Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              units.map((row, index) => (
+                <TableRow
+                  key={row.unit_id || index}
+                  sx={{
+                    backgroundColor: index % 2 === 0 ? (isDarkMode ? '#283046' : '#ffffff') : (isDarkMode ? '#283046' : '#fafbfc'),
+                    transition: 'background-color 0.2s ease',
+                    '&:hover': {
+                      backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
+                    },
+                    '& td': {
+                      borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                      color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                      py: 1.5,
+                    },
+                  }}
+                >
+                  <TableCell align="center">
+                    {(page - 1) * limit + index + 1}
+                  </TableCell>
+                  <TableCell align="center">
+                    {row.name || '-'}
+                  </TableCell>
+                  <TableCell align="center">
+                    {`${row.usage_count != null ? Number(row.usage_count) : 0} Recipes`}
+                  </TableCell>
+                  {showActionsCol && (
+                    <TableCell align="center">
+                      <Box className="flex gap-2 justify-center items-center h-full">
+                        <Tooltip title="View" arrow>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleOpenView(row)}
+                            sx={{
+                              color: isDarkMode ? '#10b981' : '#059669',
+                              '&:hover': {
+                                backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5',
+                              },
+                            }}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        {canUpdate && (
+                          <Tooltip title="Edit" arrow>
+                            <IconButton
+                              size="small"
+                              onClick={() => onEditClick(row)}
+                              sx={{
+                                color: isDarkMode ? '#3b82f6' : '#2563eb',
+                                '&:hover': {
+                                  backgroundColor: isDarkMode ? '#1e3a8a' : '#dbeafe',
+                                },
+                              }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {canDelete && (
+                          <Tooltip title="Delete" arrow>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenDeleteConfirm(row)}
+                              sx={{
+                                color: isDarkMode ? '#ef4444' : '#dc2626',
+                                '&:hover': {
+                                  backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2',
+                                },
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {/* ── Pagination ────────────────────────────────────────────── */}
       <Box
