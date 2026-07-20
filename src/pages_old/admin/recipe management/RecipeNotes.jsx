@@ -11,13 +11,16 @@ import {
   TextField,
   Pagination,
   Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
 } from "@mui/material";
 import { useTheme } from "../../../context/ThemeContext";
-import { AgGridReact } from "ag-grid-react";
 
-import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
 import { PageHeader, ConfirmDialog } from "../../../components/common";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
@@ -34,7 +37,6 @@ import { useGetRecipeCategoryDropdownQuery } from "../../../features/api/categor
 import AddEditRecipeNoteDialog from "./AddEditRecipeNoteDialog";
 import ViewRecipeNoteDialog from "./ViewRecipeNoteDialog";
 
-ModuleRegistry.registerModules([AllCommunityModule]);
 
 const STATUS_OPTIONS = [
   { value: "pending", label: "Pending" },
@@ -282,264 +284,15 @@ const RecipeNotes = () => {
     '& .MuiOutlinedInput-notchedOutline': { borderColor: isDarkMode ? '#404656' : '#d8d6de' }
   };
 
-  const columnDefs = useMemo(
-    () => [
-      {
-        headerName: "#",
-        valueGetter: "node.rowIndex + 1",
-        width: 70,
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-        },
-        headerClass: "ag-header-center",
-      },
-      {
-        headerName: "Recipe name",
-        field: "recipe_name",
-        width: 280,
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-        },
-        headerClass: "ag-header-center",
-        cellRenderer: (params) => (
-          <Box className="flex gap-2 items-center justify-center h-full w-full" sx={{ overflow: "hidden" }}>
-            <Typography variant="body2" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {params.value || "—"}
-            </Typography>
-            <IconButton
-              size="small"
-              onClick={() => handleCopyText(params.value, "Recipe name")}
-              sx={{
-                flexShrink: 0,
-                color: isDarkMode ? "#3b82f6" : "#2563eb",
-                padding: "4px",
-                "&:hover": {
-                  backgroundColor: isDarkMode ? "#1e3a8a" : "#dbeafe",
-                },
-              }}
-              title="Copy recipe name"
-            >
-              <ContentCopyIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        ),
-      },
-      {
-        headerName: "Note message",
-        field: "message",
-        width: 220,
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-        },
-        headerClass: "ag-header-center",
-        cellRenderer: (params) => {
-          const msg = params.value || "";
-          const truncated = msg.length > 40 ? msg.substring(0, 38) + "..." : msg;
-          return (
-            <Box className="flex gap-2 items-center justify-center h-full w-full" sx={{ overflow: "hidden" }}>
-              <Typography variant="body2" sx={{ fontSize: '0.9rem', overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {truncated || "—"}
-              </Typography>
-              {msg && (
-                <IconButton
-                  size="small"
-                  onClick={() => handleCopyText(msg, "Note message")}
-                  sx={{
-                    flexShrink: 0,
-                    color: isDarkMode ? "#3b82f6" : "#2563eb",
-                    padding: "4px",
-                    "&:hover": {
-                      backgroundColor: isDarkMode ? "#1e3a8a" : "#dbeafe",
-                    },
-                  }}
-                  title="Copy note message"
-                >
-                  <ContentCopyIcon fontSize="small" />
-                </IconButton>
-              )}
-            </Box>
-          );
-        }
-      },
-      {
-        headerName: "Status",
-        field: "status",
-        width: 120,
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-        },
-        headerClass: "ag-header-center",
-        cellRenderer: (params) => {
-          const value = params.value || "pending";
-          return (
-            <Typography
-              variant="body2"
-              sx={{
-                color: statusColors[value] || (isDarkMode ? "#e5e7eb" : "#374151"),
-                fontWeight: "bold",
-              }}
-            >
-              {statusLabel(value)}
-            </Typography>
-          );
-        },
-      },
-      {
-        headerName: "Commented by",
-        field: "commenter_name",
-        width: 220,
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-        },
-        headerClass: "ag-header-center",
-        cellRenderer: (params) => (
-          <Box sx={{ textAlign: "center", lineHeight: 1.35, width: '100%', overflow: 'hidden' }}>
-            <Typography variant="body2" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {params.data?.commenter_name || "—"}
-            </Typography>
-            <Typography variant="caption" sx={{ display: "block", opacity: 0.8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {params.data?.commenter_email ||
-                (params.data?.commenter_id ? `ID: ${params.data.commenter_id}` : "Unknown")}
-            </Typography>
-          </Box>
-        ),
-      },
-      {
-        headerName: "Category",
-        field: "category_name",
-        width: 130,
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-        },
-        headerClass: "ag-header-center",
-      },
-      {
-        headerName: "Sub-category",
-        field: "sub_category_name",
-        width: 130,
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-        },
-        headerClass: "ag-header-center",
-      },
-      {
-        headerName: "Created",
-        field: "created_at",
-        width: 160,
-        cellStyle: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-        },
-        headerClass: "ag-header-center",
-        valueFormatter: (p) => (p.value ? moment(p.value).format("MMM D, YYYY HH:mm") : "—"),
-      },
-      ...(canUpdate || canDelete
-        ? [
-            {
-              headerName: "Actions",
-              width: 140,
-              cellStyle: { display: "flex", justifyContent: "center", alignItems: "center" },
-              headerClass: "ag-header-center",
-              cellRenderer: (params) => {
-                const row = params.data;
-                return (
-                  <Box className="flex gap-2 justify-center items-center h-full">
-                      <Tooltip title="View" arrow>
-                        <IconButton
-                            size="small"
-                            onClick={() => handleOpenView(row)}
-                            sx={{
-                              color: isDarkMode ? "#10b981" : "#059669",
-                              "&:hover": {
-                                backgroundColor: isDarkMode ? "#064e3b" : "#d1fae5",
-                              },
-                            }}
-                          >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                              <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                          </IconButton>
-                      </Tooltip>
-                    {canUpdate && (
-                      <Tooltip title="Edit" arrow>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenEdit(row)}
-                          sx={{
-                              color: isDarkMode ? '#3b82f6' : '#2563eb',
-                              '&:hover': {
-                                  backgroundColor: isDarkMode ? '#1e3a8a' : '#dbeafe',
-                              },
-                          }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {canDelete && (
-                      <Tooltip title="Delete" arrow>
-                        <IconButton
-                          size="small"
-                          onClick={() => setDeleteId(row.id)}
-                          sx={{
-                              color: isDarkMode ? '#ef4444' : '#dc2626',
-                              '&:hover': {
-                                  backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2',
-                              },
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Box>
-                );
-              },
-            },
-          ]
-        : []),
-    ],
-    [canUpdate, canDelete, handleOpenEdit, handleOpenView, isDarkMode, statusColors]
-  );
-
-  const defaultColDef = useMemo(
-    () => ({
-      sortable: true,
-      resizable: true,
-    }),
-    []
-  );
+  
+  
 
   if (!canList && !isAdmin) {
     return <AccessDenied message="You do not have permission to view recipe notes." />;
   }
 
   return (
-        <Box className="transition-all duration-200 flex flex-col pt-0 md:pt-4 pb-4 px-3 mt-[64px] md:mt-[74px] min-h-[calc(100vh-74px)] h-auto w-full">
+          <Box className="transition-all duration-200 flex flex-col pt-0 md:pt-4 pb-4 px-3 mt-[64px] md:mt-[74px] min-h-[calc(100vh-74px)] h-auto w-full">
         <Box
             sx={{
                 flex: 1,
@@ -869,77 +622,227 @@ const RecipeNotes = () => {
             </Box>
 
             {/* AG Grid */}
-            <Box
-                className={`${isDarkMode ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'} w-full`}
+
+            {/* ── Native Table ───────────────────────────────────────────────── */}
+            <TableContainer 
                 sx={{
                     flex: 1,
-                    width: '100%',
-                    height: 'auto',
                     minHeight: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    '& .ag-root-wrapper': {
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        borderRadius: 0,
-                        width: '100%',
-                        height: '100%',
+                    overflow: 'auto',
+                    backgroundColor: 'transparent',
+                    '&::-webkit-scrollbar': { width: '8px', height: '8px' },
+                    '&::-webkit-scrollbar-track': { background: 'transparent' },
+                    '&::-webkit-scrollbar-thumb': { 
+                        background: isDarkMode ? '#404656' : '#c1c1c1', 
+                        borderRadius: '4px' 
                     },
-                    '& .ag-root': { backgroundColor: 'transparent' },
-                    '& .ag-header': {
-                        backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
-                        borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
-                        borderTop: 'none',
-                    },
-                    '& .ag-header-cell': {
-                        color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                    },
-                    '& .ag-row': {
-                        borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'} !important`,
-                        backgroundColor: isDarkMode ? '#283046' : '#ffffff',
-                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                        transition: 'background-color 0.2s ease',
-                    },
-                    '& .ag-row:hover': {
-                        backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
-                    },
-                    '& .ag-header-cell-label': { justifyContent: 'center' },
-                    '& .ag-header-center .ag-header-cell-label': { justifyContent: 'center' },
-                    '& .ag-body-viewport': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                    '& .ag-center-cols-viewport': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                    '& .ag-center-cols-container': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                    '& .ag-root-wrapper-body': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                    '& .ag-body-horizontal-scroll': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                    '& .ag-row-even': { backgroundColor: isDarkMode ? '#283046' : '#ffffff' },
-                    '& .ag-row-odd': { backgroundColor: isDarkMode ? '#283046' : '#fafbfc' },
-                    '& .ag-cell': {
-                        display: 'flex',
-                        alignItems: 'center',
-                        border: 'none',
-                    },
+                    '&::-webkit-scrollbar-thumb:hover': { 
+                        background: isDarkMode ? '#505666' : '#a8a8a8' 
+                    }
                 }}
             >
-                <AgGridReact
-                    enableCellTextSelection={true}
-                    ensureDomOrder={true}
-                    rowData={tableRows}
-                    columnDefs={columnDefs}
-                    defaultColDef={defaultColDef}
-                    domLayout="autoHeight"
-                    rowHeight={60}
-                    headerHeight={48}
-                    animateRows={false}
-                    loading={isLoading || isFetching}
-                    overlayLoadingTemplate='<span class="ag-overlay-loading-center">Loading...</span>'
-                    overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">No recipe notes found</span>'
-                    onFirstDataRendered={(params) => params.api.autoSizeAllColumns()}
-                    onRowDataUpdated={(params) => params.api.autoSizeAllColumns()}
-                />
-            </Box>
+                <Table stickyHeader sx={{ minWidth: 1000, borderCollapse: 'separate', borderSpacing: 0 }}>
+                    <TableHead>
+                        <TableRow>
+                            {['#', 'Recipe name', 'Note message', 'Status', 'Commented by', 'Category', 'Sub-category', 'Created', ...(canUpdate || canDelete ? ['Actions'] : [])].map((headCell, index) => (
+                                <TableCell 
+                                    key={index}
+                                    align="center"
+                                    sx={{
+                                        backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
+                                        color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+                                        fontWeight: 600,
+                                        fontSize: '0.8rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.5px',
+                                        borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                                        py: 2,
+                                    }}
+                                >
+                                    {headCell}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {isLoading || isFetching ? (
+                            <TableRow>
+                                <TableCell colSpan={canUpdate || canDelete ? 9 : 8} align="center" sx={{ py: 8 }}>
+                                    <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                                    <Typography sx={{ mt: 2, color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>Loading...</Typography>
+                                </TableCell>
+                            </TableRow>
+                        ) : tableRows.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={canUpdate || canDelete ? 9 : 8} align="center" sx={{ py: 8 }}>
+                                    <Typography sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>No recipe notes found</Typography>
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            tableRows.map((row, index) => {
+                                const statusVal = row.status || "pending";
+                                const statusColor = statusColors[statusVal] || (isDarkMode ? "#e5e7eb" : "#374151");
+                                const msg = row.message || "";
+                                const truncated = msg.length > 40 ? msg.substring(0, 38) + "..." : msg;
+                                
+                                return (
+                                <TableRow 
+                                    key={row.id || index}
+                                    sx={{
+                                        backgroundColor: index % 2 === 0 ? (isDarkMode ? '#283046' : '#ffffff') : (isDarkMode ? '#283046' : '#fafbfc'),
+                                        transition: 'background-color 0.2s ease',
+                                        '&:hover': {
+                                            backgroundColor: isDarkMode ? '#2f3851 !important' : '#f8f8f8 !important',
+                                        },
+                                        '& td': {
+                                            borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                            py: 1.5,
+                                        }
+                                    }}
+                                >
+                                    <TableCell align="center">
+                                        {(page - 1) * limit + index + 1}
+                                    </TableCell>
+                                    
+                                    <TableCell align="center">
+                                        <Box className="flex gap-2 items-center justify-center h-full">
+                                            <Typography variant="body2">{row.recipe_name || "-"}</Typography>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => handleCopyText(row.recipe_name, "Recipe name")}
+                                                sx={{
+                                                    color: isDarkMode ? "#3b82f6" : "#2563eb",
+                                                    padding: "4px",
+                                                    "&:hover": {
+                                                        backgroundColor: isDarkMode ? "#1e3a8a" : "#dbeafe",
+                                                    },
+                                                }}
+                                                title="Copy recipe name"
+                                            >
+                                                <ContentCopyIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        <Box className="flex gap-2 items-center justify-center h-full w-full" sx={{ overflow: "hidden" }}>
+                                            <Typography variant="body2" sx={{ fontSize: '0.9rem', overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                            {truncated || "-"}
+                                            </Typography>
+                                            {msg && (
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => handleCopyText(msg, "Note message")}
+                                                sx={{
+                                                flexShrink: 0,
+                                                color: isDarkMode ? "#3b82f6" : "#2563eb",
+                                                padding: "4px",
+                                                "&:hover": {
+                                                    backgroundColor: isDarkMode ? "#1e3a8a" : "#dbeafe",
+                                                },
+                                                }}
+                                                title="Copy note message"
+                                            >
+                                                <ContentCopyIcon fontSize="small" />
+                                            </IconButton>
+                                            )}
+                                        </Box>
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ color: statusColor, fontWeight: "bold" }}
+                                        >
+                                            {statusLabel(statusVal)}
+                                        </Typography>
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        <Box sx={{ textAlign: "center", lineHeight: 1.35, width: '100%', overflow: 'hidden' }}>
+                                            <Typography variant="body2" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                                {row.commenter_name || "-"}
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ display: "block", opacity: 0.8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                                {row.commenter_email || (row.commenter_id ? `ID: ${row.commenter_id}` : "Unknown")}
+                                            </Typography>
+                                        </Box>
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        {row.category_name || "-"}
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        {row.sub_category_name || "-"}
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        {row.created_at ? moment(row.created_at).format("MMM D, YYYY HH:mm") : "-"}
+                                    </TableCell>
+
+                                    {(canUpdate || canDelete) && (
+                                        <TableCell align="center">
+                                            <Box className="flex gap-2 justify-center items-center h-full">
+                                                <Tooltip title="View" arrow>
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => handleOpenView(row)}
+                                                        sx={{
+                                                            color: isDarkMode ? "#10b981" : "#059669",
+                                                            "&:hover": {
+                                                                backgroundColor: isDarkMode ? "#064e3b" : "#d1fae5",
+                                                            },
+                                                        }}
+                                                    >
+                                                        <VisibilityIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                
+                                                {canUpdate && (
+                                                    <Tooltip title="Edit" arrow>
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleOpenEdit(row)}
+                                                            sx={{
+                                                                color: isDarkMode ? '#3b82f6' : '#2563eb',
+                                                                '&:hover': {
+                                                                    backgroundColor: isDarkMode ? '#1e3a8a' : '#dbeafe',
+                                                                },
+                                                            }}
+                                                        >
+                                                            <EditIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
+                                                
+                                                {canDelete && (
+                                                    <Tooltip title="Delete" arrow>
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => setDeleteId(row.id)}
+                                                            sx={{
+                                                                color: isDarkMode ? '#ef4444' : '#dc2626',
+                                                                '&:hover': {
+                                                                    backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2',
+                                                                },
+                                                            }}
+                                                        >
+                                                            <DeleteIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
+                                            </Box>
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            )})
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
 
             {/* Pagination */}
             <Box
@@ -956,6 +859,7 @@ const RecipeNotes = () => {
                         freeSolo
                         size="small"
                         options={[10, 25, 50, 100, 150, 200, 250, 300, 350]}
+                        getOptionLabel={(option) => String(option)}
                         value={limit}
                         onChange={(event, newValue) => {
                             if (newValue) {
