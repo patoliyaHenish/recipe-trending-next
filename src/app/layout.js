@@ -17,8 +17,13 @@ export default async function RootLayout({ children }) {
   let initialNavItems = [];
   let initialFooterItems = [];
 
+  let apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  if (apiUrl && !apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
+    apiUrl = `https://${apiUrl}`;
+  }
+
   try {
-    const navRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/manage-nav-items/get-for-navbar`, { next: { revalidate: 60 } });
+    const navRes = await fetch(`${apiUrl}/api/manage-nav-items/get-for-navbar`, { next: { revalidate: 60 } });
     if (navRes.ok) {
       const navData = await navRes.json();
       initialNavItems = navData?.data || [];
@@ -28,7 +33,7 @@ export default async function RootLayout({ children }) {
   }
 
   try {
-    const footerRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/manage-footer-items/get-for-footer`, { next: { revalidate: 60 } });
+    const footerRes = await fetch(`${apiUrl}/api/manage-footer-items/get-for-footer`, { next: { revalidate: 60 } });
     if (footerRes.ok) {
       const footerData = await footerRes.json();
       initialFooterItems = footerData?.data || [];
