@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation, useParams } from 'react-router-dom';
 "use client";
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -277,7 +277,7 @@ const AddEditRecipePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const returnToUrl = '/admin/manage-recipes' + (location.state?.returnTo || '');
+  const returnToUrl = '/manage-recipes' + (location.state?.returnTo || '');
   const mode = (!id || id === 'create') ? 'add' : 'edit';
 
   const [searchParams, setSearchParams] = useSearchParams();

@@ -170,9 +170,7 @@ const Recipe = () => {
     document.title = 'Recipes Management'
   })
 
-  if (!canList && !isAdmin) {
-    return <AccessDenied message="You do not have permission to access Recipes Management." />;
-  }
+
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -710,7 +708,7 @@ const Recipe = () => {
     }
   }, [editId, editRecipeData]);
 
-  const handleAddOpen = () => navigate('/admin/manage-recipes/create', { state: { returnTo: location.search } });
+  const handleAddOpen = () => navigate('/manage-recipes/add', { state: { returnTo: location.search } });
 
   const handleAddSubmit = async (values, { resetForm }) => {
     try {
@@ -1233,7 +1231,7 @@ const Recipe = () => {
           <Box className="flex gap-2 justify-center items-center h-full">
             <ActionButtons
               onView={() => setViewId(params.data.recipe_id)}
-              onEdit={() => navigate('/admin/manage-recipes/edit/' + params.data.recipe_id, { state: { returnTo: location.search } })}
+              onEdit={() => navigate('/manage-recipes/edit/' + params.data.recipe_id, { state: { returnTo: location.search } })}
               onDelete={() => setDeleteId(params.data.recipe_id)}
               showView={canView}
               showEdit={canUpdate && canModifyEdit}
@@ -1361,6 +1359,10 @@ const Recipe = () => {
   const totalCompletedNotesCount = displayedRecipes.filter(isCompletedNotes).length;
   const myPendingNotesCount = displayedRecipes.filter((recipe) => isMyRecipe(recipe) && isPendingNotes(recipe)).length;
   const myCompletedNotesCount = displayedRecipes.filter((recipe) => isMyRecipe(recipe) && isCompletedNotes(recipe)).length;
+
+  if (!canList && !isAdmin) {
+    return <AccessDenied message="You do not have permission to access Recipes Management." />;
+  }
 
   return (
     <Box className="transition-all duration-200 flex flex-col pt-0 md:pt-4 pb-4 px-3 mt-[64px] md:mt-[74px] min-h-[calc(100vh-74px)] h-auto w-full">
@@ -2462,7 +2464,7 @@ const Recipe = () => {
               size="small"
               value={formatRangeLabel(approvedRange)}
               onClick={(event) => setRangeAnchorEl(event.currentTarget)}
-              InputProps={{ readOnly: true }}
+              inputProps={{ readOnly: true }}
               sx={textFieldSx}
             />
             <Popover
@@ -2527,7 +2529,7 @@ const Recipe = () => {
               size="small"
               value={formatRangeLabel(adminApprovedRange)}
               onClick={(event) => setAdminRangeAnchorEl(event.currentTarget)}
-              InputProps={{ readOnly: true }}
+              inputProps={{ readOnly: true }}
               sx={textFieldSx}
             />
             <Popover
@@ -2592,7 +2594,7 @@ const Recipe = () => {
               size="small"
               value={formatRangeLabel(createdRange)}
               onClick={(event) => setCreatedRangeAnchorEl(event.currentTarget)}
-              InputProps={{ readOnly: true }}
+              inputProps={{ readOnly: true }}
               sx={textFieldSx}
             />
             <Popover
@@ -2657,7 +2659,7 @@ const Recipe = () => {
               size="small"
               value={formatRangeLabel(updatedRange)}
               onClick={(event) => setUpdatedRangeAnchorEl(event.currentTarget)}
-              InputProps={{ readOnly: true }}
+              inputProps={{ readOnly: true }}
               sx={textFieldSx}
             />
             <Popover
@@ -3104,7 +3106,7 @@ const Recipe = () => {
                                 <Box className="flex gap-2 justify-center items-center h-full">
                                     <ActionButtons
                                         onView={() => setViewId(recipe.recipe_id)}
-                                        onEdit={() => navigate('/admin/manage-recipes/edit/' + recipe.recipe_id, { state: { returnTo: location.search } })}
+                                        onEdit={() => navigate('/manage-recipes/edit/' + recipe.recipe_id, { state: { returnTo: location.search } })}
                                         onDelete={() => setDeleteId(recipe.recipe_id)}
                                         showView={canView}
                                         showEdit={canUpdate && canModifyEdit}
@@ -3170,6 +3172,7 @@ const Recipe = () => {
                     <Autocomplete
                         freeSolo
                         size="small"
+                        getOptionLabel={(option) => String(option)}
                         options={[10, 25, 50, 100, 150, 200, 250, 300, 350]}
                         value={limit || 10}
                         onChange={(event, newValue) => {
@@ -3375,7 +3378,7 @@ const Recipe = () => {
                 return false;
               }
             }}
-            onEdit={(recipeId) => { setViewId(null); navigate('/admin/manage-recipes/edit/' + recipeId, { state: { returnTo: location.search } }); }}
+            onEdit={(recipeId) => { setViewId(null); navigate('/manage-recipes/edit/' + recipeId, { state: { returnTo: location.search } }); }}
             onDelete={(recipeId) => { setViewId(null); setDeleteId(recipeId); }}
             onViewNotes={(recipeId) => { setViewId(null); setNoteRecipeId(recipeId); }}
             canEdit={canUpdate && canModifyEdit}
