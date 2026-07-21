@@ -1,4 +1,6 @@
 import { combineReducers } from "@reduxjs/toolkit";
+import { persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 import globalReducer from "../features/globalSlice";
 import authReducer from "../features/authSlice"
 import { authApi } from "../features/api/authApi";
@@ -28,6 +30,12 @@ import { paymentSlipApi } from "../features/api/paymentSlipApi";
 import { assignedRecipeApi } from "../features/api/assignedRecipeApi";
 import { notificationApi } from "../features/api/notificationApi";
 
+const authPersistConfig = {
+    key: 'auth',
+    storage,
+    whitelist: ['user', 'isAuthenticated', 'isImpersonating'],
+};
+
 const rootReducer = combineReducers({
     [authApi.reducerPath]: authApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,
@@ -55,7 +63,7 @@ const rootReducer = combineReducers({
     [paymentSlipApi.reducerPath]: paymentSlipApi.reducer,
     [assignedRecipeApi.reducerPath]: assignedRecipeApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
-    auth: authReducer,
+    auth: persistReducer(authPersistConfig, authReducer),
     global: globalReducer,
 })
 
