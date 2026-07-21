@@ -79,10 +79,6 @@ const IngredientUnitManagement = () => {
   const canDelete = isAdmin || userPermissions.includes('ingredient_unit.delete');
   const canList = isAdmin || userPermissions.includes('ingredient_unit.list');
 
-  if (!canList && !isAdmin) {
-    return <AccessDenied message="You do not have permission to view this page." />;
-  }
-
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [search, setSearch] = useState(() => searchParams.get('search') || '');
@@ -334,6 +330,10 @@ const IngredientUnitManagement = () => {
   };
 
   const hasActiveFilters = search !== '';
+
+  if (!canList && !isAdmin) {
+    return <AccessDenied message="You do not have permission to view this page." />;
+  }
 
   return (
     <Box className="transition-all duration-200 flex flex-col pt-0 md:pt-4 pb-4 px-3 mt-[64px] md:mt-[74px] min-h-[calc(100vh-74px)] h-auto w-full">
