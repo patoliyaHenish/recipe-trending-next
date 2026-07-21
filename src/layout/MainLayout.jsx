@@ -13,16 +13,16 @@ import { clearForbidden } from '../features/globalSlice';
 const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
   const pathname = usePathname();
   const dispatch = useDispatch();
-  const { user } = useUser();
+  const { user, isLoading: isAuthLoading } = useUser();
   const { isDarkMode } = useTheme();
   const { isForbidden, forbiddenMessage } = useSelector((state) => state.global);
   const isImpersonating = useSelector((state) => state.auth.isImpersonating);
 
-  const isStaff = !!(user?.role && user.role !== 'user');
-  // Show admin layout when the user is staff OR when an admin is impersonating a regular user
-  const isAdminMode = isStaff || isImpersonating;
+  const isAuthPending = user === undefined;
 
-  // Clear forbidden state when route changes
+  const isStaff = !!(user?.role && user.role !== 'user');
+  const isAdminMode = isStaff || isImpersonating || isAuthPending;
+
   useEffect(() => {
     if (isForbidden) {
       dispatch(clearForbidden());
