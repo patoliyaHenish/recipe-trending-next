@@ -12,7 +12,8 @@ export const UserProvider = ({ children }) => {
   
   const token = typeof window !== 'undefined' ? Cookies.get('token') : null;
   const { data, isSuccess, isLoading, isError, error, isFetching, refetch } = useMyProfileQuery(undefined, {
-    skip: !token
+    skip: !token,
+    refetchOnMountOrArgChange: false,
   });
 
   useEffect(() => {

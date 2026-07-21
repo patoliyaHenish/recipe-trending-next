@@ -11,6 +11,7 @@ export const authApi = createApi({
         credentials: 'include',
     }),
     tagTypes: ['UserProfile'],
+    refetchOnMountOrArgChange: false,
     endpoints: (builder) => ({
         registerUser: builder.mutation({
             query: (inputData) => ({
@@ -124,6 +125,7 @@ export const authApi = createApi({
                 method: 'GET',
             }),
             providesTags: ['UserProfile'],
+            keepUnusedDataFor: 300,
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled;
