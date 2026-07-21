@@ -18,10 +18,20 @@ const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
   const { isForbidden, forbiddenMessage } = useSelector((state) => state.global);
   const isImpersonating = useSelector((state) => state.auth.isImpersonating);
 
-  const isAuthPending = user === undefined;
+  // mounted = false during SSR and initial hydration, true only after client mount
+  const [mounted, setMounted] = useState(false);
+
+  // Only treat user===undefined as "loading" on the client (after mount).
+  // On the server / initial hydration, we keep isAdminMode based on real user state
+  // to avoid rendering AdminVerticalNavbar during SSR (which accesses window).
+  const isAuthPending = mounted && user === undefined;
 
   const isStaff = !!(user?.role && user.role !== 'user');
   const isAdminMode = isStaff || isImpersonating || isAuthPending;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isForbidden) {
