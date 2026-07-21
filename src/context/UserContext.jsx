@@ -10,22 +10,14 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(undefined);
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  // Use state so that after client-side hydration, a re-render is triggered
-  // and RTK Query's skip condition is properly re-evaluated with the real cookie value
-  const [token, setToken] = useState(null);
-
-  useEffect(() => {
-    // Read cookie only on the client after mount
-    setToken(Cookies.get('token') || null);
-  }, []);
+  const token = typeof window !== 'undefined' ? Cookies.get('token') : null;
 
   const { data, isSuccess, isLoading, isError, error, isFetching, refetch } = useMyProfileQuery(undefined, {
     skip: !token,
   });
 
   useEffect(() => {
-    if (!token && token !== undefined) {
-      // token is null (no cookie) — confirmed not logged in
+    if (!token) {
       setUser(null);
     } else if (isSuccess && data?.user && !isFetching) {
       setUser(data.user);
