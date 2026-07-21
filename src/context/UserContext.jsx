@@ -10,16 +10,28 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(undefined);
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  const token = typeof window !== 'undefined' ? Cookies.get('token') : null;
+  // mounted starts false (SSR + initial hydration), becomes true only on the client.
+  // We skip the API during SSR because:
+  //   1. Server has no browser cookies → always 401 (wasted call)
+  //   2. credentials:'include' only works in the browser
+  // After mount, we ALWAYS call the API regardless of cookie state —
+  // exactly like a React (CRA) app. The API response determines auth:
+  //   - 200 → set user
+  //   - 401 → set user to null (handled silently in onQueryStarted)
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { data, isSuccess, isLoading, isError, error, isFetching, refetch } = useMyProfileQuery(undefined, {
-    skip: !token,
+    skip: !mounted,
   });
 
   useEffect(() => {
-    if (!token) {
-      setUser(null);
-    } else if (isSuccess && data?.user && !isFetching) {
+    if (!mounted) return;
+
+    if (isSuccess && data?.user && !isFetching) {
       setUser(data.user);
 
       if (data.user.preference) {
@@ -41,7 +53,7 @@ export const UserProvider = ({ children }) => {
     } else if (isError) {
       setUser(null);
     }
-  }, [isSuccess, data, isError, error, isFetching, token]);
+  }, [isSuccess, data, isError, error, isFetching, mounted]);
 
   return (
     <UserContext.Provider value={{ user, setUser, isLoading, authModalOpen, setAuthModalOpen, refetch }}>
