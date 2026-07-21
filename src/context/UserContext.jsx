@@ -1,6 +1,5 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { useMyProfileQuery } from '../features/api/authApi';
 import Cookies from 'js-cookie';
 
@@ -11,25 +10,15 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(undefined);
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  // Read the persisted auth state from Redux (rehydrated from localStorage on reload)
-  const persistedUser = useSelector((state) => state.auth.user);
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-
   const token = typeof window !== 'undefined' ? Cookies.get('token') : null;
 
-  // Skip the API call if we already have the user from the persisted Redux store
-  // Only call the API if we have a token but no persisted user data yet
   const { data, isSuccess, isLoading, isError, error, isFetching, refetch } = useMyProfileQuery(undefined, {
-    skip: !token || !!persistedUser,
-    refetchOnMountOrArgChange: false,
+    skip: !token,
   });
 
   useEffect(() => {
     if (!token) {
       setUser(null);
-    } else if (persistedUser && isAuthenticated) {
-      // Use persisted user data immediately — no API call needed
-      setUser(persistedUser);
     } else if (isSuccess && data?.user && !isFetching) {
       setUser(data.user);
 
@@ -52,7 +41,7 @@ export const UserProvider = ({ children }) => {
     } else if (isError) {
       setUser(null);
     }
-  }, [isSuccess, data, isError, error, isFetching, token, persistedUser, isAuthenticated]);
+  }, [isSuccess, data, isError, error, isFetching, token]);
 
   return (
     <UserContext.Provider value={{ user, setUser, isLoading, authModalOpen, setAuthModalOpen, refetch }}>
@@ -60,4 +49,3 @@ export const UserProvider = ({ children }) => {
     </UserContext.Provider>
   );
 };
-

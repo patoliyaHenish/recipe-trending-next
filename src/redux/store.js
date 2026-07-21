@@ -1,5 +1,4 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { persistStore } from "redux-persist";
 import rootReducer from "./rootReducer";
 import { authApi } from "../features/api/authApi";
 import { categoryApi } from "../features/api/categoryApi";
@@ -33,11 +32,7 @@ import { rtkQueryErrorMiddleware } from "./middleware";
 export const appStore = configureStore({
     reducer: rootReducer,
     middleware: (defaultMiddleware) =>
-        defaultMiddleware({
-            serializableCheck: {
-                ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE', 'persist/PAUSE', 'persist/PURGE', 'persist/FLUSH', 'persist/REGISTER'],
-            },
-        }).concat(
+        defaultMiddleware().concat(
             rtkQueryErrorMiddleware,
             authApi.middleware,
             categoryApi.middleware,
@@ -68,5 +63,3 @@ export const appStore = configureStore({
         )
 
 });
-
-export const persistor = persistStore(appStore);
