@@ -644,7 +644,17 @@ const RecipeNotes = () => {
                 <Table stickyHeader sx={{ minWidth: 1000, borderCollapse: 'separate', borderSpacing: 0 }}>
                     <TableHead>
                         <TableRow>
-                            {['#', 'Recipe name', 'Note message', 'Status', 'Commented by', 'Category', 'Sub-category', 'Created', ...(canUpdate || canDelete ? ['Actions'] : [])].map((headCell, index) => (
+                            {[
+                                { id: '#', label: '#' },
+                                { id: 'recipe_name', label: 'Recipe name', minWidth: 250 },
+                                { id: 'note_message', label: 'Note message', minWidth: 200 },
+                                { id: 'status', label: 'Status' },
+                                { id: 'commented_by', label: 'Commented by', minWidth: 150 },
+                                { id: 'category', label: 'Category' },
+                                { id: 'sub_category', label: 'Sub-category' },
+                                { id: 'created', label: 'Created', minWidth: 120 },
+                                ...(canUpdate || canDelete ? [{ id: 'actions', label: 'Actions' }] : [])
+                            ].map((col, index) => (
                                 <TableCell 
                                     key={index}
                                     align="center"
@@ -657,9 +667,10 @@ const RecipeNotes = () => {
                                         letterSpacing: '0.5px',
                                         borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
                                         py: 2,
+                                        minWidth: col.minWidth || 'auto',
                                     }}
                                 >
-                                    {headCell}
+                                    {col.label}
                                 </TableCell>
                             ))}
                         </TableRow>

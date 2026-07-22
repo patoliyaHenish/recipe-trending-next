@@ -4,17 +4,13 @@ import { useDispatch } from 'react-redux'
 import { bannerApi, useGetBannersQuery, useDeleteBannerMutation } from '../../../features/api/bannerApi'
 import { Box, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Switch, FormControl, MenuItem, Select, InputAdornment, TextField, Tooltip, Autocomplete, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Collapse, CircularProgress } from '@mui/material'
 import { toast } from '../../../utils/toast';
-import { ConfirmDialog, AccessDenied } from '../../../components/common'
+import { ConfirmDialog, AccessDenied, ActionButtons } from '../../../components/common'
 import CloseIcon from '@mui/icons-material/Close'
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ClearAllIcon from '@mui/icons-material/ClearAll'
 import SearchIcon from '@mui/icons-material/Search'
 import FilterAltOutlined from '@mui/icons-material/FilterAltOutlined'
 import FilterAltOffOutlined from '@mui/icons-material/FilterAltOffOutlined'
-import VisibilityIcon from '@mui/icons-material/Visibility'
-import AddIcon from '@mui/icons-material/Add'
 import { getImage } from '../../../utils/helper'
 import { useTheme } from '../../../context/ThemeContext'
 import ViewBannerDialog from './ViewBannerDialog'
@@ -177,7 +173,7 @@ const BannerManagement = () => {
             >
                 {/* ── Card header ───────────────────────────────────────────── */}
                 <Box
-                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b gap-4"
+                    className="flex flex-row justify-between items-center p-4 sm:p-5 border-b gap-4"
                     sx={{
                         borderColor: isDarkMode ? '#3b4253' : '#ebe9f1',
                     }}
@@ -211,7 +207,7 @@ const BannerManagement = () => {
                                 }
                             }}
                         >
-                            {showFilters ? 'Hide Filters' : 'Show Filters'}
+                            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
                         </Button>
                         {canAddBanner && canCreate && (
                             <Tooltip title={!canAddBanner ? `Maximum ${MAX_BANNERS} banners allowed` : ''}>
@@ -224,18 +220,17 @@ const BannerManagement = () => {
                                             setAddOpen(true)
                                         }}
                                         disabled={!canAddBanner}
-                                        startIcon={<AddIcon />}
                                         sx={{
+                                            height: '38px',
                                             textTransform: 'none',
+                                            px: 3,
+                                            fontSize: '16px',
                                             bgcolor: '#7367f0',
-                                            boxShadow: '0 2px 4px 0 rgba(115, 103, 240, 0.4)',
-                                            '&:hover': {
-                                                bgcolor: '#5e50ee',
-                                                boxShadow: '0 4px 8px 0 rgba(115, 103, 240, 0.4)'
-                                            }
+                                            boxShadow: 'none',
+                                            '&:hover': { bgcolor: '#5e50ee', boxShadow: 'none' },
                                         }}
                                     >
-                                        Add
+                                        + Add
                                     </Button>
                                 </span>
                             </Tooltip>
@@ -252,42 +247,79 @@ const BannerManagement = () => {
                                         Status:
                                     </Typography>
                                     <FormControl size="small" sx={{ minWidth: 150 }}>
-                                        <Select
-                                            value={status}
-                                            onChange={handleStatusChange}
-                                            displayEmpty
-                                            sx={{
-                                                ...selectStyles,
-                                                height: '38px',
-                                                '& .MuiSelect-select': { py: 1 }
+                                        <Autocomplete
+                                            size="small"
+                                            options={[
+                                                { label: 'All Status', value: 'all' },
+                                                { label: 'Hero', value: 'hero' },
+                                                { label: 'Regular', value: 'regular' }
+                                            ]}
+                                            getOptionLabel={(option) => option.label || ''}
+                                            value={
+                                                [
+                                                    { label: 'All Status', value: 'all' },
+                                                    { label: 'Hero', value: 'hero' },
+                                                    { label: 'Regular', value: 'regular' }
+                                                ].find(opt => opt.value === status) || { label: 'All Status', value: 'all' }
+                                            }
+                                            onChange={(_, newValue) => {
+                                                handleStatusChange({ target: { value: newValue ? newValue.value : 'all' } });
                                             }}
-                                            MenuProps={{
-                                                PaperProps: {
+                                            isOptionEqualToValue={(option, value) => option.value === value.value}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    placeholder="All Status"
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            padding: '0 39px 0 0 !important',
+                                                            height: 38,
+                                                            ...selectStyles,
+                                                        },
+                                                        '& .MuiInputBase-input': {
+                                                            padding: '8px 14px !important',
+                                                            height: 'auto',
+                                                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                            '&::placeholder': {
+                                                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                                opacity: 1,
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                            )}
+                                            disablePortal={true}
+                                            slotProps={{
+                                                paper: {
                                                     sx: {
                                                         bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                                                        border: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
-                                                        '& .MuiMenuItem-root': {
-                                                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                                            '&:hover': {
-                                                                bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
-                                                                color: '#7367f0 !important'
-                                                            },
-                                                            '&.Mui-selected': {
-                                                                bgcolor: 'rgba(115, 103, 240, 0.16) !important',
-                                                                color: '#7367f0 !important',
+                                                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                        borderRadius: '6px',
+                                                        border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
+                                                        boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
+                                                        '& .MuiAutocomplete-listbox': {
+                                                            padding: '0',
+                                                            '& .MuiAutocomplete-option': {
+                                                                fontSize: '0.9rem',
+                                                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                                '&[aria-selected="true"]': {
+                                                                    bgcolor: 'rgba(115, 103, 240, 0.12) !important',
+                                                                    color: '#7367f0 !important',
+                                                                    fontWeight: 500,
+                                                                    '&.Mui-focused': {
+                                                                        bgcolor: 'rgba(115, 103, 240, 0.12) !important',
+                                                                    }
+                                                                },
                                                                 '&:hover': {
-                                                                    bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
+                                                                    bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.08) !important' : 'rgba(115, 103, 240, 0.08) !important',
+                                                                    color: '#7367f0 !important'
                                                                 }
                                                             }
                                                         }
                                                     }
                                                 }
                                             }}
-                                        >
-                                            <MenuItem value="all">All Status</MenuItem>
-                                            <MenuItem value="hero">Hero</MenuItem>
-                                            <MenuItem value="regular">Regular</MenuItem>
-                                        </Select>
+                                        />
                                     </FormControl>
                                 </Box>
                                 
@@ -438,59 +470,15 @@ const BannerManagement = () => {
                                             <TableCell align="center">{rowItem.is_hero ? rowItem.order : '—'}</TableCell>
                                             {(canView || canUpdate || canDelete) && (
                                                 <TableCell align="center">
-                                                    <Box className="flex gap-2 justify-center items-center">
-                                                        {canView && (
-                                                            <Tooltip title="View" arrow>
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={() => setViewBanner(rowItem)}
-                                                                    sx={{
-                                                                        color: isDarkMode ? '#10b981' : '#059669',
-                                                                        '&:hover': {
-                                                                            backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5',
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    <VisibilityIcon fontSize="small" />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        )}
-                                                        {canUpdate && (
-                                                            <Tooltip title="Edit" arrow>
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={() => {
-                                                                        setEditId(rowItem.banner_id)
-                                                                        setAddOpen(true)
-                                                                    }}
-                                                                    sx={{
-                                                                        color: '#3b82f6',
-                                                                        '&:hover': {
-                                                                            backgroundColor: isDarkMode ? 'rgba(59, 130, 246, 0.1)' : '#eff6ff',
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    <EditIcon fontSize="small" />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        )}
-                                                        {canDelete && (
-                                                            <Tooltip title="Delete" arrow>
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={() => setDeleteId(rowItem.banner_id)}
-                                                                    sx={{
-                                                                        color: '#ef4444',
-                                                                        '&:hover': {
-                                                                            backgroundColor: isDarkMode ? 'rgba(239, 68, 68, 0.1)' : '#fef2f2',
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    <DeleteIcon fontSize="small" />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        )}
-                                                    </Box>
+                                                    <ActionButtons
+                                                        onView={() => setViewBanner(rowItem)}
+                                                        onEdit={() => { setEditId(rowItem.banner_id); setAddOpen(true); }}
+                                                        onDelete={() => setDeleteId(rowItem.banner_id)}
+                                                        showView={canView}
+                                                        showEdit={canUpdate}
+                                                        showDelete={canDelete}
+                                                        isDarkMode={isDarkMode}
+                                                    />
                                                 </TableCell>
                                             )}
                                         </TableRow>

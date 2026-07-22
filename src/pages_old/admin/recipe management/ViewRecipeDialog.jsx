@@ -446,36 +446,42 @@ const ViewRecipeDialog = ({
                  )}
                </Box>
                {data.ingredients && data.ingredients.length > 0 ? (
-                  <TableContainer sx={{ border: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}`, borderRadius: 1, backgroundColor: 'transparent', maxHeight: 320, overflowY: 'auto' }}>
-                    <Table size="small" stickyHeader>
+                  <TableContainer sx={{ border: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}`, borderRadius: 2, backgroundColor: isDarkMode ? '#1f2937' : '#ffffff', maxHeight: 320, overflowY: 'auto' }}>
+                    <Table size="small" stickyHeader sx={{ '& .MuiTableCell-root': { py: 1.5, px: 2 } }}>
                       <TableHead>
                         <TableRow>
-                          <TableCell sx={{ color: isDarkMode ? '#e5e7eb' : '#111827', fontWeight: 600, borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#1f2937' : '#f3f4f6' }}>Ingredient</TableCell>
-                          <TableCell sx={{ color: isDarkMode ? '#e5e7eb' : '#111827', fontWeight: 600, borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#1f2937' : '#f3f4f6' }}>Quantity</TableCell>
-                          <TableCell sx={{ color: isDarkMode ? '#e5e7eb' : '#111827', fontWeight: 600, borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#1f2937' : '#f3f4f6' }}>Unit</TableCell>
+                          <TableCell sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#374151' : '#f3f2f7' }}>Ingredient</TableCell>
+                          <TableCell sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#374151' : '#f3f2f7' }}>Quantity</TableCell>
+                          <TableCell sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#374151' : '#f3f2f7' }}>Unit</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {data.ingredients.map((ing, idx) => {
+                          const isLast = idx === data.ingredients.length - 1;
                           if (ing.is_free_text) {
                             const isSectionHeader = typeof ing.free_text === 'string' && ing.free_text.trim().endsWith(':') && !ing.quantity && !ing.unit;
                             return isSectionHeader ? (
                               <TableRow key={idx}>
-                                <TableCell colSpan={3} sx={{ padding: 0, border: 'none', borderColor: isDarkMode ? '#404656' : '#ebe9f1' }}>
-                                  <div style={{ backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.1)', color: isDarkMode ? '#fcd34d' : '#d97706', fontWeight: 700, padding: '6px 16px', borderBottom: `1px solid ${isDarkMode ? 'rgba(245,158,11,0.25)' : 'rgba(245,158,11,0.15)'}` }}>{ing.free_text}</div>
+                                <TableCell colSpan={3} sx={{ padding: 0, borderBottom: isLast ? 'none' : `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>
+                                  <div style={{ backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.1)', color: isDarkMode ? '#fcd34d' : '#d97706', fontWeight: 700, padding: '8px 16px', fontSize: '0.85rem' }}>{ing.free_text}</div>
                                 </TableCell>
                               </TableRow>
                             ) : (
                               <TableRow key={idx}>
-                                <TableCell colSpan={3} sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280', fontStyle: 'italic', borderColor: isDarkMode ? '#404656' : '#ebe9f1' }}>{ing.free_text}</TableCell>
+                                <TableCell colSpan={3} sx={{ color: isDarkMode ? '#cbd5e1' : '#475569', fontWeight: 500, backgroundColor: isDarkMode ? 'rgba(255,255,255,0.02)' : '#f8fafc', borderBottom: isLast ? 'none' : `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ color: isDarkMode ? '#64748b' : '#94a3b8' }}>•</span>
+                                    {ing.free_text}
+                                  </div>
+                                </TableCell>
                               </TableRow>
                             );
                           }
                           return (
-                            <TableRow key={idx}>
-                              <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderColor: isDarkMode ? '#404656' : '#ebe9f1' }}>{ing.ingredient_name}</TableCell>
-                              <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderColor: isDarkMode ? '#404656' : '#ebe9f1' }}>{ing.quantity}</TableCell>
-                              <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderColor: isDarkMode ? '#404656' : '#ebe9f1' }}>{ing.unit}</TableCell>
+                            <TableRow key={idx} hover sx={{ '&:hover': { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' } }}>
+                              <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderBottom: isLast ? 'none' : `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}`, fontWeight: 500 }}>{ing.ingredient_name}</TableCell>
+                              <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderBottom: isLast ? 'none' : `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>{ing.quantity}</TableCell>
+                              <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderBottom: isLast ? 'none' : `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>{ing.unit}</TableCell>
                             </TableRow>
                           );
                         })}
@@ -498,13 +504,13 @@ const ViewRecipeDialog = ({
                   border: `1px solid ${isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.12)'}`,
               }}>
                  <Typography variant="subtitle2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280', fontWeight: 700, mb: -1, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Nutrition Info (per serving)</Typography>
-                 <TableContainer sx={{ border: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}`, borderRadius: 1, backgroundColor: 'transparent', maxHeight: 320, overflowY: 'auto' }}>
-                    <Table size="small" stickyHeader>
+                 <TableContainer sx={{ border: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}`, borderRadius: 2, backgroundColor: isDarkMode ? '#1f2937' : '#ffffff', maxHeight: 320, overflowY: 'auto' }}>
+                    <Table size="small" stickyHeader sx={{ '& .MuiTableCell-root': { py: 1.5, px: 2 } }}>
                       <TableHead>
                         <TableRow>
-                          <TableCell sx={{ color: isDarkMode ? '#e5e7eb' : '#111827', fontWeight: 600, borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#1f2937' : '#f3f4f6' }}>Nutrient</TableCell>
-                          <TableCell sx={{ color: isDarkMode ? '#e5e7eb' : '#111827', fontWeight: 600, borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#1f2937' : '#f3f4f6' }}>Value</TableCell>
-                          <TableCell sx={{ color: isDarkMode ? '#e5e7eb' : '#111827', fontWeight: 600, borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#1f2937' : '#f3f4f6' }}>Unit</TableCell>
+                          <TableCell sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#374151' : '#f3f2f7' }}>Nutrient</TableCell>
+                          <TableCell sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#374151' : '#f3f2f7' }}>Value</TableCell>
+                          <TableCell sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', borderColor: isDarkMode ? '#404656' : '#ebe9f1', bgcolor: isDarkMode ? '#374151' : '#f3f2f7' }}>Unit</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -522,13 +528,16 @@ const ViewRecipeDialog = ({
                           { label: "Calcium", value: data.nutrition.calcium, unit: "mg" },
                           { label: "Iron", value: data.nutrition.iron, unit: "mg" },
                           { label: "Potassium", value: data.nutrition.potassium, unit: "mg" },
-                        ].map((nutri, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderColor: isDarkMode ? '#404656' : '#ebe9f1' }}>{nutri.label}</TableCell>
-                            <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderColor: isDarkMode ? '#404656' : '#ebe9f1' }}>{nutri.value != null ? Number(nutri.value).toFixed(1) : '-'}</TableCell>
-                            <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderColor: isDarkMode ? '#404656' : '#ebe9f1' }}>{nutri.unit}</TableCell>
-                          </TableRow>
-                        ))}
+                        ].map((nutri, idx, arr) => {
+                          const isLast = idx === arr.length - 1;
+                          return (
+                            <TableRow key={idx} hover sx={{ '&:hover': { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' } }}>
+                              <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderBottom: isLast ? 'none' : `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}`, fontWeight: 500 }}>{nutri.label}</TableCell>
+                              <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderBottom: isLast ? 'none' : `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>{nutri.value != null ? Number(nutri.value).toFixed(1) : '-'}</TableCell>
+                              <TableCell sx={{ color: isDarkMode ? '#d1d5db' : '#374151', borderBottom: isLast ? 'none' : `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>{nutri.unit}</TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                  </TableContainer>
@@ -644,7 +653,7 @@ const ViewRecipeDialog = ({
               }
             }}
           >
-            View Details Page
+            View
           </Button>
           </>
         )}

@@ -26,6 +26,7 @@ import {
   Autocomplete,
   TextField,
   Tooltip,
+  Collapse,
 } from '@mui/material';
 import { toast } from '../../../utils/toast';
 import { useTheme } from '../../../context/ThemeContext';
@@ -45,6 +46,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import SearchIcon from '@mui/icons-material/Search';
+import { FilterAltOutlined, FilterAltOffOutlined } from '@mui/icons-material';
 import { getImage } from '../../../utils/helper';
 import AddSubCategoryDialog from './AddSubCategoryDialog';
 import ViewSubCategoryDialogV2 from './ViewSubCategoryDialogV2';
@@ -119,6 +121,7 @@ const RecipeSubCategory = () => {
   const [debouncedStatus, setDebouncedStatus] = useState(() => searchParams.get('status') || '')
   const [categoryFilter, setCategoryFilter] = useState(() => searchParams.get('category_id') || '')
   const [debouncedCategory, setDebouncedCategory] = useState(() => searchParams.get('category_id') || '')
+  const [showFilters, setShowFilters] = useState(false);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState('add');
@@ -524,7 +527,7 @@ const RecipeSubCategory = () => {
         >
             {/* ── Card header ───────────────────────────────────────────── */}
             <Box
-                className="flex flex-row justify-between items-center p-4 sm:p-5 border-b gap-4"
+                className="flex flex-wrap justify-between items-center p-4 sm:p-5 border-b gap-3"
                 sx={{ borderColor: isDarkMode ? '#3b4253' : '#ebe9f1' }}
             >
                 <Box className="flex items-center flex-wrap gap-2">
@@ -540,26 +543,48 @@ const RecipeSubCategory = () => {
                         Sub-categories
                     </Typography>
                 </Box>
-                {canCreate && (
+                <Box className="flex gap-2 sm:gap-4 flex-wrap items-center">
                     <Button
-                        variant="contained"
-                        onClick={() => handleDialogOpen('add')}
+                        variant="outlined"
+                        onClick={() => setShowFilters(!showFilters)}
+                        startIcon={showFilters ? <FilterAltOffOutlined /> : <FilterAltOutlined />}
                         sx={{
-                            height: '38px',
                             textTransform: 'none',
-                            px: 3,
-                            fontSize: '16px',
-                            bgcolor: '#7367f0',
-                            boxShadow: 'none',
-                            '&:hover': { bgcolor: '#5e50ee', boxShadow: 'none' },
+                            borderColor: isDarkMode ? '#404656' : '#d8d6de',
+                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            px: { xs: 1.5, sm: 2 },
+                            '&:hover': {
+                                borderColor: '#7367f0',
+                                color: '#7367f0',
+                                backgroundColor: isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.08)'
+                            }
                         }}
                     >
-                        + Add
+                        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
                     </Button>
-                )}
+                    {canCreate && (
+                        <Button
+                            variant="contained"
+                            onClick={() => handleDialogOpen('add')}
+                            sx={{
+                                height: '38px',
+                                textTransform: 'none',
+                                px: { xs: 2, sm: 3 },
+                                fontSize: { xs: '14px', sm: '16px' },
+                                bgcolor: '#7367f0',
+                                boxShadow: 'none',
+                                '&:hover': { bgcolor: '#5e50ee', boxShadow: 'none' },
+                            }}
+                        >
+                            + Add
+                        </Button>
+                    )}
+                </Box>
             </Box>
 
             {/* ── Filters row ───────────────────────────────────────────── */}
+            <Collapse in={showFilters}>
             <Box className="flex flex-col p-5 gap-4">
                 <Box className="flex flex-wrap items-center gap-4">
                     <Box className="flex items-center gap-2">
@@ -782,6 +807,7 @@ const RecipeSubCategory = () => {
                     </Button>
                 </Box>
             </Box>
+            </Collapse>
 
             
             {/* ── Table ───────────────────────────────────────────────── */}

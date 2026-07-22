@@ -397,13 +397,13 @@ const FailedSearches = () => {
             >
                 {/* ── Card header ───────────────────────────────────────────── */}
                 <Box
-                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 border-b"
+                    className="flex flex-wrap justify-between items-center p-4 sm:p-5 border-b gap-3"
                     sx={{ borderColor: isDarkMode ? '#3b4253' : '#ebe9f1' }}
                 >
                     <Box className="flex items-center gap-2">
                         <Typography
                             variant="h5"
-                            sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b', letterSpacing: '0.5px' }}
+                            sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b', letterSpacing: '0.5px', fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
                         >
                             Failed Searches
                         </Typography>
@@ -416,6 +416,8 @@ const FailedSearches = () => {
                             textTransform: 'none', 
                             borderColor: isDarkMode ? '#404656' : '#d8d6de', 
                             color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            px: { xs: 1.5, sm: 2 },
                             '&:hover': {
                                 borderColor: '#7367f0',
                                 color: '#7367f0',
@@ -423,7 +425,7 @@ const FailedSearches = () => {
                             }
                         }}
                     >
-                        {showFilters ? 'Hide Filters' : 'Show Filters'}
+                        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
                     </Button>
                 </Box>
 

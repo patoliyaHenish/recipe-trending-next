@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Box, Stack, Typography, IconButton, Switch, MenuItem, Select, FormControl, InputLabel, useMediaQuery, Autocomplete, Tooltip } from '@mui/material'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Box, Stack, Typography, IconButton, Switch, MenuItem, Select, FormControl, InputLabel, useMediaQuery, Autocomplete, Tooltip, Collapse } from '@mui/material'
 import { useTheme as useMuiTheme } from '@mui/material/styles'
 import { toast } from '../../../utils/toast';
 import { PageHeader, SearchBar, ConfirmDialog } from '../../../components/common'
@@ -10,6 +10,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearAllIcon from '@mui/icons-material/ClearAll'
+import { FilterAltOutlined, FilterAltOffOutlined } from '@mui/icons-material'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useTheme } from '../../../context/ThemeContext'
@@ -33,7 +34,7 @@ import AddHomeSectionDialog from './AddHomeSectionDialog'
 import AddFeatureSectionDialog from './AddFeatureSectionDialog'
 
 import { useUser } from '../../../context/useUser';
-import { AccessDenied } from '../../../components/common';
+import { AccessDenied, ActionButtons } from '../../../components/common';
 
 const HomeSectionManagement = () => {
   const { isDarkMode } = useTheme()
@@ -87,6 +88,7 @@ const HomeSectionManagement = () => {
   const [debouncedSectionType, setDebouncedSectionType] = useState('all')
   const [debouncedType, setDebouncedType] = useState('all')
   const [debouncedStatus, setDebouncedStatus] = useState('all')
+  const [showFilters, setShowFilters] = useState(false)
 
   
 
@@ -292,7 +294,7 @@ const HomeSectionManagement = () => {
         >
             {/* ── Card header ───────────────────────────────────────────── */}
             <Box
-                className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-5 border-b gap-4"
+                className="flex flex-wrap justify-between items-center p-4 sm:p-5 border-b gap-3"
                 sx={{ borderColor: isDarkMode ? '#3b4253' : '#ebe9f1' }}
             >
                 <Box className="flex items-center flex-wrap gap-2">
@@ -308,60 +310,66 @@ const HomeSectionManagement = () => {
                         Home Section
                     </Typography>
                 </Box>
-                {canCreate && (
-                    <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'space-between', sm: 'flex-start' } }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: { xs: '48%', sm: 'auto' } }}>
+                <Box className="flex gap-2 sm:gap-4 flex-wrap items-center">
+                    <Button
+                        variant="outlined"
+                        onClick={() => setShowFilters(!showFilters)}
+                        startIcon={showFilters ? <FilterAltOffOutlined /> : <FilterAltOutlined />}
+                        sx={{
+                            textTransform: 'none',
+                            borderColor: isDarkMode ? '#404656' : '#d8d6de',
+                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            px: { xs: 1.5, sm: 2 },
+                            '&:hover': {
+                                borderColor: '#7367f0',
+                                color: '#7367f0',
+                                backgroundColor: isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.08)'
+                            }
+                        }}
+                    >
+                        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
+                    </Button>
+                    {canCreate && (
+                        <>
                             <Button
                                 variant="contained"
                                 onClick={() => handleOpenFeature()}
                                 sx={{
                                     height: '38px',
                                     textTransform: 'none',
-                                    px: { xs: 0, sm: 3 },
-                                    fontSize: '16px',
-                                    width: '100%',
+                                    px: { xs: 2, sm: 3 },
+                                    fontSize: { xs: '14px', sm: '16px' },
                                     bgcolor: '#7367f0',
                                     boxShadow: 'none',
                                     '&:hover': { bgcolor: '#5e50ee', boxShadow: 'none' },
                                 }}
                             >
-                                {isMobile ? '+ Add' : '+ Add Feature'}
+                                {isMobile ? '+ Feature' : '+ Add Feature'}
                             </Button>
-                            {isMobile && (
-                                <Typography variant="caption" sx={{ mt: 0.5, color: isDarkMode ? '#94a3b8' : '#64748b', fontWeight: 600 }}>
-                                    Feature
-                                </Typography>
-                            )}
-                        </Box>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: { xs: '48%', sm: 'auto' } }}>
                             <Button
                                 variant="contained"
                                 onClick={() => handleOpen()}
                                 sx={{
                                     height: '38px',
                                     textTransform: 'none',
-                                    px: { xs: 0, sm: 3 },
-                                    fontSize: '16px',
-                                    width: '100%',
+                                    px: { xs: 2, sm: 3 },
+                                    fontSize: { xs: '14px', sm: '16px' },
                                     bgcolor: '#28c76f',
                                     boxShadow: 'none',
                                     '&:hover': { bgcolor: '#23af62', boxShadow: 'none' },
                                 }}
                             >
-                                {isMobile ? '+ Add' : '+ Add Section'}
+                                {isMobile ? '+ Section' : '+ Add Section'}
                             </Button>
-                            {isMobile && (
-                                <Typography variant="caption" sx={{ mt: 0.5, color: isDarkMode ? '#94a3b8' : '#64748b', fontWeight: 600 }}>
-                                    Section
-                                </Typography>
-                            )}
-                        </Box>
-                    </Box>
-                )}
+                        </>
+                    )}
+                </Box>
             </Box>
 
             {/* ── Filters row ───────────────────────────────────────────── */}
-            <Box className="flex flex-col p-5 gap-4">
+            <Collapse in={showFilters}>
+            <Box className="flex flex-col p-5 gap-4" sx={{ borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>
                 <Box className="flex flex-wrap items-center justify-between gap-4">
                     <Box className="flex flex-wrap items-center gap-4">
                         <Box className="flex items-center gap-2">
@@ -703,6 +711,7 @@ const HomeSectionManagement = () => {
                     </Box>
                 </Box>
             </Box>
+            </Collapse>
 
             
             {/* ── Table ───────────────────────────────────────────────── */}
@@ -811,65 +820,20 @@ const HomeSectionManagement = () => {
                                         </TableCell>
                                         <TableCell align="center">{rowItem.position}</TableCell>
                                         <TableCell align="center">
-                                            <Box display="flex" gap={1} justifyContent="center" alignItems="center" height="100%">
-                                                {allowedToView && (
-                                                    <Tooltip title="View" arrow>
-                                                        <IconButton 
-                                                            size="small" 
-                                                            onClick={() => setViewSection(rowItem)} 
-                                                            sx={{ 
-                                                                color: isDarkMode ? '#10b981' : '#059669',
-                                                                '&:hover': {
-                                                                    backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5',
-                                                                },
-                                                            }}
-                                                        >
-                                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                                <circle cx="12" cy="12" r="3"></circle>
-                                                            </svg>
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                )}
-                                                {allowedToUpdate && (
-                                                    <Tooltip title="Edit" arrow>
-                                                        <IconButton
-                                                            size="small"
-                                                            onClick={() => {
-                                                                if (isFeature) {
-                                                                    handleOpenFeature(rowItem)
-                                                                } else {
-                                                                    handleOpen(rowItem)
-                                                                }
-                                                            }}
-                                                            sx={{
-                                                                color: isDarkMode ? '#3b82f6' : '#2563eb',
-                                                                '&:hover': {
-                                                                    backgroundColor: isDarkMode ? '#1e3a8a' : '#dbeafe',
-                                                                },
-                                                            }}
-                                                        >
-                                                            <EditIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                )}
-                                                {allowedToDelete && !rowItem.is_active && (
-                                                    <Tooltip title="Delete" arrow>
-                                                        <IconButton 
-                                                            size="small" 
-                                                            onClick={() => handleDelete(rowItem.home_section_id)} 
-                                                            sx={{
-                                                                color: isDarkMode ? '#ef4444' : '#dc2626',
-                                                                '&:hover': {
-                                                                    backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2',
-                                                                },
-                                                            }}
-                                                        >
-                                                            <DeleteIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                )}
-                                            </Box>
+                                            <ActionButtons
+                                                onView={allowedToView ? () => setViewSection(rowItem) : undefined}
+                                                onEdit={allowedToUpdate ? () => {
+                                                    if (isFeature) {
+                                                        handleOpenFeature(rowItem);
+                                                    } else {
+                                                        handleOpen(rowItem);
+                                                    }
+                                                } : undefined}
+                                                onDelete={allowedToDelete && !rowItem.is_active ? () => handleDelete(rowItem.home_section_id) : undefined}
+                                                showView={allowedToView}
+                                                showEdit={allowedToUpdate}
+                                                showDelete={allowedToDelete && !rowItem.is_active}
+                                            />
                                         </TableCell>
                                     </TableRow>
                                 );

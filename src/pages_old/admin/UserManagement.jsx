@@ -672,7 +672,7 @@ const UserManagement = () => {
                             }
                         }}
                     >
-                        {showFilters ? 'Hide Filters' : 'Show Filters'}
+                        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
                     </Button>
                 </Box>
 
@@ -1268,17 +1268,18 @@ const UserManagement = () => {
                                 } 
                             }}>
                                 <TableCell align="center" width="50">#</TableCell>
-                                <TableCell>USER</TableCell>
+                                <TableCell sx={{ minWidth: 300 }}>USER</TableCell>
                                 <TableCell>EMAIL</TableCell>
                                 <TableCell align="center" width="140">ROLE</TableCell>
                                 <TableCell align="center" width="100">VERIFIED</TableCell>
                                 <TableCell align="center" width="100">GOOGLE</TableCell>
                                 <TableCell align="center">PREFERENCES</TableCell>
                                 <TableCell align="center" width="100">BLOCKED</TableCell>
+                                <TableCell align="center" sx={{ minWidth: 160 }}>BLOCKED AT</TableCell>
                                 {isUserLoginEnabled && <TableCell align="center" width="90">LOGIN</TableCell>}
-                                <TableCell align="center">LAST ACTIVE</TableCell>
-                                <TableCell align="center">REGISTERED AT</TableCell>
-                                <TableCell align="center">UPDATED AT</TableCell>
+                                <TableCell align="center" sx={{ minWidth: 160 }}>LAST ACTIVE</TableCell>
+                                <TableCell align="center" sx={{ minWidth: 160 }}>REGISTERED AT</TableCell>
+                                <TableCell align="center" sx={{ minWidth: 160 }}>UPDATED AT</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -1431,6 +1432,11 @@ const UserManagement = () => {
                                                         />
                                                     )
                                                 )}
+                                            </TableCell>
+
+                                            {/* BLOCKED AT */}
+                                            <TableCell align="center" sx={{ whiteSpace: 'nowrap', color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                                                {userItem.blocked && userItem.blocked_time ? moment(userItem.blocked_time).format('MMM D, YYYY h:mm A') : '-'}
                                             </TableCell>
 
                                             {/* LOGIN */}

@@ -11,7 +11,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
-import { Edit, Save, Cancel, Delete } from '@mui/icons-material';
+import { Edit, Save, Cancel, Delete, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { useSearchIngredientsQuery, useCreateIngredientMutation, useGetPopularIngredientsQuery } from '../features/api/ingredientApi';
 import { toast } from 'react-toastify';
 import { useTheme } from '../context/ThemeContext';
@@ -92,7 +92,7 @@ const autocompleteSlotProps = (isDarkMode) => ({
   },
 });
 
-const IngredientItem = ({ ingredient, index, onUpdate, onRemove, disabled, allUnits = [] }) => {
+const IngredientItem = ({ ingredient, index, total, onUpdate, onRemove, onMoveUp, onMoveDown, disabled, allUnits = [] }) => {
   const { isDarkMode } = useTheme();
   const menuProps = getMenuProps(isDarkMode);
   const [isEditing, setIsEditing] = useState(false);
@@ -288,6 +288,8 @@ const IngredientItem = ({ ingredient, index, onUpdate, onRemove, disabled, allUn
       <div className="flex items-center justify-between w-full sm:w-auto sm:flex-none">
         <span className={`min-w-[30px] font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{index + 1}.</span>
         <div className="flex sm:hidden items-center gap-1">
+          <IconButton size="small" onClick={onMoveUp} disabled={disabled || index === 0} sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}><ArrowUpward fontSize="small" /></IconButton>
+          <IconButton size="small" onClick={onMoveDown} disabled={disabled || index === total - 1} sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}><ArrowDownward fontSize="small" /></IconButton>
           <IconButton size="small" color="primary" onClick={() => setIsEditing(true)} disabled={disabled} sx={{ bgcolor: isDarkMode ? 'rgba(59,130,246,0.1)' : 'rgba(59,130,246,0.05)' }}><Edit fontSize="small" /></IconButton>
           <IconButton size="small" color="error" onClick={onRemove} disabled={disabled} sx={{ bgcolor: isDarkMode ? 'rgba(239,68,68,0.1)' : 'rgba(239,68,68,0.05)' }}><Delete fontSize="small" /></IconButton>
         </div>
@@ -307,6 +309,8 @@ const IngredientItem = ({ ingredient, index, onUpdate, onRemove, disabled, allUn
       )}
       
       <div className="hidden sm:flex items-center gap-1 ml-auto">
+        <IconButton size="small" onClick={onMoveUp} disabled={disabled || index === 0} sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}><ArrowUpward fontSize="small" /></IconButton>
+        <IconButton size="small" onClick={onMoveDown} disabled={disabled || index === total - 1} sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}><ArrowDownward fontSize="small" /></IconButton>
         <IconButton size="small" onClick={() => setIsEditing(true)} disabled={disabled} sx={{ color: "#3b82f6" }}><Edit fontSize="small" /></IconButton>
         <IconButton size="small" onClick={onRemove} disabled={disabled} sx={{ color: "#ef4444" }}><Delete fontSize="small" /></IconButton>
       </div>
@@ -425,6 +429,24 @@ const IngredientInput = ({ value = [], onChange, disabled = false, dialogOpen, e
 
   const handleRemoveIngredient = (index) => {
     onChange(value.filter((_, i) => i !== index));
+  };
+
+  const handleMoveUp = (index) => {
+    if (index === 0) return;
+    const newIngredients = [...value];
+    const temp = newIngredients[index - 1];
+    newIngredients[index - 1] = newIngredients[index];
+    newIngredients[index] = temp;
+    onChange(newIngredients);
+  };
+
+  const handleMoveDown = (index) => {
+    if (index === value.length - 1) return;
+    const newIngredients = [...value];
+    const temp = newIngredients[index + 1];
+    newIngredients[index + 1] = newIngredients[index];
+    newIngredients[index] = temp;
+    onChange(newIngredients);
   };
 
   const ingredientExists = (name, list) => list.some(item => item.name.toLowerCase() === name.toLowerCase());
@@ -701,9 +723,12 @@ const IngredientInput = ({ value = [], onChange, disabled = false, dialogOpen, e
                 key={index}
                 ingredient={ingredient}
                 index={index}
+                total={value.length}
                 allUnits={allUnits}
                 onUpdate={(updatedIngredient) => handleUpdateIngredient(index, updatedIngredient)}
                 onRemove={() => handleRemoveIngredient(index)}
+                onMoveUp={() => handleMoveUp(index)}
+                onMoveDown={() => handleMoveDown(index)}
                 disabled={disabled}
               />
             ))}

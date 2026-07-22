@@ -31,6 +31,8 @@ import {
   TableRow,
   Paper,
   CircularProgress,
+  Collapse,
+  Tooltip,
 } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -42,6 +44,10 @@ import NoteAltOutlinedIcon from '@mui/icons-material/NoteAltOutlined';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import UpdateIcon from '@mui/icons-material/Update';
+import { FilterAltOutlined, FilterAltOffOutlined } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import { getImage, getYouTubeThumbnail } from '../../../utils/helper';
 import { useSelector } from 'react-redux';
@@ -888,7 +894,24 @@ const Recipe = () => {
         const imgVal = (typeof params.value === 'string' ? params.value.trim() : '') || '';
         const imgUrl = imgVal && imgVal.toLowerCase() !== 'null' ? getImage(imgVal) : '';
         return imgUrl ? (
-          <img src={imgUrl} alt={params.data.title} style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 4 }} />
+          <Box
+            sx={{
+              width: 72,
+              aspectRatio: '16 / 9',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: isDarkMode ? '#1f2937' : '#e5e7eb',
+              borderRadius: '4px'
+            }}
+          >
+            <img
+              src={imgUrl}
+              alt={params.data.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          </Box>
         ) : (
           <span className="text-gray-400">No Image</span>
         );
@@ -913,7 +936,8 @@ const Recipe = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: isDarkMode ? '#1f2937' : '#e5e7eb'
+              backgroundColor: isDarkMode ? '#1f2937' : '#e5e7eb',
+              borderRadius: '4px'
             }}
           >
             <img
@@ -1229,14 +1253,54 @@ const Recipe = () => {
         const canModifyDelete = isAdmin || canDeleteAll || Number(params.data.created_by) === Number(user?.user_id);
         return (
           <Box className="flex gap-2 justify-center items-center h-full">
-            <ActionButtons
-              onView={() => setViewId(params.data.recipe_id)}
-              onEdit={() => navigate('/manage-recipes/edit/' + params.data.recipe_id, { state: { returnTo: location.search } })}
-              onDelete={() => setDeleteId(params.data.recipe_id)}
-              showView={canView}
-              showEdit={canUpdate && canModifyEdit}
-              showDelete={canDelete && canModifyDelete}
-            />
+            {canView && (
+              <Tooltip title="View" arrow>
+                <IconButton
+                  size="small"
+                  onClick={() => setViewId(params.data.recipe_id)}
+                  sx={{
+                    color: isDarkMode ? '#10b981' : '#059669',
+                    '&:hover': {
+                      backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5',
+                    },
+                  }}
+                >
+                  <VisibilityIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            {canUpdate && canModifyEdit && (
+              <Tooltip title="Edit" arrow>
+                <IconButton
+                  size="small"
+                  onClick={() => navigate('/manage-recipes/edit/' + params.data.recipe_id, { state: { returnTo: location.search } })}
+                  sx={{
+                    color: '#7367f0',
+                    '&:hover': {
+                      backgroundColor: isDarkMode ? 'rgba(115,103,240,0.1)' : 'rgba(115,103,240,0.08)',
+                    },
+                  }}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            {canDelete && canModifyDelete && (
+              <Tooltip title="Delete" arrow>
+                <IconButton
+                  size="small"
+                  onClick={() => setDeleteId(params.data.recipe_id)}
+                  sx={{
+                    color: '#ea5455',
+                    '&:hover': {
+                      backgroundColor: isDarkMode ? 'rgba(234,84,85,0.1)' : 'rgba(234,84,85,0.08)',
+                    },
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
             {canNotesList && (
               <IconButton
                 onClick={() => setNoteRecipeId(params.data.recipe_id)}
@@ -1406,6 +1470,25 @@ const Recipe = () => {
                     </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', mt: { xs: 0, sm: 0 } }}>
+                    <Button
+                        variant="outlined"
+                        onClick={() => setShowFilters(!showFilters)}
+                        startIcon={showFilters ? <FilterAltOffOutlined /> : <FilterAltOutlined />}
+                        sx={{
+                            textTransform: 'none',
+                            borderColor: isDarkMode ? '#404656' : '#d8d6de',
+                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            px: { xs: 1.5, sm: 2 },
+                            '&:hover': {
+                                borderColor: '#7367f0',
+                                color: '#7367f0',
+                                backgroundColor: isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.08)'
+                            }
+                        }}
+                    >
+                        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
+                    </Button>
                     {selectionMode && selectedRows.length > 0 && (
                         <Button
                             variant="contained"
@@ -1471,6 +1554,7 @@ const Recipe = () => {
             </Box>
 
             {/* ── Filters row ───────────────────────────────────────────── */}
+            <Collapse in={showFilters}>
             <Box className="flex flex-col p-4 sm:p-5 gap-4">
                 {/* Search and Refresh Row */}
                 <Box className="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full flex-wrap gap-3">
@@ -1516,28 +1600,13 @@ const Recipe = () => {
                             }} />
                         </IconButton>
                     </Box>
-                    <Box sx={{ display: { xs: 'flex', lg: 'none' }, justifyContent: 'flex-end' }}>
-                        <Button
-                            variant="outlined"
-                            onClick={() => setShowFilters(!showFilters)}
-                            startIcon={<FilterListIcon />}
-                            sx={{
-                                height: '38px',
-                                textTransform: 'none',
-                                borderColor: showFilters ? (isDarkMode ? '#10b981' : '#059669') : (isDarkMode ? '#404656' : '#d8d6de'),
-                                color: showFilters ? (isDarkMode ? '#10b981' : '#059669') : (isDarkMode ? '#d0d2d6' : '#6e6b7b'),
-                            }}
-                        >
-                            Filters
-                        </Button>
-                    </Box>
                 </Box>
 
 
           <Box
             ref={filterRef}
             sx={{
-              display: showFilters ? 'grid' : { xs: 'none', lg: 'grid' },
+              display: 'grid',
               gridTemplateColumns: {
                 xs: '1fr',
                 sm: 'repeat(2, 1fr)',
@@ -2767,6 +2836,7 @@ const Recipe = () => {
             </Box>
             </Box>
         </Box>
+        </Collapse>
 
             {/* ── AG Grid ───────────────────────────────────────────────── */}
             <Box
@@ -2858,11 +2928,11 @@ const Recipe = () => {
                 } 
             }}>
                 <TableCell align="center" width={70}>#</TableCell>
-                <TableCell align="center">Image</TableCell>
-                <TableCell align="center">YT Image</TableCell>
-                <TableCell>Title</TableCell>
-                <TableCell align="center">Category</TableCell>
-                <TableCell align="center">Sub Category</TableCell>
+                <TableCell align="center" width={100}>Image</TableCell>
+                <TableCell align="center" width={120}>YT Image</TableCell>
+                <TableCell sx={{ minWidth: 300 }}>Title</TableCell>
+                <TableCell align="center" sx={{ minWidth: 200 }}>Category</TableCell>
+                <TableCell align="center" sx={{ minWidth: 200 }}>Sub Category</TableCell>
                 <TableCell align="center">Food Type</TableCell>
                 {(isAdmin || canPublish || canPublishAll) && (
                     <>
@@ -2877,16 +2947,16 @@ const Recipe = () => {
                             )}
                             Public Approved
                         </TableCell>
-                        <TableCell align="center">Approved Date</TableCell>
+                        <TableCell align="center" sx={{ minWidth: 190 }}>Approved Date</TableCell>
                     </>
                 )}
                 {isAdmin && (
                     <TableCell align="center">Admin Approved</TableCell>
                 )}
-                <TableCell align="center">Admin Approved Time</TableCell>
-                <TableCell align="center">Created Date</TableCell>
-                <TableCell align="center">Updated Date</TableCell>
-                <TableCell align="center">Created By</TableCell>
+                <TableCell align="center" sx={{ minWidth: 190 }}>Admin Approved Time</TableCell>
+                <TableCell align="center" sx={{ minWidth: 190 }}>Created Date</TableCell>
+                <TableCell align="center" sx={{ minWidth: 190 }}>Updated Date</TableCell>
+                <TableCell align="center" sx={{ minWidth: 160 }}>Created By</TableCell>
                 {showAnalyticsColumns && (
                     <>
                         <TableCell align="center">Badge</TableCell>
@@ -2955,7 +3025,21 @@ const Recipe = () => {
                             <TableCell align="center">{(page - 1) * limit + index + 1}</TableCell>
                             <TableCell align="center">
                                 {recipe.image && recipe.image.toLowerCase() !== 'null' ? (
-                                    <img src={getImage(recipe.image)} alt={recipe.title} style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 4 }} />
+                                    <Box
+                                        sx={{
+                                            width: 72,
+                                            aspectRatio: '16 / 9',
+                                            overflow: 'hidden',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            backgroundColor: isDarkMode ? '#1f2937' : '#e5e7eb',
+                                            borderRadius: '4px',
+                                            mx: 'auto'
+                                        }}
+                                    >
+                                        <img src={getImage(recipe.image)} alt={recipe.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                    </Box>
                                 ) : (
                                     <span className="text-gray-400">No Image</span>
                                 )}
@@ -2971,6 +3055,7 @@ const Recipe = () => {
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             backgroundColor: isDarkMode ? '#1f2937' : '#e5e7eb',
+                                            borderRadius: '4px',
                                             mx: 'auto'
                                         }}
                                     >

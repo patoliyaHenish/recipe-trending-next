@@ -228,7 +228,7 @@ const NavbarManagement = () => {
             >
                 {/* ── Card header ───────────────────────────────────────────── */}
                 <Box
-                    className="flex flex-row justify-between items-center p-4 sm:p-5 border-b gap-4"
+                    className="flex flex-wrap justify-between items-center p-4 sm:p-5 border-b gap-3"
                     sx={{ borderColor: isDarkMode ? '#3b4253' : '#ebe9f1' }}
                 >
                     <Box className="flex items-center flex-wrap gap-2">
@@ -244,7 +244,7 @@ const NavbarManagement = () => {
                             Navbar
                         </Typography>
                     </Box>
-                    <Box className="flex gap-4">
+                    <Box className="flex gap-2 sm:gap-4 flex-wrap">
                         <Button
                             variant="outlined"
                             onClick={() => setShowFilters(!showFilters)}
@@ -253,6 +253,8 @@ const NavbarManagement = () => {
                                 textTransform: 'none',
                                 borderColor: isDarkMode ? '#404656' : '#d8d6de',
                                 color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                px: { xs: 1.5, sm: 2 },
                                 '&:hover': {
                                     borderColor: '#7367f0',
                                     color: '#7367f0',
@@ -260,7 +262,7 @@ const NavbarManagement = () => {
                                 }
                             }}
                         >
-                            {showFilters ? 'Hide Filters' : 'Show Filters'}
+                            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
                         </Button>
                         {canCreate && (
                             <Button
@@ -272,8 +274,8 @@ const NavbarManagement = () => {
                                 sx={{
                                     height: '38px',
                                     textTransform: 'none',
-                                    px: 3,
-                                    fontSize: '16px',
+                                    px: { xs: 2, sm: 3 },
+                                    fontSize: { xs: '14px', sm: '16px' },
                                     bgcolor: '#7367f0',
                                     boxShadow: 'none',
                                     '&:hover': { bgcolor: '#5e50ee', boxShadow: 'none' },
@@ -288,131 +290,33 @@ const NavbarManagement = () => {
                 {/* ── Filters row ───────────────────────────────────────────── */}
                 <Collapse in={showFilters}>
                     <Box className="flex flex-col p-5 gap-4" sx={{ borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>
-                        <Box className="flex flex-wrap items-center justify-between gap-4">
-                            <Box className="flex flex-wrap items-center gap-4">
-                                <Box className="flex items-center gap-2">
-                                    <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                                        Status:
-                                    </Typography>
-                                    <FormControl size="small" sx={{ minWidth: 150 }}>
-                                        <Autocomplete
-                                            size="small"
-                                            options={[
-                                                { label: 'All Status', value: 'all' },
-                                                { label: 'Active', value: 'active' },
-                                                { label: 'Inactive', value: 'inactive' }
-                                            ]}
-                                            getOptionLabel={(option) => option.label || ''}
-                                            value={
-                                                [
-                                                    { label: 'All Status', value: 'all' },
-                                                    { label: 'Active', value: 'active' },
-                                                    { label: 'Inactive', value: 'inactive' }
-                                                ].find(opt => opt.value === status) || { label: 'All Status', value: 'all' }
-                                            }
-                                            onChange={(_, newValue) => {
-                                                handleStatusChange({ target: { value: newValue ? newValue.value : 'all' } });
-                                            }}
-                                            isOptionEqualToValue={(option, value) => option.value === value.value}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    placeholder="All Status"
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': {
-                                                            padding: '0 39px 0 0 !important',
-                                                            height: 38,
-                                                            ...selectStyles,
-                                                        },
-                                                        '& .MuiInputBase-input': {
-                                                            padding: '8px 14px !important',
-                                                            height: 'auto',
-                                                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                                            '&::placeholder': {
-                                                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                                                opacity: 1,
-                                                            }
-                                                        }
-                                                    }}
-                                                />
-                                            )}
-                                            disablePortal={true}
-                                            slotProps={{
-                                                paper: {
-                                                    sx: {
-                                                        bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                                                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                                        borderRadius: '6px',
-                                                        border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
-                                                        boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
-                                                        '& .MuiAutocomplete-listbox': {
-                                                            padding: '0',
-                                                            '& .MuiAutocomplete-option': {
-                                                                fontSize: '0.9rem',
-                                                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                                                '&[aria-selected="true"]': {
-                                                                    bgcolor: 'rgba(115, 103, 240, 0.12) !important',
-                                                                    color: '#7367f0 !important',
-                                                                    fontWeight: 500,
-                                                                    '&.Mui-focused': {
-                                                                        bgcolor: 'rgba(115, 103, 240, 0.16) !important'
-                                                                    }
-                                                                },
-                                                                '&:hover': {
-                                                                    bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
-                                                                    color: '#7367f0 !important'
-                                                                },
-                                                                '&.Mui-focused': {
-                                                                    bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
-                                                                    color: '#7367f0 !important'
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }}
-                                            sx={{
-                                                width: '100%',
-                                                '& .MuiAutocomplete-popupIndicator': {
-                                                    color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                                },
-                                                '& .MuiAutocomplete-clearIndicator': {
-                                                    color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                                }
-                                            }}
-                                        />
-                                    </FormControl>
-                                </Box>
-
-                                <Box className="flex items-center gap-2">
-                                    <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                                        Search:
-                                    </Typography>
-                                    <input
-                                        type="text"
-                                        value={search}
-                                        onChange={handleSearchChange}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                                        placeholder="Search nav items..."
-                                        className="px-3 py-2 border rounded outline-none transition-colors"
-                                        style={{
-                                            height: '38px',
-                                            width: '220px',
-                                            backgroundColor: isDarkMode ? '#283046' : '#fff',
-                                            borderColor: isDarkMode ? '#404656' : '#d8d6de',
-                                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                            borderRadius: '4px',
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
-                            <Box className="flex items-center gap-3">
+                        <Box className="flex items-center gap-3" sx={{ width: '100%' }}>
+                                <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', display: { xs: 'none', sm: 'block' }, whiteSpace: 'nowrap' }}>
+                                    Search:
+                                </Typography>
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={handleSearchChange}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                    placeholder="Search nav items..."
+                                    className="px-3 py-2 border rounded outline-none transition-colors"
+                                    style={{
+                                        height: '38px',
+                                        flex: 1,
+                                        minWidth: 0,
+                                        backgroundColor: isDarkMode ? '#283046' : '#fff',
+                                        borderColor: isDarkMode ? '#404656' : '#d8d6de',
+                                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                        borderRadius: '4px',
+                                    }}
+                                />
                                 <Button
                                     variant="outlined"
                                     color="error"
                                     onClick={handleClearFilters}
                                     disabled={search === '' && status === 'all' && debouncedSearch === '' && debouncedStatus === 'all'}
-                                    sx={{ height: '38px', minWidth: { xs: '38px', sm: '100px' }, textTransform: 'none', px: { xs: 0, sm: 3 } }}
+                                    sx={{ height: '38px', minWidth: { xs: '38px', sm: '100px' }, textTransform: 'none', px: { xs: 0, sm: 3 }, flexShrink: 0 }}
                                 >
                                     <ClearAllIcon sx={{ mr: { xs: 0, sm: 1 } }} />
                                     <Box component="span" sx={{ display: { xs: 'none', sm: 'block' } }}>Clear</Box>
@@ -429,13 +333,13 @@ const NavbarManagement = () => {
                                         bgcolor: '#7367f0',
                                         '&:hover': { bgcolor: '#5e50ee' },
                                         boxShadow: 'none',
+                                        flexShrink: 0,
                                     }}
                                 >
                                     <SearchIcon sx={{ mr: { xs: 0, sm: 1 } }} />
                                     <Box component="span" sx={{ display: { xs: 'none', sm: 'block' } }}>Search</Box>
                                 </Button>
                             </Box>
-                        </Box>
                     </Box>
                 </Collapse>
 

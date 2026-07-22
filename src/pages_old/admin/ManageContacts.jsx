@@ -385,7 +385,7 @@ const ManageContacts = () => {
             >
                 {/* ── Card header ───────────────────────────────────────────── */}
                 <Box
-                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-5 border-b gap-4"
+                    className="flex flex-wrap justify-between items-center p-4 sm:p-5 border-b gap-3"
                     sx={{ borderColor: isDarkMode ? '#3b4253' : '#ebe9f1' }}
                 >
                     <Box className="flex items-center gap-2">
@@ -409,6 +409,8 @@ const ManageContacts = () => {
                             textTransform: 'none', 
                             borderColor: isDarkMode ? '#404656' : '#d8d6de', 
                             color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            px: { xs: 1.5, sm: 2 },
                             '&:hover': {
                                 borderColor: '#7367f0',
                                 color: '#7367f0',
@@ -416,7 +418,7 @@ const ManageContacts = () => {
                             }
                         }}
                     >
-                        {showFilters ? 'Hide Filters' : 'Show Filters'}
+                        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
                     </Button>
                 </Box>
 

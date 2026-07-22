@@ -24,7 +24,9 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Collapse,
 } from "@mui/material";
+import { FilterAltOutlined, FilterAltOffOutlined } from '@mui/icons-material';
 import { useTheme } from "../../../context/ThemeContext";
 
 import { PageHeader, SearchBar, ConfirmDialog } from "../../../components/common";
@@ -35,6 +37,8 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
+import SearchIcon from '@mui/icons-material/Search';
 import { toast } from '../../../utils/toast';
 import moment from "moment";
 import { useSelector } from "react-redux";
@@ -363,7 +367,7 @@ const AssignedRecipes = () => {
         >
             {/* ── Card header ───────────────────────────────────────────── */}
             <Box
-                className="flex flex-row justify-between items-center p-4 sm:p-5 border-b gap-4"
+                className="flex flex-col sm:flex-row justify-between items-center p-4 sm:p-5 border-b gap-4"
                 sx={{ borderColor: isDarkMode ? '#3b4253' : '#ebe9f1' }}
             >
                 <Box className="flex items-center flex-wrap gap-2">
@@ -379,30 +383,55 @@ const AssignedRecipes = () => {
                         Assigned Recipes
                     </Typography>
                 </Box>
-                {canCreate && (
+                <Box className="flex gap-2 sm:gap-4 flex-wrap items-center">
                     <Button
-                        variant="contained"
-                        onClick={handleOpenAdd}
+                        variant="outlined"
+                        onClick={() => setShowFilters(!showFilters)}
+                        startIcon={showFilters ? <FilterAltOffOutlined /> : <FilterAltOutlined />}
                         sx={{
-                            height: '38px',
                             textTransform: 'none',
-                            px: 3,
-                            fontSize: '16px',
-                            bgcolor: '#7367f0',
-                            boxShadow: 'none',
-                            '&:hover': { bgcolor: '#5e50ee', boxShadow: 'none' },
+                            borderColor: isDarkMode ? '#404656' : '#d8d6de',
+                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            px: { xs: 1.5, sm: 2 },
+                            '&:hover': {
+                                borderColor: '#7367f0',
+                                color: '#7367f0',
+                                backgroundColor: isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.08)'
+                            }
                         }}
                     >
-                        + Add
+                        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
                     </Button>
-                )}
+                    {canCreate && (
+                        <Button
+                            variant="contained"
+                            onClick={handleOpenAdd}
+                            sx={{
+                                height: '38px',
+                                textTransform: 'none',
+                                px: { xs: 2, sm: 3 },
+                                fontSize: { xs: '14px', sm: '16px' },
+                                bgcolor: '#7367f0',
+                                boxShadow: 'none',
+                                '&:hover': { bgcolor: '#5e50ee', boxShadow: 'none' },
+                            }}
+                        >
+                            + Add
+                        </Button>
+                    )}
+                </Box>
             </Box>
 
             {/* ── Filters row ───────────────────────────────────────────── */}
-            <Box className="flex flex-col p-4 sm:p-5 gap-4">
-                {/* Search and Refresh Row */}
-                <Box className="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full flex-wrap gap-3">
-                    <Box className="flex items-center gap-2 flex-wrap">
+            <Collapse in={showFilters}>
+            <Box className="flex flex-col p-5 gap-4">
+                <Box className="flex flex-wrap items-center gap-4">
+                    {/* Search Filter */}
+                    <Box className="flex items-center gap-2">
+                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                            Name:
+                        </Typography>
                         <input
                             type="text"
                             value={search}
@@ -412,142 +441,45 @@ const AssignedRecipes = () => {
                             className="px-3 py-2 border rounded outline-none transition-colors"
                             style={{
                                 height: '38px',
-                                width: '250px',
+                                width: '200px',
                                 backgroundColor: isDarkMode ? '#283046' : '#fff',
                                 borderColor: isDarkMode ? '#404656' : '#d8d6de',
                                 color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
                                 borderRadius: '4px',
                             }}
                         />
-
                     </Box>
-                    <Box sx={{ display: { xs: 'flex', lg: 'none' }, justifyContent: 'flex-end' }}>
-                        <Button
-                            variant="outlined"
-                            onClick={() => setShowFilters(!showFilters)}
-                            startIcon={<FilterListIcon />}
-                            sx={{
-                                height: '38px',
-                                textTransform: 'none',
-                                borderColor: showFilters ? (isDarkMode ? '#10b981' : '#059669') : (isDarkMode ? '#404656' : '#d8d6de'),
-                                color: showFilters ? (isDarkMode ? '#10b981' : '#059669') : (isDarkMode ? '#d0d2d6' : '#6e6b7b'),
-                            }}
-                        >
-                            Filters
-                        </Button>
-                    </Box>
-                </Box>
 
-                <Box
-                    ref={filterRef}
-                    sx={{
-                        display: showFilters ? 'grid' : { xs: 'none', lg: 'grid' },
-                        gridTemplateColumns: {
-                            xs: '1fr',
-                            sm: 'repeat(2, 1fr)',
-                            md: 'repeat(3, 1fr)',
-                            lg: 'repeat(4, 1fr)',
-                            xl: 'repeat(6, 1fr)',
-                        },
-                        gap: 2,
-                        width: '100%',
-                        alignItems: 'center',
-                        transition: 'all 0.3s ease-in-out',
-                        '& > *': { width: '100%', m: 0 }
-                    }}
-                >
                     {/* Status Filter */}
-                    <FormControl size="small" sx={{ width: '100%' }}>
-                        <Autocomplete
-                            size="small"
-                            options={[
-                                { label: 'All Status', value: '' },
-                                ...STATUS_OPTIONS
-                            ]}
-                            getOptionLabel={(option) => option.label || ''}
-                            value={
-                                [
-                                    { label: 'All Status', value: '' },
-                                    ...STATUS_OPTIONS
-                                ].find(opt => opt.value === statusInput) || { label: 'All Status', value: '' }
-                            }
-                            onChange={(_, newValue) => {
-                                setStatusInput(newValue ? newValue.value : '');
-                            }}
-                            isOptionEqualToValue={(option, value) => option.value === value.value}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    placeholder="All Status"
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            padding: '0 39px 0 0 !important',
-                                            height: 38,
-                                            ...selectStyles,
-                                        },
-                                        '& .MuiInputBase-input': {
-                                            padding: '8px 14px !important',
-                                            height: 'auto',
-                                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                            '&::placeholder': {
-                                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                                opacity: 1,
-                                            }
-                                        }
-                                    }}
-                                />
-                            )}
-                            disablePortal={true}
-                            slotProps={{
-                                paper: {
-                                    sx: {
-                                        bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                        borderRadius: '6px',
-                                        border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
-                                        boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
-                                        '& .MuiAutocomplete-listbox': { padding: '0', '& .MuiAutocomplete-option': { fontSize: '0.9rem', '&:hover': { bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important', color: '#7367f0 !important' } } }
-                                    }
-                                }
-                            }}
-                        />
-                    </FormControl>
-
-                    {/* Assigned To Filter */}
-                    {canListAll && (
-                        <FormControl size="small" sx={{ width: '100%' }}>
+                    <Box className="flex items-center gap-2">
+                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                            Status:
+                        </Typography>
+                        <FormControl size="small" sx={{ minWidth: 150 }}>
                             <Autocomplete
                                 size="small"
                                 options={[
-                                    { label: 'All Users', value: '' },
-                                    ...userOptions
+                                    { label: 'All Status', value: '' },
+                                    ...STATUS_OPTIONS
                                 ]}
                                 getOptionLabel={(option) => option.label || ''}
                                 value={
                                     [
-                                        { label: 'All Users', value: '' },
-                                        ...userOptions
-                                    ].find(opt => opt.value === assignedToInput) || { label: 'All Users', value: '' }
+                                        { label: 'All Status', value: '' },
+                                        ...STATUS_OPTIONS
+                                    ].find(opt => opt.value === statusInput) || { label: 'All Status', value: '' }
                                 }
                                 onChange={(_, newValue) => {
-                                    setAssignedToInput(newValue ? newValue.value : '');
+                                    setStatusInput(newValue ? newValue.value : '');
                                 }}
                                 isOptionEqualToValue={(option, value) => option.value === value.value}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
-                                        placeholder="All Users"
+                                        placeholder="All Status"
                                         sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                padding: '0 39px 0 0 !important',
-                                                height: 38,
-                                                ...selectStyles,
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                padding: '8px 14px !important',
-                                                height: 'auto',
-                                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                            }
+                                            '& .MuiOutlinedInput-root': { padding: '0 39px 0 0 !important', height: 38, ...selectStyles, },
+                                            '& .MuiInputBase-input': { padding: '8px 14px !important', height: 'auto', color: isDarkMode ? '#d0d2d6' : '#6e6b7b', }
                                         }}
                                     />
                                 )}
@@ -555,10 +487,8 @@ const AssignedRecipes = () => {
                                 slotProps={{
                                     paper: {
                                         sx: {
-                                            bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                            borderRadius: '6px',
-                                            border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
+                                            bgcolor: isDarkMode ? '#283046' : '#ffffff', color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                            borderRadius: '6px', border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
                                             boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
                                             '& .MuiAutocomplete-listbox': { padding: '0', '& .MuiAutocomplete-option': { fontSize: '0.9rem', '&:hover': { bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important', color: '#7367f0 !important' } } }
                                         }
@@ -566,134 +496,204 @@ const AssignedRecipes = () => {
                                 }}
                             />
                         </FormControl>
+                    </Box>
+
+                    {/* Assigned To Filter */}
+                    {canListAll && (
+                        <Box className="flex items-center gap-2">
+                            <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                                Assigned To:
+                            </Typography>
+                            <FormControl size="small" sx={{ minWidth: 150 }}>
+                                <Autocomplete
+                                    size="small"
+                                    options={[
+                                        { label: 'All Users', value: '' },
+                                        ...userOptions
+                                    ]}
+                                    getOptionLabel={(option) => option.label || ''}
+                                    value={
+                                        [
+                                            { label: 'All Users', value: '' },
+                                            ...userOptions
+                                        ].find(opt => opt.value === assignedToInput) || { label: 'All Users', value: '' }
+                                    }
+                                    onChange={(_, newValue) => {
+                                        setAssignedToInput(newValue ? newValue.value : '');
+                                    }}
+                                    isOptionEqualToValue={(option, value) => option.value === value.value}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            placeholder="All Users"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': { padding: '0 39px 0 0 !important', height: 38, ...selectStyles, },
+                                                '& .MuiInputBase-input': { padding: '8px 14px !important', height: 'auto', color: isDarkMode ? '#d0d2d6' : '#6e6b7b', }
+                                            }}
+                                        />
+                                    )}
+                                    disablePortal={true}
+                                    slotProps={{
+                                        paper: {
+                                            sx: {
+                                                bgcolor: isDarkMode ? '#283046' : '#ffffff', color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                borderRadius: '6px', border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
+                                                boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
+                                                '& .MuiAutocomplete-listbox': { padding: '0', '& .MuiAutocomplete-option': { fontSize: '0.9rem', '&:hover': { bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important', color: '#7367f0 !important' } } }
+                                            }
+                                        }
+                                    }}
+                                />
+                            </FormControl>
+                        </Box>
                     )}
 
                     {/* Category Filter */}
-                    <FormControl size="small" sx={{ width: '100%' }}>
-                        <Autocomplete
-                            size="small"
-                            options={[
-                                { label: 'All Categories', value: '' },
-                                ...categoryOptions
-                            ]}
-                            getOptionLabel={(option) => option.label || ''}
-                            value={
-                                [
+                    <Box className="flex items-center gap-2">
+                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                            Category:
+                        </Typography>
+                        <FormControl size="small" sx={{ minWidth: 180 }}>
+                            <Autocomplete
+                                size="small"
+                                options={[
                                     { label: 'All Categories', value: '' },
                                     ...categoryOptions
-                                ].find(opt => opt.value === categoryInput) || { label: 'All Categories', value: '' }
-                            }
-                            onChange={(_, newValue) => {
-                                setCategoryInput(newValue ? newValue.value : '');
-                                setSubCategoryInput(''); // Reset sub-category when category changes
-                            }}
-                            isOptionEqualToValue={(option, value) => option.value === value.value}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    placeholder="All Categories"
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': { padding: '0 39px 0 0 !important', height: 38, ...selectStyles, },
-                                        '& .MuiInputBase-input': { padding: '8px 14px !important', height: 'auto', color: isDarkMode ? '#d0d2d6' : '#6e6b7b', }
-                                    }}
-                                />
-                            )}
-                            disablePortal={true}
-                            slotProps={{
-                                paper: {
-                                    sx: {
-                                        bgcolor: isDarkMode ? '#283046' : '#ffffff', color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                        borderRadius: '6px', border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
-                                        boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
-                                        '& .MuiAutocomplete-listbox': { padding: '0', '& .MuiAutocomplete-option': { fontSize: '0.9rem', '&:hover': { bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important', color: '#7367f0 !important' } } }
-                                    }
+                                ]}
+                                getOptionLabel={(option) => option.label || ''}
+                                value={
+                                    [
+                                        { label: 'All Categories', value: '' },
+                                        ...categoryOptions
+                                    ].find(opt => opt.value === categoryInput) || { label: 'All Categories', value: '' }
                                 }
-                            }}
-                        />
-                    </FormControl>
+                                onChange={(_, newValue) => {
+                                    setCategoryInput(newValue ? newValue.value : '');
+                                    setSubCategoryInput(''); // Reset sub-category when category changes
+                                }}
+                                isOptionEqualToValue={(option, value) => option.value === value.value}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        placeholder="All Categories"
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { padding: '0 39px 0 0 !important', height: 38, ...selectStyles, },
+                                            '& .MuiInputBase-input': { padding: '8px 14px !important', height: 'auto', color: isDarkMode ? '#d0d2d6' : '#6e6b7b', }
+                                        }}
+                                    />
+                                )}
+                                disablePortal={true}
+                                slotProps={{
+                                    paper: {
+                                        sx: {
+                                            bgcolor: isDarkMode ? '#283046' : '#ffffff', color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                            borderRadius: '6px', border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
+                                            boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
+                                            '& .MuiAutocomplete-listbox': { padding: '0', '& .MuiAutocomplete-option': { fontSize: '0.9rem', '&:hover': { bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important', color: '#7367f0 !important' } } }
+                                        }
+                                    }
+                                }}
+                            />
+                        </FormControl>
+                    </Box>
 
                     {/* Sub Category Filter */}
-                    <FormControl size="small" sx={{ width: '100%' }}>
-                        <Autocomplete
-                            size="small"
-                            options={[
-                                { label: 'All Sub-categories', value: '' },
-                                ...subCategoryOptions
-                            ]}
-                            getOptionLabel={(option) => option.label || ''}
-                            value={
-                                [
+                    <Box className="flex items-center gap-2">
+                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                            Sub-Category:
+                        </Typography>
+                        <FormControl size="small" sx={{ minWidth: 180 }}>
+                            <Autocomplete
+                                size="small"
+                                options={[
                                     { label: 'All Sub-categories', value: '' },
                                     ...subCategoryOptions
-                                ].find(opt => opt.value === subCategoryInput) || { label: 'All Sub-categories', value: '' }
-                            }
-                            onChange={(_, newValue) => {
-                                setSubCategoryInput(newValue ? newValue.value : '');
-                            }}
-                            isOptionEqualToValue={(option, value) => option.value === value.value}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    placeholder="All Sub-categories"
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': { padding: '0 39px 0 0 !important', height: 38, ...selectStyles, },
-                                        '& .MuiInputBase-input': { padding: '8px 14px !important', height: 'auto', color: isDarkMode ? '#d0d2d6' : '#6e6b7b', }
-                                    }}
-                                />
-                            )}
-                            disablePortal={true}
-                            slotProps={{
-                                paper: {
-                                    sx: {
-                                        bgcolor: isDarkMode ? '#283046' : '#ffffff', color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                        borderRadius: '6px', border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
-                                        boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
-                                        '& .MuiAutocomplete-listbox': { padding: '0', '& .MuiAutocomplete-option': { fontSize: '0.9rem', '&:hover': { bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important', color: '#7367f0 !important' } } }
-                                    }
+                                ]}
+                                getOptionLabel={(option) => option.label || ''}
+                                value={
+                                    [
+                                        { label: 'All Sub-categories', value: '' },
+                                        ...subCategoryOptions
+                                    ].find(opt => opt.value === subCategoryInput) || { label: 'All Sub-categories', value: '' }
                                 }
-                            }}
-                        />
-                    </FormControl>
+                                onChange={(_, newValue) => {
+                                    setSubCategoryInput(newValue ? newValue.value : '');
+                                }}
+                                isOptionEqualToValue={(option, value) => option.value === value.value}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        placeholder="All Sub-categories"
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': { padding: '0 39px 0 0 !important', height: 38, ...selectStyles, },
+                                            '& .MuiInputBase-input': { padding: '8px 14px !important', height: 'auto', color: isDarkMode ? '#d0d2d6' : '#6e6b7b', }
+                                        }}
+                                    />
+                                )}
+                                disablePortal={true}
+                                slotProps={{
+                                    paper: {
+                                        sx: {
+                                            bgcolor: isDarkMode ? '#283046' : '#ffffff', color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                            borderRadius: '6px', border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
+                                            boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
+                                            '& .MuiAutocomplete-listbox': { padding: '0', '& .MuiAutocomplete-option': { fontSize: '0.9rem', '&:hover': { bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important', color: '#7367f0 !important' } } }
+                                        }
+                                    }
+                                }}
+                            />
+                        </FormControl>
+                    </Box>
 
                     {/* Created Filter */}
-                    <FormControl size="small" sx={{ width: '100%' }}>
-                        <input
-                            type="date"
-                            value={createdInput}
-                            onChange={(e) => setCreatedInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                            className="px-3 py-2 border rounded outline-none transition-colors"
-                            style={{
-                                height: '38px',
-                                width: '100%',
-                                backgroundColor: isDarkMode ? '#283046' : '#fff',
-                                borderColor: isDarkMode ? '#404656' : '#d8d6de',
-                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                borderRadius: '4px',
-                            }}
-                        />
-                    </FormControl>
-
-                    <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
-                        <Button 
-                            variant="outlined" 
-                            onClick={handleClearFilters} 
-                            color="error" 
-                            disabled={!hasActiveFilters}
-                            sx={{ flex: 1, height: '38px', textTransform: 'none' }}
-                        >
-                            Clear
-                        </Button>
-                        <Button 
-                            variant="contained" 
-                            onClick={handleSearch} 
-                            sx={{ flex: 1, height: '38px', bgcolor: '#7367f0', '&:hover': { bgcolor: '#5e50ee' }, textTransform: 'none' }}
-                        >
-                            Search
-                        </Button>
+                    <Box className="flex items-center gap-2">
+                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                            Created:
+                        </Typography>
+                        <FormControl size="small" sx={{ minWidth: 150 }}>
+                            <input
+                                type="date"
+                                value={createdInput}
+                                onChange={(e) => setCreatedInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                className="px-3 py-2 border rounded outline-none transition-colors"
+                                style={{
+                                    height: '38px',
+                                    width: '100%',
+                                    backgroundColor: isDarkMode ? '#283046' : '#fff',
+                                    borderColor: isDarkMode ? '#404656' : '#d8d6de',
+                                    color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                    borderRadius: '4px',
+                                }}
+                            />
+                        </FormControl>
                     </Box>
                 </Box>
+                
+                {/* Action Buttons */}
+                <Box className="flex justify-end items-center gap-3">
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={handleClearFilters}
+                        disabled={!hasActiveFilters}
+                        startIcon={<ClearAllIcon />}
+                        sx={{ height: '38px', minWidth: '120px', textTransform: 'none', px: 3 }}
+                    >
+                        Clear
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSearch}
+                        startIcon={<SearchIcon />}
+                        sx={{ height: '38px', minWidth: '120px', textTransform: 'none', px: 3, bgcolor: '#7367f0', '&:hover': { bgcolor: '#5e50ee' }, boxShadow: 'none' }}
+                    >
+                        Search
+                    </Button>
+                </Box>
             </Box>
+            </Collapse>
 
             {/* ── AG Grid ───────────────────────────────────────────────── */}
 
@@ -718,7 +718,16 @@ const AssignedRecipes = () => {
                 <Table stickyHeader sx={{ minWidth: 1000, borderCollapse: 'separate', borderSpacing: 0 }}>
                     <TableHead>
                         <TableRow>
-                            {['#', 'Recipe name', 'Status', 'Assigned to', 'Category', 'Sub-category', 'Created', ...(canUpdate || canDelete ? ['Actions'] : [])].map((headCell, index) => (
+                            {[
+                                { id: '#', label: '#' },
+                                { id: 'recipe_name', label: 'Recipe name', minWidth: 250 },
+                                { id: 'status', label: 'Status' },
+                                { id: 'assigned_to', label: 'Assigned to', minWidth: 150 },
+                                { id: 'category', label: 'Category' },
+                                { id: 'sub_category', label: 'Sub-category' },
+                                { id: 'created', label: 'Created', minWidth: 120 },
+                                ...(canUpdate || canDelete ? [{ id: 'actions', label: 'Actions' }] : [])
+                            ].map((col, index) => (
                                 <TableCell 
                                     key={index}
                                     align="center"
@@ -731,9 +740,10 @@ const AssignedRecipes = () => {
                                         letterSpacing: '0.5px',
                                         borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
                                         py: 2,
+                                        minWidth: col.minWidth || 'auto',
                                     }}
                                 >
-                                    {headCell}
+                                    {col.label}
                                 </TableCell>
                             ))}
                         </TableRow>

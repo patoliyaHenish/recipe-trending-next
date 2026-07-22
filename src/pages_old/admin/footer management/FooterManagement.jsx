@@ -203,7 +203,7 @@ const FooterManagement = () => {
                                 }
                             }}
                         >
-                            {showFilters ? 'Hide Filters' : 'Show Filters'}
+                            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
                         </Button>
                         {canCreate && (
                             <Button

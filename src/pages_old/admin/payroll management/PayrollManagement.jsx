@@ -28,7 +28,7 @@ import { toast } from '../../../utils/toast';
 import CloseIcon from '@mui/icons-material/Close'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { PageHeader, SearchBar, AccessDenied, ConfirmDialog } from '../../../components/common'
+import { PageHeader, SearchBar, AccessDenied, ConfirmDialog, ActionButtons } from '../../../components/common'
 import { useTheme } from '../../../context/ThemeContext'
 import { useUser } from '../../../context/useUser'
 import { useGetAllUsersQuery } from '../../../features/api/authApi'
@@ -459,51 +459,14 @@ const PayrollManagement = () => {
                       {showActions && (
                         <TableCell align="center">
                           <Box className="flex gap-2 justify-center items-center h-full">
-                            {canView && (
-                              <Tooltip title="View" arrow>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => setViewSlip(slip)}
-                                  sx={{
-                                    color: isDarkMode ? '#10b981' : '#059669',
-                                    '&:hover': { backgroundColor: isDarkMode ? '#064e3b' : '#d1fae5' },
-                                  }}
-                                >
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                  </svg>
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            {canUpdate && (
-                              <Tooltip title="Edit" arrow>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleOpenEdit(slip)}
-                                  sx={{
-                                    color: isDarkMode ? '#3b82f6' : '#2563eb',
-                                    '&:hover': { backgroundColor: isDarkMode ? '#1e3a8a' : '#dbeafe' },
-                                  }}
-                                >
-                                  <EditIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            {canDelete && (
-                              <Tooltip title="Delete" arrow>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => setDeleteId(slip.id)}
-                                  sx={{
-                                    color: isDarkMode ? '#ef4444' : '#dc2626',
-                                    '&:hover': { backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2' },
-                                  }}
-                                >
-                                  <DeleteIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
+                            <ActionButtons
+                              onView={canView ? () => setViewSlip(slip) : undefined}
+                              onEdit={canUpdate ? () => handleOpenEdit(slip) : undefined}
+                              onDelete={canDelete ? () => setDeleteId(slip.id) : undefined}
+                              showView={canView}
+                              showEdit={canUpdate}
+                              showDelete={canDelete}
+                            />
                           </Box>
                         </TableCell>
                       )}
