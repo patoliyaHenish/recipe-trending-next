@@ -343,7 +343,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
     const shortDesc = (recipe?.meta_description || recipe?.description || "").replace(/^"|"$/g, '').trim();
     const truncatedDesc = shortDesc.length > 160 ? shortDesc.substring(0, 157) + "..." : shortDesc;
     const recipeTitle = recipe?.title || "Recipe";
-    const messageText = `${recipeTitle}\n\n${truncatedDesc}\n\nCheck out this recipe at Recipe Trending!`;
+    const messageText = `${recipeTitle}\n\n${truncatedDesc}\n\nCheck out this recipe at Recipe Trending!\n${recipeUrl}`;
 
     try {
       if (navigator.share) {

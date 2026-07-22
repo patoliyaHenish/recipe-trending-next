@@ -58,7 +58,7 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
     const url = `${window.location.origin}${linkPath}`;
     const shortDesc = (recipe.meta_description || recipe.description || "").replace(/^"|"$/g, '').trim();
     const truncatedDesc = shortDesc.length > 160 ? shortDesc.substring(0, 157) + "..." : shortDesc;
-    const messageText = `${name}\n\n${truncatedDesc}\n\nCheck out this recipe at Recipe Trending!`;
+    const messageText = `${name}\n\n${truncatedDesc}\n\nCheck out this recipe at Recipe Trending!\n${url}`;
 
     try {
       if (navigator.share) {

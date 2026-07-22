@@ -146,7 +146,7 @@ const BannerRecipes = () => {
 
     const shareData = { 
       title: pageTitle, 
-      text: `${pageTitle}\n\n${shortDesc}\n\nCheck it out here:`, 
+      text: `${pageTitle}\n\n${shortDesc}\n\nCheck it out here:\n${url}`, 
       url 
     };
 

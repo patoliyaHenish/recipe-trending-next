@@ -606,8 +606,8 @@ const Result = () => {
     const shareData = {
       title: "Recipe Trending Results",
       text: executedSearchQuery
-        ? `Check out these recipe search results for "${executedSearchQuery}" on Recipe Trending!`
-        : "Check out these recipe search results on Recipe Trending!",
+        ? `Check out these recipe search results for "${executedSearchQuery}" on Recipe Trending!\n${url}`
+        : `Check out these recipe search results on Recipe Trending!\n${url}`,
       url,
     };
 

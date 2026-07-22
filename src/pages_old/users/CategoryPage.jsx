@@ -48,7 +48,7 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
     const url = window.location.href;
     const shareData = {
       title: pageTitle,
-      text: `Check out these recipes in ${pageTitle}:`,
+      text: `Check out these recipes in ${pageTitle}:\n${url}`,
       url,
     };
 
