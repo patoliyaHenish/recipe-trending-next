@@ -1,4 +1,4 @@
-"use client";
+d "use client";
 import React, { useState, useEffect } from 'react'
 import { Box, Typography, Skeleton, IconButton, Tooltip, CircularProgress } from '@mui/material';
 import { usePathname, useParams } from 'next/navigation';
