@@ -91,7 +91,7 @@ const BannerRecipes = () => {
     if (shareImageUrl) updateOgTag('og:image', shareImageUrl);
     
     return () => { document.title = 'Recipe Trending'; };
-  }, [pageTitle, collectionDescription, section, location.state, displayRecipes]);
+  }, [pageTitle, collectionDescription, section, navState, displayRecipes]);
 
   useEffect(() => {
     const handler = () => setUserPreference(Cookies.get('userPreference') || '');
@@ -137,7 +137,7 @@ const BannerRecipes = () => {
 
   const handleShare = async () => {
     const url = window.location.href;
-    const imgVal = section?.image || section?.background_image || location.state?.image;
+    const imgVal = section?.image || section?.background_image || navState?.image;
     const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
     const finalImg = imgVal || recipeImg;
     const imgUrl = (typeof finalImg === 'string' ? finalImg.trim() : '') || '';
@@ -263,7 +263,7 @@ const BannerRecipes = () => {
             <Box
               component="img"
               src={(() => {
-                const imgVal = section?.image || section?.background_image || location.state?.image;
+                const imgVal = section?.image || section?.background_image || navState?.image;
                 const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
                 const finalImg = imgVal || recipeImg;
                 const imgUrl = (typeof finalImg === 'string' ? finalImg.trim() : '') || '';
