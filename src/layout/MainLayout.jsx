@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import Navbar from '../components/Navbar';
 import AdminVerticalNavbar from '../components/AdminVerticalNavbar';
+import AppWrapper from '../components/AppWrapper';
 import { useUser } from '../context/useUser';
 import { useTheme } from '../context/ThemeContext';
 import Footer from '../components/Footer';
@@ -18,20 +19,10 @@ const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
   const { isForbidden, forbiddenMessage } = useSelector((state) => state.global);
   const isImpersonating = useSelector((state) => state.auth.isImpersonating);
 
-  // mounted = false during SSR and initial hydration, true only after client mount
-  const [mounted, setMounted] = useState(false);
-
-  // Only treat user===undefined as "loading" on the client (after mount).
-  // On the server / initial hydration, we keep isAdminMode based on real user state
-  // to avoid rendering AdminVerticalNavbar during SSR (which accesses window).
-  const isAuthPending = mounted && user === undefined;
-
   const isStaff = !!(user?.role && user.role !== 'user');
-  const isAdminMode = isStaff || isImpersonating || isAuthPending;
+  const isAdminMode = isStaff || isImpersonating;
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+
 
   useEffect(() => {
     if (isForbidden) {
@@ -86,6 +77,10 @@ const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
 
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: 'var(--bg-primary)', transition: 'background-color 0.3s ease' }}>
+      {/* AppWrapper handles: auth redirects, Google OAuth toasts, scroll-to-top */}
+      <Suspense fallback={null}>
+        <AppWrapper />
+      </Suspense>
       <Suspense fallback={<div style={{ height: '64px' }} />}>
         <Navbar
           adminNavOpen={isAdminMode ? mobileNavOpen : undefined}

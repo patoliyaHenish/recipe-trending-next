@@ -1,7 +1,7 @@
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { 
     Button, 
@@ -81,11 +81,11 @@ const AddEditRole = () => {
         if (mode === 'add') {
           await createRole(payload).unwrap();
           toast.success('Role created successfully');
-          navigate('/admin/manage-roles');
+          navigate('/manage-roles');
         } else {
           await updateRole({ id, ...payload }).unwrap();
           toast.success('Role updated successfully');
-          navigate('/admin/manage-roles');
+          navigate('/manage-roles');
         }
       } catch (error) {
         toast.error(error?.data?.message || 'Failed to save role');
@@ -106,7 +106,7 @@ const AddEditRole = () => {
   };
 
   const handleBack = () => {
-    navigate('/admin/manage-roles');
+    navigate('/manage-roles');
   };
 
   const groupedPermissions = React.useMemo(() => {

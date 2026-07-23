@@ -88,7 +88,7 @@ const RoleManagement = () => {
   const pagination = displayedPagination
 
   const handleOpenAdd = () => {
-    navigate('/admin/manage-roles/create')
+    navigate('/manage-roles/add')
   }
 
   const handleOpenDeleteConfirm = (id) => {
@@ -107,7 +107,7 @@ const RoleManagement = () => {
   }
 
   const onEditClick = (row) => {
-    navigate(`/admin/manage-roles/edit/${row.role_id}`)
+    navigate(`/manage-roles/edit/${row.role_id}`)
   }
 
   const searchTimerRef = useRef(null)

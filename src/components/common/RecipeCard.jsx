@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, IconButton, Chip, CircularProgress } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
@@ -30,6 +30,13 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
   const isUpdating = isSaving || isUnsaving;
   const initialSaved = typeof recipe.is_saved === 'boolean' ? recipe.is_saved : showRemoveIcon;
   const [isSaved, setIsSaved] = useState(initialSaved);
+
+  // Sync internal state if the recipe's saved status changes from upstream
+  useEffect(() => {
+    if (typeof recipe.is_saved === 'boolean') {
+      setIsSaved(recipe.is_saved);
+    }
+  }, [recipe.is_saved]);
 
 
   const imgUrl = getImage(recipe?.image || recipe?.image_url);
@@ -245,7 +252,12 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
                   '&:hover': {
                     bgcolor: 'transparent',
                   }
-                }} onClick={handleSaveClick}>
+                }} 
+                onClickCapture={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSaveClick(e);
+                }}>
                   {isUpdating ? (
                     <CircularProgress size={20} sx={{ color: isSaved ? '#CA6014' : '#8A4A1C' }} />
                   ) : isSaved ? (
@@ -314,7 +326,12 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
                 '&:hover': {
                   bgcolor: 'transparent',
                 }
-              }} onClick={handleShare}>
+              }}
+              onClickCapture={(e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+                handleShare(e);
+              }}>
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '60%', height: '60%' }}>
                     <path d="M15 5L22 12L15 19V14.5C10 14.5 6.5 16 4 20C5 15 8 10 15 9V5Z" fill="#4D9CFF"/>
                   </svg>
@@ -427,7 +444,12 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
                 cursor: 'pointer',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                 backdropFilter: 'blur(10px)',
-              }} onClick={handleShare}>
+              }}
+              onClickCapture={(e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+                handleShare(e);
+              }}>
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: isMobileVertical ? '60%' : '55%', height: isMobileVertical ? '60%' : '55%', marginLeft: '2px' }}>
                     <path d="M15 5L22 12L15 19V14.5C10 14.5 6.5 16 4 20C5 15 8 10 15 9V5Z" fill="#4D9CFF"/>
                   </svg>
@@ -443,7 +465,12 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
                 cursor: 'pointer',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                 backdropFilter: 'blur(10px)',
-                }} onClick={handleSaveClick}>
+                }} 
+                onClickCapture={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSaveClick(e);
+                }}>
                   {isUpdating ? (
                     <CircularProgress size={isMobileVertical ? 18 : 16} sx={{ color: isSaved ? '#CA6014' : '#8A4A1C' }} />
                   ) : isSaved ? (

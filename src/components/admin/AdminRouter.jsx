@@ -77,6 +77,7 @@ export default function AdminRouter() {
         <Route path="manage-contacts" element={<ManageContacts />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="manage-payroll" element={<PayrollManagement />} />
+        <Route path="manage-payment-slips" element={<PayrollManagement />} />
         <Route path="activity-logs" element={<ActivityLogs />} />
         <Route path="cron-logs" element={<CronLogs />} />
         <Route path="failed-logs" element={<FailedLogs />} />

@@ -1,138 +1,56 @@
 "use client";
-import React, { useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useUser } from '../context/useUser';
 import { toast } from '../utils/toast';
-import RouteTracker from '../routes/RouteTracker';
 
+/**
+ * AppWrapper — Next.js client-side side-effects component.
+ *
+ * Handles:
+ *  1. Redirect authenticated users away from /auth to /
+ *  2. Google OAuth redirect toasts (login=success / login=error query params)
+ *  3. Scroll-to-top on every route change
+ *
+ * NOTE: This component renders nothing (returns null).
+ * Mount it once near the top of the component tree (e.g. inside MainLayout or layout.js).
+ */
 const AppWrapper = () => {
   const { user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const validRoutes = useMemo(() => [
-    '/',
-    '/auth',
-    '/my-profile',
-    '/my-cravings',
-    '/result',
-    '/recipe-spotlight',
-    '/collection-spotlight/:collectionName',
-    '/about-us',
-    '/contact-us',
-    '/privacy',
-    '/category/:categorySlug',
-    '/category/:categorySlug/:subCategorySlug',
-    '/:recipeSlug',
-    '/verify-email',
-    '/sitemap.xml',
-    '/ads.txt',
-    '/admin/manage-recipe-category',
-    '/admin/manage-recipe-subcategories',
-    '/admin/manage-ingredients',
-    '/admin/manage-recipes',
-    '/admin/manage-banners',
-    '/admin/manage-ingredient-units',
-    '/admin/manage-keywords',
-    '/admin/manage-users',
-    '/admin/manage-recipe-notes',
-    '/admin/cron-logs',
-    '/admin/activity-logs',
-    '/admin/manage-home-section',
-    '/admin/manage-home-section-items',
-    '/admin/manage-footer',
-    '/admin/manage-navbar',
-    '/admin/failed-searches',
-    '/admin/manage-config',
-    '/admin/manage-payment-slips',
-    '/admin/recipe-performance',
-    '/admin/engagement-dashboard',
-    '/admin/manage-contacts',
-    '/admin/failed-logs',
-    '/admin/manage-permissions',
-    '/admin/manage-roles',
-    '/admin/manage-roles/create',
-    '/admin/manage-roles/edit/:id',
-    '/admin/manage-assigned-recipes',
-    '/admin/manage-recipes/create',
-    '/admin/manage-recipes/edit/:id',
-    '/admin/notifications',
-    '/not-authenticated',
-    '/forgot-password'
-  ], []);
-
-  const isValidRoute = useCallback((path) => {
-    if (validRoutes.includes(path)) {
-      return true;
-    }
-
-    if (path.startsWith('/reset-password/')) {
-      return true;
-    }
-
-    if (path.startsWith('/category/')) {
-      return true;
-    }
-
-    if (path.startsWith('/collection-spotlight/')) {
-      return true;
-    }
-
-    if (/^\/[a-z0-9-]+$/.test(path)) {
-      return true;
-    }
-
-    if (path.startsWith('/admin/manage-roles/edit/')) {
-      return true;
-    }
-
-    if (path.startsWith('/admin/manage-recipes/edit/')) {
-      return true;
-    }
-
-    return false;
-  }, [validRoutes]);
-
-  useEffect(() => {
-    if (!isValidRoute(pathname)) {
-      const timer = setTimeout(() => {
-        router.push('/');
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [pathname, navigate, isValidRoute]);
-
+  // 1. Redirect authenticated users away from /auth
   useEffect(() => {
     if (user && pathname === '/auth') {
       router.push('/');
     }
-    
-    if (user && location.search.includes('login=success')) {
+  }, [user, pathname, router]);
+
+  // 2. Handle Google OAuth redirect query params
+  useEffect(() => {
+    const loginStatus = searchParams.get('login');
+    const message = searchParams.get('message');
+
+    if (user && loginStatus === 'success') {
       toast.success('Google login successful!');
-      router.push('/', { replace: true });
+      // Strip the query param from URL without a full navigation
+      router.replace(pathname);
     }
 
-    if (location.search.includes('login=error')) {
-      const params = new URLSearchParams(location.search);
-      const message = params.get('message') || 'Google login failed';
-      toast.error(message);
-      router.push('/', { replace: true });
+    if (loginStatus === 'error') {
+      toast.error(message || 'Google login failed');
+      router.replace(pathname);
     }
-  }, [user, pathname, location.search, navigate]);
+  }, [searchParams, user, pathname, router]);
 
+  // 3. Scroll to top on route change
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }, [pathname]);
 
-  return (
-    <>
-      <RouteTracker />
-      <Outlet />
-    </>
-  );
+  return null;
 };
 
-export default AppWrapper; 
-
-
-
+export default AppWrapper;
