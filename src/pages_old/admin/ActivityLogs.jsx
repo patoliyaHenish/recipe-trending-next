@@ -52,10 +52,14 @@ const ActivityLogs = () => {
     const [createdAtSearch, setCreatedAtSearch] = useState(() => searchParams.get('created_at') || '');
     const [debouncedCreatedAt, setDebouncedCreatedAt] = useState(() => searchParams.get('created_at') || '');
 
+    const [userSearch, setUserSearch] = useState(() => searchParams.get('user') || '');
+    const [debouncedUser, setDebouncedUser] = useState(() => searchParams.get('user') || '');
+
     const handleSearch = () => {
         setDebouncedAction(actionSearch);
         setDebouncedEntityType(entityTypeSearch);
         setDebouncedCreatedAt(createdAtSearch);
+        setDebouncedUser(userSearch);
         setPage(1);
 
         setSearchParams((prev) => {
@@ -63,6 +67,7 @@ const ActivityLogs = () => {
             if (actionSearch) next.set('action', actionSearch); else next.delete('action');
             if (entityTypeSearch) next.set('entity_type', entityTypeSearch); else next.delete('entity_type');
             if (createdAtSearch) next.set('created_at', createdAtSearch); else next.delete('created_at');
+            if (userSearch) next.set('user', userSearch); else next.delete('user');
             next.set('page', '1');
             return next;
         });
@@ -75,6 +80,8 @@ const ActivityLogs = () => {
         setDebouncedEntityType('');
         setCreatedAtSearch('');
         setDebouncedCreatedAt('');
+        setUserSearch('');
+        setDebouncedUser('');
         setPage(1);
 
         setSearchParams((prev) => {
@@ -82,12 +89,13 @@ const ActivityLogs = () => {
             next.delete('action');
             next.delete('entity_type');
             next.delete('created_at');
+            next.delete('user');
             next.set('page', '1');
             return next;
         });
     };
 
-    const hasActiveFilters = actionSearch !== '' || entityTypeSearch !== '' || createdAtSearch !== '';
+    const hasActiveFilters = actionSearch !== '' || entityTypeSearch !== '' || createdAtSearch !== '' || userSearch !== '';
 
     const selectStyles = {
         backgroundColor: isDarkMode ? '#283046' : '#fff',
@@ -180,7 +188,8 @@ const ActivityLogs = () => {
         limit, 
         action: debouncedAction, 
         entity_type: debouncedEntityType, 
-        created_at: debouncedCreatedAt 
+        created_at: debouncedCreatedAt,
+        user: debouncedUser
     }, {
         skip: !canList && !isAdmin
     });
@@ -233,6 +242,17 @@ const ActivityLogs = () => {
                         </Typography>
                     </Box>
                     <Box className="flex flex-wrap items-center gap-3 w-full">
+                        <TextField
+                            placeholder="Search User..."
+                            size="small"
+                            value={userSearch}
+                            onChange={(e) => setUserSearch(e.target.value)}
+                            sx={{
+                                minWidth: 150,
+                                '& .MuiOutlinedInput-root': { height: 38, ...selectStyles },
+                                '& .MuiInputBase-input': { color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }
+                            }}
+                        />
                         <TextField
                             placeholder="Search Action..."
                             size="small"

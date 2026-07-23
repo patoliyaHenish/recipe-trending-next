@@ -1555,7 +1555,7 @@ const Recipe = () => {
 
             {/* ── Filters row ───────────────────────────────────────────── */}
             <Collapse in={showFilters}>
-            <Box className="flex flex-col p-4 sm:p-5 gap-4">
+            <Box ref={filterRef} className="flex flex-col p-4 sm:p-5 gap-4">
                 {/* Search and Refresh Row */}
                 <Box className="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full flex-wrap gap-3">
                     <Box className="flex items-center gap-2 flex-wrap">
@@ -1575,7 +1575,14 @@ const Recipe = () => {
                             }}
                         />
                         <IconButton
-                            onClick={() => refetch()}
+                            onClick={async () => {
+                                const res = await refetch();
+                                if (res.data) {
+                                    toast.success("Data refreshed successfully");
+                                } else if (res.error) {
+                                    toast.error("Failed to refresh data");
+                                }
+                            }}
                             disabled={isFetching}
                             sx={{
                                 height: '38px',
@@ -1604,7 +1611,6 @@ const Recipe = () => {
 
 
           <Box
-            ref={filterRef}
             sx={{
               display: 'grid',
               gridTemplateColumns: {

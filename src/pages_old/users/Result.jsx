@@ -37,7 +37,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   useGetCombinedSuggestionsQuery,
   useSearchRecipesQuery,
@@ -74,11 +74,12 @@ const getPreferenceIcon = (label) => {
 const Result = () => {
   const { isDarkMode } = useTheme();
   const router = useRouter();
+  const pathname = usePathname();
   const [showSuggestionsDropdown, setShowSuggestionsDropdown] = useState(false);
   const [isPreferenceMenuOpen, setIsPreferenceMenuOpen] = useState(false);
   const [isBadgeMenuOpen, setIsBadgeMenuOpen] = useState(false);
   const [isTimeMenuOpen, setIsTimeMenuOpen] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [executedSearchQuery, setExecutedSearchQuery] = useState(
@@ -171,8 +172,9 @@ const Result = () => {
       }
     });
 
-    setSearchParams(updatedParams);
-  }, [searchParams, setSearchParams]);
+    const urlParams = new URLSearchParams(updatedParams);
+    router.push(`${pathname}?${urlParams.toString()}`);
+  }, [searchParams, router, pathname]);
 
   const handleFilterChange = useCallback((key, value) => {
     if (key === 'preference') {
@@ -530,7 +532,7 @@ const Result = () => {
       badge: "",
       timeRange: "",
     });
-    setSearchParams({});
+    router.push(pathname);
     setShowSuggestionsDropdown(false);
   };
 
@@ -1639,7 +1641,7 @@ const Result = () => {
                   cookTime: null,
                   servingSize: null,
                 });
-                setSearchParams({});
+                router.push(pathname);
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             >

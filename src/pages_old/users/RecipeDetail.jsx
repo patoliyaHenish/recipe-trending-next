@@ -112,10 +112,10 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
     isError,
     refetch,
   } = useGetRecipeDetailsBySlugQuery(recipeSlug, {
-    skip: !!initialData || !recipeSlug,
+    skip: (!isAuthenticated && !!initialData) || !recipeSlug,
   });
 
-  const recipeData = initialData || fetchedData;
+  const recipeData = fetchedData || initialData;
   const [saveRecipe, { isLoading: isSaving }] = useSaveRecipeMutation();
 
   const recipe = recipeData?.data || recipeData;
@@ -485,9 +485,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
     return checkedIngredients.has(ingredientIndex);
   };
 
-  if (showRecipeLoading) {
-    return <ThreeDotsLoader />;
-  }
+
 
   if (isError || !recipe) {
     return (

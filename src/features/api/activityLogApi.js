@@ -12,10 +12,10 @@ export const activityLogApi = createApi({
     }),
     endpoints: (builder) => ({
         getAllActivityLogs: builder.query({
-            query: ({ page = 1, limit = 50, action, entity_type, created_at }) => ({
+            query: ({ page = 1, limit = 50, action, entity_type, created_at, user }) => ({
                 url: `/logs`,
                 method: 'GET',
-                params: { page, limit, action, entity_type, created_at },
+                params: { page, limit, action, entity_type, created_at, user },
             }),
             providesTags: ['Refetch_ActivityLogs'],
             keepUnusedDataFor: 0
