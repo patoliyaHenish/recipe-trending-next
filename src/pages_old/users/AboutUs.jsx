@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import { Box, Typography, Container, Chip } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { 
   Restaurant as RestaurantIcon, 
   KeyboardArrowDown as ArrowDownIcon,
@@ -105,7 +105,7 @@ const Spotlight = ({ isDarkMode }) => {
   const spotRef = useRef(null);
 
   useEffect(() => {
-    const move = (e) => {documentTitle 
+    const move = (e) => {
       if (!spotRef.current) return;
       spotRef.current.style.left = `${e.clientX}px`;
       spotRef.current.style.top  = `${e.clientY}px`;

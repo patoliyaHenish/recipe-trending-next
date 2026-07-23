@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react'
 import { Box, Typography, Skeleton, IconButton, Tooltip, CircularProgress } from '@mui/material';
-import { usePathname } from 'next/navigation';
+import { usePathname, useParams } from 'next/navigation';
+import Link from 'next/link';
 import Cookies from 'js-cookie';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { useGetPublicRecipesByKeywordsQuery } from '../../features/api/recipeDetailsApi';
@@ -28,15 +29,17 @@ const BannerRecipes = () => {
     { skip: !collectionName }
   );
 
-  const section      = sectionData?.data || location.state?.section || null;
+  const navState = typeof window !== 'undefined' ? window.history.state : {};
+
+  const section      = sectionData?.data || navState?.section || null;
   const isCollection = !!section || !!collectionName;
 
   const collectionTitle       = section?.name        || collectionName?.split('-').join(' ') || 'Collection';
   const collectionDescription = section?.description || '';
   const collectionItems       = section?.items       || [];
 
-  const keywords  = location.state?.keywords || '';
-  const pageTitle = isCollection ? collectionTitle : (location.state?.title || 'Recipe Spotlight');
+  const keywords  = navState?.keywords || '';
+  const pageTitle = isCollection ? collectionTitle : (navState?.title || 'Recipe Spotlight');
 
   const [userPreference, setUserPreference] = useState(Cookies.get('userPreference') || '');
   const [page, setPage]               = useState(1);
@@ -53,7 +56,7 @@ const BannerRecipes = () => {
     document.title = `${pageTitle} | Recipe Trending`;
     
     // SEO & Social Sharing Meta Tags
-    const imgVal = section?.image || section?.background_image || location.state?.image;
+    const imgVal = section?.image || section?.background_image || navState?.image;
     const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
     const finalImg = imgVal || recipeImg;
     const imgUrl = (typeof finalImg === 'string' ? finalImg.trim() : '') || '';
