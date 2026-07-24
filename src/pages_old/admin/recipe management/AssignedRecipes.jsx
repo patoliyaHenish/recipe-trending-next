@@ -426,12 +426,25 @@ const AssignedRecipes = () => {
             {/* ── Filters row ───────────────────────────────────────────── */}
             <Collapse in={showFilters}>
             <Box className="flex flex-col p-5 gap-4">
-                <Box className="flex flex-wrap items-center gap-4">
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                            xs: '1fr',
+                            sm: 'repeat(2, 1fr)',
+                            md: 'repeat(3, 1fr)',
+                            lg: 'repeat(4, 1fr)',
+                            xl: 'repeat(5, 1fr)',
+                        },
+                        gap: 2,
+                        width: '100%',
+                        alignItems: 'center',
+                        transition: 'all 0.3s ease-in-out',
+                        '& > *': { width: '100%', m: 0 }
+                    }}
+                >
                     {/* Search Filter */}
-                    <Box className="flex items-center gap-2">
-                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                            Name:
-                        </Typography>
+                    <Box className="flex items-center">
                         <input
                             type="text"
                             value={search}
@@ -441,21 +454,19 @@ const AssignedRecipes = () => {
                             className="px-3 py-2 border rounded outline-none transition-colors"
                             style={{
                                 height: '38px',
-                                width: '200px',
+                                width: '100%',
                                 backgroundColor: isDarkMode ? '#283046' : '#fff',
                                 borderColor: isDarkMode ? '#404656' : '#d8d6de',
                                 color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
                                 borderRadius: '4px',
+                                boxSizing: 'border-box',
                             }}
                         />
                     </Box>
 
                     {/* Status Filter */}
-                    <Box className="flex items-center gap-2">
-                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                            Status:
-                        </Typography>
-                        <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <Box className="flex items-center">
+                        <FormControl size="small" sx={{ width: '100%' }}>
                             <Autocomplete
                                 size="small"
                                 options={[
@@ -500,11 +511,8 @@ const AssignedRecipes = () => {
 
                     {/* Assigned To Filter */}
                     {canListAll && (
-                        <Box className="flex items-center gap-2">
-                            <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                                Assigned To:
-                            </Typography>
-                            <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <Box className="flex items-center">
+                            <FormControl size="small" sx={{ width: '100%' }}>
                                 <Autocomplete
                                     size="small"
                                     options={[
@@ -549,11 +557,8 @@ const AssignedRecipes = () => {
                     )}
 
                     {/* Category Filter */}
-                    <Box className="flex items-center gap-2">
-                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                            Category:
-                        </Typography>
-                        <FormControl size="small" sx={{ minWidth: 180 }}>
+                    <Box className="flex items-center">
+                        <FormControl size="small" sx={{ width: '100%' }}>
                             <Autocomplete
                                 size="small"
                                 options={[
@@ -598,11 +603,8 @@ const AssignedRecipes = () => {
                     </Box>
 
                     {/* Sub Category Filter */}
-                    <Box className="flex items-center gap-2">
-                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                            Sub-Category:
-                        </Typography>
-                        <FormControl size="small" sx={{ minWidth: 180 }}>
+                    <Box className="flex items-center">
+                        <FormControl size="small" sx={{ width: '100%' }}>
                             <Autocomplete
                                 size="small"
                                 options={[
@@ -646,11 +648,8 @@ const AssignedRecipes = () => {
                     </Box>
 
                     {/* Created Filter */}
-                    <Box className="flex items-center gap-2">
-                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                            Created:
-                        </Typography>
-                        <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <Box className="flex items-center">
+                        <FormControl size="small" sx={{ width: '100%' }}>
                             <input
                                 type="date"
                                 value={createdInput}
@@ -664,6 +663,7 @@ const AssignedRecipes = () => {
                                     borderColor: isDarkMode ? '#404656' : '#d8d6de',
                                     color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
                                     borderRadius: '4px',
+                                    boxSizing: 'border-box',
                                 }}
                             />
                         </FormControl>
@@ -720,13 +720,13 @@ const AssignedRecipes = () => {
                         <TableRow>
                             {[
                                 { id: '#', label: '#' },
-                                { id: 'recipe_name', label: 'Recipe name', minWidth: 250 },
-                                { id: 'status', label: 'Status' },
-                                { id: 'assigned_to', label: 'Assigned to', minWidth: 150 },
-                                { id: 'category', label: 'Category' },
-                                { id: 'sub_category', label: 'Sub-category' },
-                                { id: 'created', label: 'Created', minWidth: 120 },
-                                ...(canUpdate || canDelete ? [{ id: 'actions', label: 'Actions' }] : [])
+                                { id: 'recipe_name', label: 'Recipe name', minWidth: 300 },
+                                { id: 'status', label: 'Status', minWidth: 150 },
+                                { id: 'assigned_to', label: 'Assigned to', minWidth: 200 },
+                                { id: 'category', label: 'Category', minWidth: 200 },
+                                { id: 'sub_category', label: 'Sub-category', minWidth: 200 },
+                                { id: 'created', label: 'Created', minWidth: 190 },
+                                ...(canUpdate || canDelete ? [{ id: 'actions', label: 'Actions', minWidth: 180 }] : [])
                             ].map((col, index) => (
                                 <TableCell 
                                     key={index}
@@ -834,7 +834,7 @@ const AssignedRecipes = () => {
                                     </TableCell>
 
                                     <TableCell align="center">
-                                        {row.created_at ? moment(row.created_at).format("MMM D, YYYY HH:mm") : "-"}
+                                        {row.created_at ? moment(row.created_at).format("MMM D, YYYY hh:mm A") : "-"}
                                     </TableCell>
 
                                     {(canUpdate || canDelete) && (

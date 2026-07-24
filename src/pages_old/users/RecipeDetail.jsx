@@ -61,7 +61,6 @@ import Footer from "../../components/Footer";
 import Image from "next/image";
 
 import RecipeSuggestions from "../../components/RecipeSuggestions";
-import ThreeDotsLoader from "../../components/ThreeDotsLoader";
 import RecipeGridSkeleton from "../../components/common/RecipeGridSkeleton";
 import { useCallback, useMemo } from "react";
 import useTrackEngagement from "../../hooks/useTrackEngagement";
@@ -107,8 +106,6 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
 
   const {
     data: fetchedData,
-    isLoading,
-    isFetching,
     isError,
     refetch,
   } = useGetRecipeDetailsBySlugQuery(recipeSlug, {
@@ -119,20 +116,6 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
   const [saveRecipe, { isLoading: isSaving }] = useSaveRecipeMutation();
 
   const recipe = recipeData?.data || recipeData;
-
-  const slugMismatch =
-    recipe &&
-    recipe.slug != null &&
-    String(recipe.slug) !== String(recipeSlug);
-
-  const showRecipeLoading =
-    !!recipeSlug &&
-    !isError &&
-    !initialData &&
-    (isLoading ||
-      (!recipe && isFetching) ||
-      !recipe ||
-      slugMismatch);
 
   const engagementData = useMemo(() => {
     if (!recipe?.recipe_id) return null;
