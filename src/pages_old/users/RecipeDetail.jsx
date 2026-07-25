@@ -50,7 +50,6 @@ import { toast } from '../../utils/toast';
 import AuthModal from "../../components/AuthModal";
 import { useTheme } from "../../context/ThemeContext";
 import {
-  useGetRecipeDetailsBySlugQuery,
   useSaveRecipeMutation,
   useUnsaveRecipeMutation,
 } from "../../features/api/recipeDetailsApi";
@@ -104,15 +103,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
   const { user, authModalOpen, setAuthModalOpen } = useUser();
   const isAuthenticated = !!user;
 
-  const {
-    data: fetchedData,
-    isError,
-    refetch,
-  } = useGetRecipeDetailsBySlugQuery(recipeSlug, {
-    skip: (!isAuthenticated && !!initialData) || !recipeSlug,
-  });
-
-  const recipeData = fetchedData || initialData;
+  const recipeData = initialData;
   const [saveRecipe, { isLoading: isSaving }] = useSaveRecipeMutation();
 
   const recipe = recipeData?.data || recipeData;
@@ -470,7 +461,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
 
 
 
-  if (isError || !recipe) {
+  if (!recipe) {
     return (
       <Box
         sx={{
