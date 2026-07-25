@@ -178,7 +178,7 @@ const SubItem = ({ sub, isActive, onClick, tokens, isDarkMode }) => {
         {React.cloneElement(sub.icon, { style: { fontSize: 20 } })}
       </span>
       <span style={{
-        fontSize: '1.05rem', fontWeight: 600,
+        fontSize: '1.05rem', fontWeight: 500,
         color: isActive ? '#ffffff' : TEXT_PRI,
         whiteSpace: 'nowrap', overflow: 'hidden',
         textOverflow: 'ellipsis', letterSpacing: '0.01em',
@@ -394,7 +394,7 @@ const AdminVerticalNavbar = ({ open, setOpen, mobileOpen, setMobileOpen }) => {
                               style={{
                                 flex: 1, display: 'flex', alignItems: 'center',
                                 justifyContent: 'space-between', overflow: 'hidden',
-                                whiteSpace: 'nowrap', fontSize: '1.05rem', fontWeight: 600,
+                                fontSize: '1.05rem', fontWeight: 500,
                                 color: isActive ? TEXT_PRI : TEXT_PRI, letterSpacing: '0.01em',
                               }}
                             >
