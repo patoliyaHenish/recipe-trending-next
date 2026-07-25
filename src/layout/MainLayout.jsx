@@ -19,6 +19,7 @@ const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
   const { isForbidden, forbiddenMessage } = useSelector((state) => state.global);
   const isImpersonating = useSelector((state) => state.auth.isImpersonating);
 
+  const isAdminRoute = pathname?.startsWith('/admin');
   const isStaff = !!(user?.role && user.role !== 'user');
   const isAdminMode = isStaff || isImpersonating;
 
@@ -122,6 +123,33 @@ const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
         >
           {isForbidden ? (
             <AccessDenied message={forbiddenMessage} />
+          ) : (isAdminRoute && user === undefined) ? (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 'calc(100vh - 80px)',
+              width: '100%',
+            }}>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '16px',
+                color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+              }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  border: `3px solid ${isDarkMode ? 'rgba(115, 103, 240, 0.2)' : 'rgba(115, 103, 240, 0.15)'}`,
+                  borderTopColor: '#7367f0',
+                  borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite',
+                }} />
+                <span style={{ fontSize: '0.95rem', fontWeight: 500 }}>Loading...</span>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+              </div>
+            </div>
           ) : (
             <>
               {children}
