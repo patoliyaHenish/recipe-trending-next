@@ -136,13 +136,12 @@ const Notifications = () => {
   }
 
   const handleClearAll = async () => {
-    if (!type) return
     try {
-      await clearLogs(type).unwrap()
-      toast.success(`${type} notifications cleared successfully`)
+      const result = await clearLogs(type || '').unwrap()
+      toast.success(type ? `${type} notifications cleared successfully` : 'All notifications cleared successfully')
       setClearDialogOpen(false)
     } catch (err) {
-      toast.error(err?.data?.message || 'Failed to clear notifications')
+      toast.error(err?.data?.message || err?.message || 'Failed to clear notifications')
     }
   }
 
@@ -287,11 +286,11 @@ const Notifications = () => {
                                     variant="contained"
                                     color="error"
                                     onClick={() => setClearDialogOpen(true)}
-                                    disabled={!type && logs.length === 0}
+                                    disabled={logs.length === 0}
                                     startIcon={<ClearAllIcon />}
-                                    sx={{ height: '38px', textTransform: 'none', mr: 'auto', px: 3 }}
+                                    sx={{ height: '38px', textTransform: 'none', mr: 'auto', px: 3, minWidth: { xs: '40px', sm: 'auto' } }}
                                 >
-                                    Clear Data
+                                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Clear Data</Box>
                                 </Button>
                             )}
                             <Button
