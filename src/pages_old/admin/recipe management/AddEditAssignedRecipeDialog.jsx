@@ -402,6 +402,42 @@ const AddEditAssignedRecipeDialog = ({
           }}
         >
           <Box sx={{ mb: 0 }}>
+            {/* Label row with plus icon always visible for add mode */}
+            {mode === "add" && (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    fontWeight: 600, 
+                    color: isDarkMode ? '#e2e8f0' : '#1e293b',
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  Recipe names
+                </Typography>
+                <IconButton 
+                  onClick={handleAddRecipeName} 
+                  size="small"
+                  disabled={inputValue.trim() === "" || isCreating || isUpdating}
+                  sx={{ 
+                    color: inputValue.trim() ? (isDarkMode ? "#93c5fd" : "#2563eb") : (isDarkMode ? '#6b7280' : '#9ca3af'),
+                    backgroundColor: isDarkMode ? 'rgba(59, 130, 246, 0.08)' : 'rgba(37, 99, 235, 0.08)',
+                    border: `1px solid ${inputValue.trim() ? (isDarkMode ? '#3b82f6' : '#2563eb') : (isDarkMode ? '#374151' : '#d1d5db')}`,
+                    borderRadius: '8px',
+                    padding: '6px',
+                    '&:hover': {
+                      backgroundColor: isDarkMode ? 'rgba(59, 130, 246, 0.16)' : 'rgba(37, 99, 235, 0.16)',
+                    },
+                    '&.Mui-disabled': {
+                      backgroundColor: 'transparent',
+                      borderColor: isDarkMode ? '#374151' : '#e5e7eb',
+                    }
+                  }}
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            )}
             <Autocomplete
               freeSolo
               options={[]}
@@ -434,26 +470,13 @@ const AddEditAssignedRecipeDialog = ({
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label={mode === "add" ? "Recipe names" : "Recipe name"}
-                  placeholder={mode === "add" ? "Type and click + or press enter" : ""}
+                  label={mode === "add" ? "" : "Recipe name"}
+                  placeholder={mode === "add" ? "Type recipe name..." : ""}
                   error={formik.touched.recipe_name && Boolean(formik.errors.recipe_name)}
                   helperText={formik.touched.recipe_name && formik.errors.recipe_name}
                   required={mode === "add" ? (formik.values.recipe_name.length === 0) : true}
                   margin="none"
                   fullWidth
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <React.Fragment>
-                        {params.InputProps?.endAdornment}
-                        {mode === "add" && (
-                          <IconButton onClick={handleAddRecipeName} edge="end" size="small" sx={{ color: isDarkMode ? "#93c5fd" : "#2563eb", mr: 0.5 }}>
-                            <AddIcon />
-                          </IconButton>
-                        )}
-                      </React.Fragment>
-                    ),
-                  }}
                   sx={customInputSx}
                 />
               )}
