@@ -374,6 +374,8 @@ const AddEditRecipePage = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [isClearDraftDialogOpen, setIsClearDraftDialogOpen] = useState(false);
   const [isClearingDraft, setIsClearingDraft] = useState(false);
+  const [draftImageFileName, setDraftImageFileName] = useState(null);
+  const [initialImageFile, setInitialImageFile] = useState(null);
 
   const handleAutoSaveToggle = (e) => {
     const isChecked = e.target.checked;
@@ -405,7 +407,7 @@ const AddEditRecipePage = () => {
       sub_category_id: recipeData?.sub_category_id || null,
       keywords: Array.isArray(recipeData?.keywords) ? recipeData.keywords : (recipeData?.keywords ? [recipeData.keywords] : []),
       ingredients: recipeData?.ingredients || [],
-      recipe_instructions: recipeData?.instructions || [],
+      recipe_instructions: recipeData?.recipe_instructions || recipeData?.instructions || [],
       video_url: recipeData?.video_url || '',
       image: null,
       meta_title: (recipeData?.meta_title || '').replace(' | Recipe Trending', '').replace(' | Casual Cravings', ''),
@@ -438,6 +440,12 @@ const AddEditRecipePage = () => {
         formData.append('keepExistingImage', 'true');
       }
 
+      // In add mode, if user uploaded a draft image (stored locally on server)
+      // but didn't re-select it as a File, tell the backend to promote it to R2
+      if (mode === 'add' && !finalValues.image && draftImageFileName) {
+        formData.append('draft_image_filename', draftImageFileName);
+      }
+
       if (mode === 'add') {
         addRecipe(formData).unwrap().then(() => {
           toast.success("Recipe added successfully");
@@ -466,15 +474,24 @@ const AddEditRecipePage = () => {
     let interval;
     if (mode === 'add' && isAutoSaveEnabled) {
       interval = setInterval(() => {
-        saveDraft(valuesRef.current).unwrap().then(() => {
+        const draftPayload = {
+          ...valuesRef.current,
+          ...(draftImageFileName ? { image: draftImageFileName } : {}),
+        };
+        // Remove the File object from payload before saving to draft DB
+        delete draftPayload.image;
+        if (draftImageFileName) {
+          draftPayload.draft_image_filename = draftImageFileName;
+        }
+        saveDraft(draftPayload).unwrap().then(() => {
           setLastSaved(new Date());
         }).catch(err => {
           console.error("Auto save failed", err);
         });
-      }, 15000);
+      }, 10000);
     }
     return () => clearInterval(interval);
-  }, [mode, isAutoSaveEnabled, saveDraft]);
+  }, [mode, isAutoSaveEnabled, saveDraft, draftImageFileName]);
 
   const handleCheckSlug = async () => {
     if (formik.values.slug && formik.values.slug.length >= 3) {
@@ -529,10 +546,57 @@ const AddEditRecipePage = () => {
     if (recipeData?.image && typeof recipeData.image === 'string') {
       const img = recipeData.image;
       setImagePreview(img.startsWith("http") ? img : getImage(img));
+    } else if (recipeData?.draft_image_filename) {
+      // Restore image preview from draft's server-stored image.
+      // Draft images are local to the backend server (not on R2), so
+      // we build the URL from NEXT_PUBLIC_API_URL, not getImage() which uses R2.
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
+      setDraftImageFileName(recipeData.draft_image_filename);
+      setImagePreview(`${apiBase}/uploads/${recipeData.draft_image_filename}`);
     } else {
       setImagePreview(null);
     }
   }, [recipeData]);
+
+  // Draft images are saved locally on the backend server (not R2),
+  // so we build the URL directly from the API base URL.
+  const getDraftImageUrl = (filename) => {
+    if (!filename) return '';
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
+    return `${apiBase}/uploads/${filename}`;
+  };
+
+  // Upload a draft image file to the server
+  const uploadDraftImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/manage-recipe-by-admin/draft/upload-image`, {
+        method: 'POST',
+        credentials: 'include', // backend uses cookie-based auth (req.cookies.token), not Bearer
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.data?.filename) {
+        const filename = data.data.filename;
+        setDraftImageFileName(filename);
+        setImagePreview(getDraftImageUrl(filename));
+
+        // Immediately persist the draft so the image reference survives a refresh
+        // (don't wait for the 10-second auto-save interval)
+        const currentValues = valuesRef.current;
+        const immediatePayload = { ...currentValues, draft_image_filename: filename };
+        delete immediatePayload.image; // remove File object — not serialisable
+        saveDraft(immediatePayload).unwrap().then(() => {
+          setLastSaved(new Date());
+        }).catch(err => {
+          console.error('Failed to save draft after image upload', err);
+        });
+      }
+    } catch (err) {
+      console.error('Failed to upload draft image', err);
+    }
+  };
 
   useEffect(() => {
     if (formik.values.video_url) {
@@ -583,17 +647,32 @@ const AddEditRecipePage = () => {
     };
   }, [videoUrl]);
 
-  const handleImageChange = (e) => {
+  // Convert a File to base64 data URL for draft storage
+  const fileToDataUrl = (file) => {
+    return new Promise((resolve) => {
+      if (!file) return resolve(null);
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  };
+
+const handleImageChange = async (e) => {
     const file = e.target.files[0];
     formik.setFieldValue('image', file);
     if (file) {
       setImagePreview(URL.createObjectURL(file));
+      setInitialImageFile(file);
+      if (mode === 'add') {
+        await uploadDraftImage(file);
+      }
     } else {
       setImagePreview(null);
+      setInitialImageFile(null);
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -601,6 +680,10 @@ const AddEditRecipePage = () => {
       const file = e.dataTransfer.files[0];
       formik.setFieldValue('image', file);
       setImagePreview(URL.createObjectURL(file));
+      setInitialImageFile(file);
+      if (mode === 'add') {
+        await uploadDraftImage(file);
+      }
     }
   };
 
