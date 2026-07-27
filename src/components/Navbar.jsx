@@ -834,33 +834,7 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
               {adminNavOpen ? <CloseIcon /> : <MenuOpenRounded />}
             </IconButton>
 
-            {/* Search bar */}
-            <Box
-              onClick={openSearchDrawer}
-              sx={{
-                display: 'flex', alignItems: 'center', gap: 1,
-                bgcolor: 'transparent',
-                px: 1, py: 0.9,
-                width: { xs: '44px', sm: '240px', md: '280px' },
-                height: 40,
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                flexShrink: 0,
-                overflow: 'hidden',
-              }}
-            >
-              <SearchIcon sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', fontSize: 24, flexShrink: 0 }} />
-              <Typography sx={{
-                display: { xs: 'none', sm: 'block' },
-                color: isDarkMode ? '#6b7280' : '#9ca3af',
-                fontSize: '0.95rem',
-                whiteSpace: 'nowrap',
-                userSelect: 'none',
-              }}>
-                Search (Ctrl+K)
-              </Typography>
-            </Box>
+
 
             <Box sx={{ flexGrow: 1 }} />
 
@@ -919,118 +893,8 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
           </Toolbar>
         </AppBar>
 
-        {/* Search drawer (reuse existing) */}
-        {searchDrawerOpen && (
-          <Box
-            sx={{
-              position: 'fixed', inset: 0, zIndex: 1300,
-              bgcolor: 'rgba(0,0,0,0.5)',
-              display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-              pt: '80px',
-            }}
-            onClick={closeSearchDrawer}
-          >
-            <Box
-              onClick={e => e.stopPropagation()}
-              sx={{
-                bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                borderRadius: '8px',
-                width: { xs: '95%', sm: '600px' },
-                maxHeight: '70vh',
-                overflow: 'auto',
-                p: 2,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-              }}
-            >
-              {(() => {
-                const userPermissions = user?.permissions || [];
-                const role = user?.role || user?.role_name || '';
-                const checkPerm = (perm) => {
-                  if (!perm) return true;
-                  if (role === 'admin') return true;
-                  if (Array.isArray(perm)) return perm.some(p => userPermissions.includes(p));
-                  return userPermissions.includes(perm);
-                };
 
-                const adminPages = [
-                  { label: 'User List', path: '/admin/manage-users', permission: ['user.list', 'user.update'] },
-                  { label: 'Failed Searches', path: '/admin/failed-searches', permission: 'search_failed.list' },
-                  { label: 'Inquiries', path: '/admin/manage-contacts', permission: 'inquiry.list' },
-                  { label: 'Navbar Settings', path: '/admin/manage-navbar', permission: 'nav.list' },
-                  { label: 'Footer Settings', path: '/admin/manage-footer', permission: 'footer.list' },
-                  { label: 'Banners', path: '/admin/manage-banners', permission: 'banner.list' },
-                  { label: 'Home Sections', path: '/admin/manage-home-section', permission: 'home_section.list' },
-                  { label: 'Home Section Items', path: '/admin/manage-home-section-items', permission: 'home_section_items.list' },
-                  { label: 'Manage Category', path: '/admin/manage-recipe-category', permission: 'category.list' },
-                  { label: 'Manage Sub-Category', path: '/admin/manage-recipe-subcategories', permission: 'subcategory.list' },
-                  { label: 'Manage Recipes', path: '/admin/manage-recipes', permission: ['recipe.list_all', 'recipe.list'] },
-                  { label: 'Assigned Recipes', path: '/admin/manage-assigned-recipes', permission: ['assigned_recipe.list', 'assigned_recipe.list_all'] },
-                  { label: 'Manage Keywords', path: '/admin/manage-keywords', permission: 'keyword.list' },
-                  { label: 'Ingredients', path: '/admin/manage-ingredients', permission: 'ingredient.list' },
-                  { label: 'Ingredient Units', path: '/admin/manage-ingredient-units', permission: 'ingredient_unit.list' },
-                  { label: 'Cron Logs', path: '/admin/cron-logs', permission: 'cron_logs.list' },
-                  { label: 'Activity Logs', path: '/admin/activity-logs', permission: 'activity_logs.list' },
-                  { label: 'Failed Logs', path: '/admin/failed-logs', permission: 'failed_logs.list' },
-                  { label: 'Manage Config', path: '/admin/manage-config', permission: 'config.manage' },
-                  { label: 'Payroll', path: '/admin/manage-payment-slips', permission: 'payment_slip.list' },
-                  { label: 'Roles', path: '/admin/manage-roles', permission: 'role.list' },
-                  { label: 'Permissions', path: '/admin/manage-permissions', permission: 'permission.list' }
-                ];
-                const matches = adminPages
-                  .filter(p => checkPerm(p.permission))
-                  .filter(p => p.label.toLowerCase().includes((searchInputValue || '').toLowerCase()))
-                  .slice(0, 8);
-                return (
-                  <>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                      <SearchIcon sx={{ color: isDarkMode ? '#6b7280' : '#9ca3af' }} />
-                      <input
-                        id="search-input-field"
-                        autoFocus
-                        value={searchInputValue}
-                        onChange={handleSearchInputChange}
-                        onKeyDown={e => { 
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            if (matches.length > 0) {
-                              router.push(matches[0].path);
-                              closeSearchDrawer();
-                            }
-                          }
-                          if (e.key === 'Escape') closeSearchDrawer(); 
-                        }}
-                        placeholder="Search admin pages..."
-                        style={{
-                          flex: 1, border: 'none', outline: 'none',
-                          background: 'transparent',
-                          color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                          fontSize: '1rem',
-                        }}
-                      />
-                      <IconButton size="small" onClick={closeSearchDrawer}>
-                        <CloseIcon sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', fontSize: 18 }} />
-                      </IconButton>
-                    </Box>
-                    {matches.map((s, i) => (
-                      <Box
-                        key={i}
-                        onClick={() => { router.push(s.path); closeSearchDrawer(); }}
-                        sx={{
-                          px: 2, py: 1.2, borderRadius: '6px', cursor: 'pointer',
-                          color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                          fontSize: '0.9rem',
-                          '&:hover': { bgcolor: isDarkMode ? 'rgba(115,103,240,0.12)' : 'rgba(115,103,240,0.08)', color: '#7367f0' }
-                        }}
-                      >
-                        {s.label}
-                      </Box>
-                    ))}
-                  </>
-                );
-              })()}
-            </Box>
-          </Box>
-        )}
+
         <NotificationsDialog 
           anchorEl={notificationAnchorEl} 
           onClose={() => setNotificationAnchorEl(null)} 
