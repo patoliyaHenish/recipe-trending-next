@@ -1270,7 +1270,7 @@ const UserManagement = () => {
                                 <TableCell align="center" width="50">#</TableCell>
                                 <TableCell sx={{ minWidth: 300 }}>USER</TableCell>
                                 <TableCell>EMAIL</TableCell>
-                                <TableCell align="center" width="140">ROLE</TableCell>
+                                <TableCell align="center" sx={{ minWidth: 200, width: 200 }}>ROLE</TableCell>
                                 <TableCell align="center" width="100">VERIFIED</TableCell>
                                 <TableCell align="center" width="100">GOOGLE</TableCell>
                                 <TableCell align="center">PREFERENCES</TableCell>
@@ -1354,7 +1354,7 @@ const UserManagement = () => {
                                             </TableCell>
 
                                             {/* ROLE */}
-                                            <TableCell align="center">
+                                            <TableCell align="center" sx={{ minWidth: 200, width: 200 }}>
                                                 {isRoleUpdateEnabled && canUpdateRole ? (
                                                     <Select
                                                         size="small"
