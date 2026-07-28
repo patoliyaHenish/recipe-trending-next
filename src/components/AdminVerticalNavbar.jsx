@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Category,
   CategoryOutlined,
+  Dashboard,
   FoodBank,
   Restaurant,
   Straighten,
@@ -28,6 +29,12 @@ import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/useUser';
 
 const adminLinks = [
+  {
+    label: 'Dashboard',
+    icon: <Dashboard />,
+    to: '/admin/dashboard',
+    permission: 'dashboard.view',
+  },
   {
     label: 'User List',
     icon: <People />,

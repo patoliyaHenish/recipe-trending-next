@@ -33,12 +33,14 @@ import RecipeNotes from '../../pages_old/admin/recipe management/RecipeNotes';
 import AddEditRecipePage from '../../pages_old/admin/recipe management/AddEditRecipePage';
 
 import RecipeSubCategory from '../../pages_old/admin/sub-category/RecipeSubCategory';
+import Dashboard from '../../pages_old/admin/Dashboard';
 
 export default function AdminRouter() {
   return (
     <BrowserRouter basename="/admin">
       <Routes>
-        <Route path="/" element={<Navigate to="manage-users" replace />} />
+        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
         
         {/* Core Management */}
         <Route path="manage-users" element={<UserManagement />} />
