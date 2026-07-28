@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress, IconButton, Switch, FormControlLabel, Tooltip } from '@mui/material';
+import { Box, Typography, CircularProgress, IconButton, Switch, FormControlLabel, Tooltip, Collapse } from '@mui/material';
 import { useTheme } from '../../context/ThemeContext';
 import { useGetDashboardStatsQuery } from '../../features/api/dashboardApi';
 import AccessDenied from '../../components/common/AccessDenied';
@@ -17,44 +17,66 @@ import {
   Bookmark,
   AccessTime,
   Refresh as RefreshIcon,
+  KeyboardArrowUp,
+  KeyboardArrowDown,
 } from '@mui/icons-material';
 import { toast } from '../../utils/toast';
 
-const OverviewBox = ({ title, totalRecipes, approvedRecipes, pendingRecipes, uniqueUsers, isDarkMode }) => (
-  <Box
-    sx={{
-      flex: 1,
-      minWidth: '250px',
-      borderRadius: '6px',
-      backgroundColor: isDarkMode ? '#1a1d27' : '#f8f9fa',
-      border: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.05)',
-      p: 3,
-      boxShadow: isDarkMode ? 'inset 0 2px 4px 0 rgba(0,0,0,0.1)' : 'inset 0 2px 4px 0 rgba(0,0,0,0.02)',
-    }}
-  >
-    <Typography variant="h6" sx={{ color: isDarkMode ? '#e2e8f0' : '#1e293b', fontWeight: 700, mb: 3 }}>
-      {title}
-    </Typography>
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Box>
-        <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#64748b', fontWeight: 500, mb: 0.5 }}>Total recipes</Typography>
-        <Typography variant="h4" sx={{ color: isDarkMode ? '#e2e8f0' : '#1e293b', fontWeight: 700 }}>{totalRecipes ?? 0}</Typography>
-      </Box>
-      <Box>
-        <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#64748b', fontWeight: 500, mb: 0.5 }}>Approved recipes</Typography>
-        <Typography variant="h4" sx={{ color: '#28c76f', fontWeight: 700 }}>{approvedRecipes ?? 0}</Typography>
-      </Box>
-      <Box>
-        <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#64748b', fontWeight: 500, mb: 0.5 }}>Pending recipes</Typography>
-        <Typography variant="h4" sx={{ color: '#ea5455', fontWeight: 700 }}>{pendingRecipes ?? 0}</Typography>
-      </Box>
-      <Box>
-        <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#64748b', fontWeight: 500, mb: 0.5 }}>Users added recipes</Typography>
-        <Typography variant="h4" sx={{ color: '#7367f0', fontWeight: 700 }}>{uniqueUsers ?? 0}</Typography>
+const OverviewBox = ({ title, totalRecipes, approvedRecipes, pendingRecipes, uniqueUsers, isDarkMode, gradient = 'linear-gradient(135deg, #7367f0 0%, #9e95f5 100%)' }) => {
+  const [collapsed, setCollapsed] = useState(false);
+
+  return (
+    <Box
+      sx={{
+        flex: 1,
+        minWidth: '250px',
+        borderRadius: '6px',
+        backgroundColor: isDarkMode ? '#1a1d27' : '#f8f9fa',
+        border: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.05)',
+        overflow: 'hidden',
+        boxShadow: isDarkMode ? 'inset 0 2px 4px 0 rgba(0,0,0,0.1)' : 'inset 0 2px 4px 0 rgba(0,0,0,0.02)',
+      }}
+    >
+      <Box
+        sx={{
+          height: 4,
+          width: '100%',
+          background: gradient,
+        }}
+      />
+      <Box sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6" sx={{ color: isDarkMode ? '#e2e8f0' : '#1e293b', fontWeight: 700 }}>
+            {title}
+          </Typography>
+          <IconButton size="small" onClick={() => setCollapsed(!collapsed)} sx={{ color: isDarkMode ? '#a5b4fc' : '#7367f0' }}>
+            {collapsed ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
+          </IconButton>
+        </Box>
+        <Collapse in={!collapsed} timeout="auto" unmountOnExit>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box>
+              <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#64748b', fontWeight: 500, mb: 0.5 }}>Total recipes</Typography>
+              <Typography variant="h4" sx={{ color: isDarkMode ? '#e2e8f0' : '#1e293b', fontWeight: 700 }}>{totalRecipes ?? 0}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#64748b', fontWeight: 500, mb: 0.5 }}>Approved recipes</Typography>
+              <Typography variant="h4" sx={{ color: '#28c76f', fontWeight: 700 }}>{approvedRecipes ?? 0}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#64748b', fontWeight: 500, mb: 0.5 }}>Pending recipes</Typography>
+              <Typography variant="h4" sx={{ color: '#ea5455', fontWeight: 700 }}>{pendingRecipes ?? 0}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#64748b', fontWeight: 500, mb: 0.5 }}>Users added recipes</Typography>
+              <Typography variant="h4" sx={{ color: isDarkMode ? '#e2e8f0' : '#1e293b', fontWeight: 700 }}>{uniqueUsers ?? 0}</Typography>
+            </Box>
+          </Box>
+        </Collapse>
       </Box>
     </Box>
-  </Box>
-);
+  );
+};
 
 const KPI_CARDS = [
   {
@@ -294,6 +316,7 @@ export default function Dashboard() {
                   pendingRecipes={stats.todaysPendingRecipesCount}
                   uniqueUsers={stats.todaysRecipeCreatorsCount}
                   isDarkMode={isDarkMode}
+                  gradient="linear-gradient(135deg, #7367f0 0%, #9e95f5 100%)"
                 />
                 <OverviewBox
                   title="Weekly Overview"
@@ -302,6 +325,7 @@ export default function Dashboard() {
                   pendingRecipes={stats.weeklyPendingRecipesCount}
                   uniqueUsers={stats.weeklyRecipeCreatorsCount}
                   isDarkMode={isDarkMode}
+                  gradient="linear-gradient(135deg, #28c76f 0%, #5ddb8c 100%)"
                 />
                 <OverviewBox
                   title="15 Days Overview"
@@ -310,6 +334,7 @@ export default function Dashboard() {
                   pendingRecipes={stats.fifteenDaysPendingRecipesCount}
                   uniqueUsers={stats.fifteenDaysRecipeCreatorsCount}
                   isDarkMode={isDarkMode}
+                  gradient="linear-gradient(135deg, #ff9f43 0%, #ffb976 100%)"
                 />
                 <OverviewBox
                   title="Monthly Overview"
@@ -318,6 +343,7 @@ export default function Dashboard() {
                   pendingRecipes={stats.monthlyPendingRecipesCount}
                   uniqueUsers={stats.monthlyRecipeCreatorsCount}
                   isDarkMode={isDarkMode}
+                  gradient="linear-gradient(135deg, #00cfe8 0%, #46e3f7 100%)"
                 />
               </Box>
 
