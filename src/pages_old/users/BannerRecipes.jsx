@@ -18,7 +18,7 @@ import { toast } from '../../utils/toast';
 const RECIPES_PER_PAGE    = 12;
 const COLLECTION_PER_PAGE = 12;
 
-const BannerRecipes = () => {
+const BannerRecipes = ({ bannerTitle, bannerImage, bannerKeywords }) => {
   const { isDarkMode } = useTheme();
   const pathname = usePathname();
 
@@ -38,8 +38,8 @@ const BannerRecipes = () => {
   const collectionDescription = section?.description || '';
   const collectionItems       = section?.items       || [];
 
-  const keywords  = navState?.keywords || '';
-  const pageTitle = isCollection ? collectionTitle : (navState?.title || 'Recipe Spotlight');
+  const keywords  = bannerKeywords || navState?.keywords || '';
+  const pageTitle = isCollection ? collectionTitle : (bannerTitle || navState?.title || 'Recipe Spotlight');
 
   const [userPreference, setUserPreference] = useState(Cookies.get('userPreference') || '');
   const [page, setPage]               = useState(1);
@@ -56,7 +56,7 @@ const BannerRecipes = () => {
     document.title = `${pageTitle} | Recipe Trending`;
     
     // SEO & Social Sharing Meta Tags
-    const imgVal = section?.image || section?.background_image || navState?.image;
+    const imgVal = bannerImage || section?.image || section?.background_image || navState?.image;
     const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
     const finalImg = imgVal || recipeImg;
     const imgUrl = (typeof finalImg === 'string' ? finalImg.trim() : '') || '';
@@ -137,7 +137,7 @@ const BannerRecipes = () => {
 
   const handleShare = async () => {
     const url = window.location.href;
-    const imgVal = section?.image || section?.background_image || navState?.image;
+    const imgVal = bannerImage || section?.image || section?.background_image || navState?.image;
     const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
     const finalImg = imgVal || recipeImg;
     const imgUrl = (typeof finalImg === 'string' ? finalImg.trim() : '') || '';
@@ -263,8 +263,8 @@ const BannerRecipes = () => {
             <Box
               component="img"
               src={(() => {
-                const imgVal = section?.image || section?.background_image || navState?.image;
-                const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
+    const imgVal = bannerImage || section?.image || section?.background_image || navState?.image;
+    const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
                 const finalImg = imgVal || recipeImg;
                 const imgUrl = (typeof finalImg === 'string' ? finalImg.trim() : '') || '';
                 return imgUrl && imgUrl.toLowerCase() !== 'null' ? getImage(imgUrl) : noImageFound;

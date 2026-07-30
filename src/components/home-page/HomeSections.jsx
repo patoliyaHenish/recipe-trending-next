@@ -222,14 +222,12 @@ const HomeSections = () => {
                   title={section.name}
                   description={section.description}
                   isDarkMode={isDarkMode}
-                  onClick={() => {
+                   onClick={() => {
                     const slug = slugify(section.name || 'collection');
-                    router.push(`/collection-spotlight/${slug}`, { 
-                      state: { 
-                        section,
-                        image: section.image || section.background_image
-                      } 
+                    const searchParams = new URLSearchParams({
+                      image: section.image || section.background_image || '',
                     });
+                    router.push(`/collection-spotlight/${slug}?${searchParams.toString()}`);
                   }}
                 />
               </Box>

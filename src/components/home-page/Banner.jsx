@@ -129,13 +129,12 @@ const  Banner = () => {
                   '&:hover': { background: '#ffffff' }
                 }}
                 onClick={() => {
-                  router.push('/recipe-spotlight', {
-                    state: { 
-                      keywords: banner.keywords || banner.title, 
-                      title: banner.title,
-                      image: banner.image 
-                    }
+                  const searchParams = new URLSearchParams({
+                    keywords: banner.keywords || banner.title,
+                    title: banner.title,
+                    image: banner.image || '',
                   });
+                  router.push(`/recipe-spotlight?${searchParams.toString()}`);
                 }}
               >
                 {banner.button_text}
@@ -229,13 +228,12 @@ const  Banner = () => {
                   }
                 }}
                 onClick={() => {
-                  router.push('/recipe-spotlight', {
-                    state: { 
-                      keywords: banner.keywords || banner.title,
-                      title: banner.title,
-                      image: banner.image
-                    }
+                  const searchParams = new URLSearchParams({
+                    keywords: banner.keywords || banner.title,
+                    title: banner.title,
+                    image: banner.image || '',
                   });
+                  router.push(`/recipe-spotlight?${searchParams.toString()}`);
                 }}
               >
                 {banner.button_text}
