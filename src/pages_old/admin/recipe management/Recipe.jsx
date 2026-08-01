@@ -3347,7 +3347,10 @@ const Recipe = () => {
                 <Pagination
                     count={pagination.totalPages || 1}
                     page={page || 1}
-                    onChange={(e, value) => setPage(value)}
+                    onChange={(e, value) => {
+                        setPage(value);
+                        syncUrlParams(value, limit);
+                    }}
                     shape="rounded"
                     showFirstButton
                     showLastButton
