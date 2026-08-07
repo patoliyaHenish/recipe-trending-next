@@ -78,7 +78,7 @@ const MyCravings = () => {
             mb: 2,
             pb: 1.5,
             borderBottom: '1px solid',
-            borderColor: isDarkMode ? 'rgba(2598945, 255, 255, 0.15)' : '#e5e7eb',
+            borderColor: isDarkMode ? 'rgba(202, 96, 20, 0.15)' : '#e5e7eb',
           }}
         >
           <Typography
