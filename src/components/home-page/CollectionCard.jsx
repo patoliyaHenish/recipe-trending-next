@@ -6,7 +6,7 @@ import noImageFound from '../../assets/no-image-found.png';
 
 const CollectionCard = ({ image, title, description, isDarkMode, onClick }) => {
   const imgVal = (typeof image === 'string' ? image.trim() : '') || '';
-  const imageSrc = imgVal && imgVal.toLowerCase() !== 'null' ? getImage(imgVal) : noImageFound;
+  const imageSrc = imgVal && imgVal.toLowerCase() !== 'null' ? getImage(imgVal) : (noImageFound?.src || noImageFound);
 
   return (
     <Box
@@ -45,7 +45,7 @@ const CollectionCard = ({ image, title, description, isDarkMode, onClick }) => {
           alt={title || 'Collection'}
           loading="lazy"
           onError={(e) => {
-            e.currentTarget.src = noImageFound;
+            e.currentTarget.src = noImageFound?.src || noImageFound;
           }}
           sx={{
             width: '100%',

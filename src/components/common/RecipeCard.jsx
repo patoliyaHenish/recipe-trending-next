@@ -40,7 +40,7 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
 
 
   const imgUrl = getImage(recipe?.image || recipe?.image_url);
-  const imageSrc = imgUrl || noImageFound;
+  const imageSrc = imgUrl || noImageFound?.src || noImageFound;
   const name = recipe.title || recipe.name;
   const recipeId = recipe.recipe_id || recipe.id;
   const linkPath = `/${recipe.slug}`;
@@ -184,9 +184,9 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
               title={name}
               fill
               sizes="(max-width: 600px) 108px, 108px"
-              className={imageSrc && (imageSrc.includes('ytimg.com') || imageSrc.includes('youtube')) ? "recipe-card-image-youtube" : "recipe-card-image"}
+              className={imageSrc && typeof imageSrc === 'string' && (imageSrc.includes('ytimg.com') || imageSrc.includes('youtube')) ? "recipe-card-image-youtube" : "recipe-card-image"}
               onError={(event) => {
-                event.currentTarget.src = noImageFound;
+                event.currentTarget.src = noImageFound?.src || noImageFound;
               }}
               style={{
                 objectFit: 'cover',
@@ -356,9 +356,9 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
                 title={name}
                 fill
                 sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
-                className={imageSrc && (imageSrc.includes('ytimg.com') || imageSrc.includes('youtube')) ? "recipe-card-image-youtube" : "recipe-card-image"}
+                className={imageSrc && typeof imageSrc === 'string' && (imageSrc.includes('ytimg.com') || imageSrc.includes('youtube')) ? "recipe-card-image-youtube" : "recipe-card-image"}
                 onError={(event) => {
-                  event.currentTarget.src = noImageFound;
+                  event.currentTarget.src = noImageFound?.src || noImageFound;
                 }}
                 style={{
                   objectFit: 'cover',
