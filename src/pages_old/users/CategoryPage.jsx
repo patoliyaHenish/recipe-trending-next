@@ -192,8 +192,8 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
       setAllRecipes(newRecipes);
     } else {
       setAllRecipes(prev => {
-        const existingIds = new Set(prev.map(r => r.id));
-        const uniqueNew = newRecipes.filter(r => !existingIds.has(r.id));
+        const existingIds = new Set(prev.map(r => r.id || r.recipe_id));
+        const uniqueNew = newRecipes.filter(r => !existingIds.has(r.id || r.recipe_id));
         return [...prev, ...uniqueNew];
       });
     }

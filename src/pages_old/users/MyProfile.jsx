@@ -68,14 +68,14 @@ const MyProfile = () => {
   useEffect(() => {
     const title = "My Profile | Recipe Trending";
     const metaDesc = "Manage your Recipe Trending profile, update your food preferences, and view recipes you've reacted to.";
-    
+
     document.title = title;
 
     let metaDescriptionTag = document.querySelector('meta[name="description"]');
     if (!metaDescriptionTag) {
-        metaDescriptionTag = document.createElement('meta');
-        metaDescriptionTag.name = "description";
-        document.head.appendChild(metaDescriptionTag);
+      metaDescriptionTag = document.createElement('meta');
+      metaDescriptionTag.name = "description";
+      document.head.appendChild(metaDescriptionTag);
     }
     metaDescriptionTag.setAttribute('content', metaDesc);
 
@@ -144,7 +144,7 @@ const MyProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const formData = new FormData();
     formData.append('name', name);
 
@@ -153,7 +153,7 @@ const MyProfile = () => {
     } else if (profilePic) {
       formData.append('image', profilePic);
     }
-    
+
     try {
       setNameError('');
       await updateProfile(formData).unwrap();
@@ -188,7 +188,7 @@ const MyProfile = () => {
   const handleSavePreference = async (selectedPreferences) => {
     try {
       await updatePreference(selectedPreferences).unwrap();
-      
+
       const prefValue = selectedPreferences.join(',');
       if (prefValue === 'all') {
         Cookies.remove('userPreference');
@@ -225,7 +225,7 @@ const MyProfile = () => {
 
 
   if (isLoading) return (
-    <div 
+    <div
       className="flex justify-center items-center min-h-screen"
       style={{
         backgroundColor: 'var(--bg-primary)',
@@ -248,7 +248,7 @@ const MyProfile = () => {
       }}
     >
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Card 
+        <Card
           sx={{
             backgroundColor: isDarkMode ? '#301400' : '#FFF5E8',
             border: isDarkMode ? '1px solid #555555' : '2px solid #CA6014',
@@ -259,193 +259,50 @@ const MyProfile = () => {
           }}
         >
           {!isEditing ? (
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: { xs: 'column', sm: 'row' }, 
-              gap: { xs: 3, sm: 6 }, 
+            <Box sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 3, sm: 6 },
               alignItems: 'flex-start',
               justifyContent: 'flex-start',
               width: '100%'
             }}>
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'row', 
-                gap: { xs: 2, sm: 6 }, 
-                flex: 1, 
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: { xs: 2, sm: 6 },
+                flex: 1,
                 width: '100%',
                 alignItems: 'flex-start'
               }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, order: 1, width: { xs: '100px', sm: 'auto' }, flexShrink: 0 }}>
-                <Avatar
-                  src={preview}
-                  alt={data?.user?.username || name}
-                  sx={{ 
-                    width: { xs: 80, sm: 120 }, 
-                    height: { xs: 80, sm: 120 }, 
-                    bgcolor: !preview ? (data?.user?.profile_color || '#2563eb') : 'transparent',
-                    color: !preview ? '#ffffff' : 'transparent',
-                    fontSize: { xs: '2.5rem', sm: '4rem' },
-                    fontWeight: 400,
-                    fontFamily: "'Basic', sans-serif !important",
-                    letterSpacing: '1px',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                  }}
-                >
-                  {!preview && (data?.user?.name || name) && (data?.user?.name || name).charAt(0).toUpperCase()}
-                </Avatar>
-                <Typography
-                  component="button"
-                  onClick={() => setIsEditing(true)}
-                  sx={{
-                    color: isDarkMode ? '#FFEFD9' : '#000000',
-                    fontSize: '0.95rem',
-                    fontWeight: 500,
-                    fontFamily: "'Basic', sans-serif !important",
-                    textDecoration: 'none',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0,
-                    '&:hover': {
-                      textDecoration: 'underline',
-                      color: '#CA6014'
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  Edit Profile
-                </Typography>
-                <Box sx={{ mt: 1.5, display: { xs: 'block', sm: 'none' } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, justifyContent: 'center' }}>
-                    <Typography 
-                      variant="subtitle2" 
-                      sx={{ 
-                        fontWeight: 500, 
-                        color: '#ca6014', 
-                        fontFamily: "'Basic', sans-serif", 
-                        fontSize: '0.95rem',
-                        textDecoration: 'underline',
-                        textUnderlineOffset: '3px',
-                        textDecorationThickness: '1.5px',
-                      }}
-                    >
-                      Preferences
-                    </Typography>
-                    <IconButton 
-                      size="small" 
-                      onClick={() => setIsPreferenceDialogOpen(true)}
-                      sx={{ color: '#CA6014', padding: '2px' }}
-                    >
-                      <EditRounded sx={{ fontSize: '1.1rem' }} />
-                    </IconButton>
-                  </Box>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ justifyContent: 'center' }}>
-                    {(data?.user?.preference || ['all']).map(pref => (
-                      <Chip 
-                        key={pref}
-                        icon={getPreferenceIcon(pref)}
-                        label={preferenceMap[pref] || pref}
-                        size="small"
-                        sx={{ 
-                          bgcolor: isDarkMode ? 'rgba(255, 239, 217, 0.1)' : 'rgba(202, 96, 20, 0.08)', 
-                          color: isDarkMode ? '#FFEFD9' : '#000000', 
-                          fontSize: '0.75rem',
-                          height: '24px',
-                          border: isDarkMode ? '1px solid rgba(255, 239, 217, 0.2)' : '1px solid rgba(202, 96, 20, 0.25)',
-                          '& .MuiChip-label': { px: 0.8, fontFamily: "'Basic', sans-serif" }
-                        }}
-                      />
-                    ))}
-                  </Stack>
-                </Box>
-              </Box>
-
-              <Box sx={{ 
-                flex: 1, 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: { xs: 1.5, sm: 1.5 }, 
-                order: { xs: 2, sm: 2 },
-                alignItems: 'flex-start',
-                textAlign: 'left',
-                width: { xs: 'calc(100% - 116px)', sm: '100%' }
-              }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 0.5, sm: 0.5 }, alignItems: 'flex-start', width: '100%' }}>
-                  <Box>
-                    <Typography 
-                      variant="h4"
-                      sx={{ 
-                        color: isDarkMode ? '#FFEFD9' : '#000000',
-                        fontWeight: 700,
-                        fontFamily: "'Basic', sans-serif !important",
-                        fontSize: { xs: '1.4rem', md: '2.2rem' },
-                        lineHeight: 1.2,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }}
-                    >
-                      {data?.user?.name || name || data?.user?.username}
-                    </Typography>
-                  </Box>
-
-                  <Box>
-                    <Typography 
-                      variant="body1"
-                      sx={{ 
-                        color: isDarkMode ? '#DEDEDE' : '#4B5563',
-                        fontSize: { xs: '0.9rem', md: '1.05rem' },
-                        fontFamily: "'Basic', sans-serif",
-                        fontWeight: 500,
-                        opacity: 0.9
-                      }}
-                    >
-                      {data?.user?.email}
-                    </Typography>
-                  </Box>
-
-                <Box sx={{ 
-                  display: { xs: 'flex', sm: 'none' }, 
-                  flexDirection: 'row', 
-                  alignItems: 'center', 
-                  gap: 3, 
-                  mt: 1.5,
-                  width: '100%'
-                }}>
-                  {data?.user?.hasPassword && (
-                    <Typography
-                      component="button"
-                      onClick={() => setShowPasswordDialog(true)}
-                      sx={{
-                        color: isDarkMode ? '#FFEFD9' : '#000000',
-                        fontSize: '0.9rem',
-                        fontWeight: 400,
-                        fontFamily: "'Basic', sans-serif",
-                        textDecoration: 'none',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 0,
-                        '&:hover': {
-                          textDecoration: 'underline',
-                          color: isDarkMode ? '#FFEFD9' : '#000000',
-                        },
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      Change Password
-                    </Typography>
-                  )}
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, order: 1, width: { xs: '100px', sm: 'auto' }, flexShrink: 0 }}>
+                  <Avatar
+                    src={preview}
+                    alt={data?.user?.username || name}
+                    sx={{
+                      width: { xs: 80, sm: 120 },
+                      height: { xs: 80, sm: 120 },
+                      bgcolor: !preview ? (data?.user?.profile_color || '#2563eb') : 'transparent',
+                      color: !preview ? '#ffffff' : 'transparent',
+                      fontSize: { xs: '2.5rem', sm: '4rem' },
+                      fontWeight: 400,
+                      fontFamily: "'Basic', sans-serif !important",
+                      letterSpacing: '1px',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    {!preview && (data?.user?.name || name) && (data?.user?.name || name).charAt(0).toUpperCase()}
+                  </Avatar>
                   <Typography
                     component="button"
-                    onClick={handleLogout}
+                    onClick={() => setIsEditing(true)}
                     sx={{
-                      color: '#dc3545',
-                      fontSize: '0.9rem',
-                      fontWeight: 400,
-                      fontFamily: "'Basic', sans-serif",
+                      color: isDarkMode ? '#FFEFD9' : '#000000',
+                      fontSize: '0.95rem',
+                      fontWeight: 500,
+                      fontFamily: "'Basic', sans-serif !important",
                       textDecoration: 'none',
                       background: 'none',
                       border: 'none',
@@ -453,93 +310,236 @@ const MyProfile = () => {
                       padding: 0,
                       '&:hover': {
                         textDecoration: 'underline',
-                        color: '#dc3545',
+                        color: '#CA6014'
                       },
                       transition: 'all 0.3s ease'
                     }}
                   >
-                    Logout
+                    Edit Profile
                   </Typography>
-                </Box>
-              </Box>
-
-                <Box sx={{ mt: { xs: 0.5, sm: 1 }, display: { xs: 'none', sm: 'block' } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 0.5, sm: 1.5 }, justifyContent: { xs: 'flex-start', sm: 'flex-start' } }}>
-                    <Typography 
-                      variant="subtitle2" 
-                      sx={{ 
-                        fontWeight: 500, 
-                        color: '#ca6014', 
-                        fontFamily: "'Basic', sans-serif", 
-                        fontSize: '1.05rem',
-                        textDecoration: 'underline',
-                        textUnderlineOffset: '4px',
-                        textDecorationThickness: '1.5px',
-                        letterSpacing: '0.5px'
-                      }}
-                    >
-                      Food Preferences
-                    </Typography>
-                    <IconButton 
-                      size="small" 
-                      onClick={() => setIsPreferenceDialogOpen(true)}
-                      sx={{ color: '#CA6014', padding: '4px' }}
-                    >
-                      <EditRounded fontSize="small" />
-                    </IconButton>
-                  </Box>
-                  <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap sx={{ justifyContent: { xs: 'center', sm: 'flex-start' } }}>
-                    {(data?.user?.preference || ['all']).map(pref => (
-                      <Chip 
-                        key={pref}
-                        icon={getPreferenceIcon(pref)}
-                        label={preferenceMap[pref] || pref}
-                        size="small"
-                        sx={{ 
-                          bgcolor: isDarkMode ? 'rgba(255, 239, 217, 0.1)' : 'rgba(202, 96, 20, 0.08)', 
-                          color: isDarkMode ? '#FFEFD9' : '#000000', 
-                          fontWeight: 400,
-                          fontSize: '0.875rem',
-                          border: isDarkMode ? '1px solid rgba(255, 239, 217, 0.2)' : '1px solid rgba(202, 96, 20, 0.25)',
-                          borderRadius: '6px',
-                          px: 1,
-                          py: 0.5,
-                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                          transition: 'all 0.2s ease',
-                          '&:hover': {
-                            bgcolor: isDarkMode ? 'rgba(255, 239, 217, 0.15)' : 'rgba(202, 96, 20, 0.12)',
-                            borderColor: isDarkMode ? 'rgba(255, 239, 217, 0.3)' : 'rgba(202, 96, 20, 0.4)',
-                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.08)',
-                          },
-                          '& .MuiChip-icon': { 
-                            ml: 0.25, 
-                            mr: 0.25,
-                            ...(pref === 'egg' && { 
-                              color: '#ffb300',
-                              '& svg': {
-                                color: '#ffb300',
-                                fill: '#ffb300'
-                              }
-                            })
-                          },
-                          '& .MuiChip-label': { 
-                            fontFamily: "'Basic', sans-serif",
-                            fontWeight: 400,
-                            px: 0.25
-                          }
+                  <Box sx={{ mt: 1.5, display: { xs: 'block', sm: 'none' } }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, justifyContent: 'center' }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: 500,
+                          color: '#ca6014',
+                          fontFamily: "'Basic', sans-serif",
+                          fontSize: '0.95rem',
+                          textDecoration: 'underline',
+                          textUnderlineOffset: '3px',
+                          textDecorationThickness: '1.5px',
                         }}
-                      />
-                    ))}
-                  </Stack>
+                      >
+                        Preferences
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() => setIsPreferenceDialogOpen(true)}
+                        sx={{ color: '#CA6014', padding: '2px' }}
+                      >
+                        <EditRounded sx={{ fontSize: '1.1rem' }} />
+                      </IconButton>
+                    </Box>
+                    <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
+                      {(Array.isArray(data?.user?.preference) && data.user.preference.length > 0 ? data.user.preference : ['all']).map(pref => (
+                        <Chip
+                          key={pref}
+                          icon={getPreferenceIcon(pref)}
+                          label={preferenceMap[pref] || pref}
+                          size="small"
+                          sx={{
+                            bgcolor: isDarkMode ? 'rgba(255, 239, 217, 0.1)' : 'rgba(202, 96, 20, 0.08)',
+                            color: isDarkMode ? '#FFEFD9' : '#000000',
+                            fontSize: '0.75rem',
+                            height: '24px',
+                            border: isDarkMode ? '1px solid rgba(255, 239, 217, 0.2)' : '1px solid rgba(202, 96, 20, 0.25)',
+                            '& .MuiChip-label': { px: 0.8, fontFamily: "'Basic', sans-serif" }
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                </Box>
+
+                <Box sx={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: { xs: 1.5, sm: 1.5 },
+                  order: { xs: 2, sm: 2 },
+                  alignItems: 'flex-start',
+                  textAlign: 'left',
+                  width: { xs: 'calc(100% - 116px)', sm: '100%' }
+                }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 0.5, sm: 0.5 }, alignItems: 'flex-start', width: '100%' }}>
+                    <Box>
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          color: isDarkMode ? '#FFEFD9' : '#000000',
+                          fontWeight: 700,
+                          fontFamily: "'Basic', sans-serif !important",
+                          fontSize: { xs: '1.4rem', md: '2.2rem' },
+                          lineHeight: 1.2,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
+                        {data?.user?.name || name || data?.user?.username}
+                      </Typography>
+                    </Box>
+
+                    <Box>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          color: isDarkMode ? '#DEDEDE' : '#4B5563',
+                          fontSize: { xs: '0.9rem', md: '1.05rem' },
+                          fontFamily: "'Basic', sans-serif",
+                          fontWeight: 500,
+                          opacity: 0.9
+                        }}
+                      >
+                        {data?.user?.email}
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{
+                      display: { xs: 'flex', sm: 'none' },
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 3,
+                      mt: 1.5,
+                      width: '100%'
+                    }}>
+                      {data?.user?.hasPassword && (
+                        <Typography
+                          component="button"
+                          onClick={() => setShowPasswordDialog(true)}
+                          sx={{
+                            color: isDarkMode ? '#FFEFD9' : '#000000',
+                            fontSize: '0.9rem',
+                            fontWeight: 400,
+                            fontFamily: "'Basic', sans-serif",
+                            textDecoration: 'none',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            '&:hover': {
+                              textDecoration: 'underline',
+                              color: isDarkMode ? '#FFEFD9' : '#000000',
+                            },
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          Change Password
+                        </Typography>
+                      )}
+                      <Typography
+                        component="button"
+                        onClick={handleLogout}
+                        sx={{
+                          color: '#dc3545',
+                          fontSize: '0.9rem',
+                          fontWeight: 400,
+                          fontFamily: "'Basic', sans-serif",
+                          textDecoration: 'none',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: 0,
+                          '&:hover': {
+                            textDecoration: 'underline',
+                            color: '#dc3545',
+                          },
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        Logout
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ mt: { xs: 0.5, sm: 1 }, display: { xs: 'none', sm: 'block' } }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 0.5, sm: 1.5 }, justifyContent: { xs: 'flex-start', sm: 'flex-start' } }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: 500,
+                          color: '#ca6014',
+                          fontFamily: "'Basic', sans-serif",
+                          fontSize: '1.05rem',
+                          textDecoration: 'underline',
+                          textUnderlineOffset: '4px',
+                          textDecorationThickness: '1.5px',
+                          letterSpacing: '0.5px'
+                        }}
+                      >
+                        Food Preferences
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() => setIsPreferenceDialogOpen(true)}
+                        sx={{ color: '#CA6014', padding: '4px' }}
+                      >
+                        <EditRounded fontSize="small" />
+                      </IconButton>
+                    </Box>
+                    <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: 'wrap', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
+                      {(Array.isArray(data?.user?.preference) && data.user.preference.length > 0 ? data.user.preference : ['all']).map(pref => (
+                        <Chip
+                          key={pref}
+                          icon={getPreferenceIcon(pref)}
+                          label={preferenceMap[pref] || pref}
+                          size="small"
+                          sx={{
+                            bgcolor: isDarkMode ? 'rgba(255, 239, 217, 0.1)' : 'rgba(202, 96, 20, 0.08)',
+                            color: isDarkMode ? '#FFEFD9' : '#000000',
+                            fontWeight: 400,
+                            fontSize: '0.875rem',
+                            border: isDarkMode ? '1px solid rgba(255, 239, 217, 0.2)' : '1px solid rgba(202, 96, 20, 0.25)',
+                            borderRadius: '6px',
+                            px: 1,
+                            py: 0.5,
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              bgcolor: isDarkMode ? 'rgba(255, 239, 217, 0.15)' : 'rgba(202, 96, 20, 0.12)',
+                              borderColor: isDarkMode ? 'rgba(255, 239, 217, 0.3)' : 'rgba(202, 96, 20, 0.4)',
+                              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.08)',
+                            },
+                            '& .MuiChip-icon': {
+                              ml: 0.25,
+                              mr: 0.25,
+                              ...(pref === 'egg' && {
+                                color: '#ffb300',
+                                '& svg': {
+                                  color: '#ffb300',
+                                  fill: '#ffb300'
+                                }
+                              })
+                            },
+                            '& .MuiChip-label': {
+                              fontFamily: "'Basic', sans-serif",
+                              fontWeight: 400,
+                              px: 0.25
+                            }
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
                 </Box>
               </Box>
-            </Box>
 
-              <Box sx={{ 
-                display: { xs: 'none', sm: 'flex' }, 
-                flexDirection: 'row', 
-                alignItems: 'center', 
-                gap: 3, 
+              <Box sx={{
+                display: { xs: 'none', sm: 'flex' },
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 3,
                 justifyContent: 'flex-end',
                 order: { xs: 3, sm: 3 },
                 ml: 'auto',
@@ -600,9 +600,9 @@ const MyProfile = () => {
                   <Avatar
                     src={preview}
                     alt={data?.user?.username || name}
-                    sx={{ 
-                      width: 120, 
-                      height: 120, 
+                    sx={{
+                      width: 120,
+                      height: 120,
                       bgcolor: !preview ? (data?.user?.profile_color || '#2563eb') : 'transparent',
                       color: !preview ? '#ffffff' : 'transparent',
                       fontSize: '4rem',
@@ -617,8 +617,8 @@ const MyProfile = () => {
                     {!preview && (data?.user?.name || name) && (data?.user?.name || name).charAt(0).toUpperCase()}
                   </Avatar>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%', maxWidth: '200px' }}>
-                    <Button 
-                      variant="contained" 
+                    <Button
+                      variant="contained"
                       component="label"
                       fullWidth
                       sx={{
@@ -636,7 +636,7 @@ const MyProfile = () => {
                       <input type="file" accept="image/*" hidden onChange={handleFileChange} />
                     </Button>
                     {preview && (
-                      <Button 
+                      <Button
                         variant="outlined"
                         fullWidth
                         onClick={handleRemovePicture}
@@ -764,7 +764,7 @@ const MyProfile = () => {
         </Box>
 
       </div>
-        <Dialog
+      <Dialog
         open={showPasswordDialog}
         onClose={() => {
           setShowPasswordDialog(false);
@@ -779,8 +779,8 @@ const MyProfile = () => {
           }
         }}
       >
-        <DialogTitle 
-          sx={{ 
+        <DialogTitle
+          sx={{
             color: 'var(--text-primary)',
             fontWeight: 600,
             transition: 'color 0.3s ease'
@@ -810,7 +810,7 @@ const MyProfile = () => {
                 err.data.errors.forEach((error) => {
                   toast.error(error);
                 });
-                
+
                 err.data.errors.forEach((error) => {
                   if (error.toLowerCase().includes('current password')) {
                     setFieldError('currentPassword', error);
@@ -850,213 +850,213 @@ const MyProfile = () => {
                 setStatus({ success: true });
               }
             };
-            
+
             return (
-            <Form>
-              <DialogContent className="flex flex-col gap-3 min-w-[300px]">
-                <TextField
-                  label="Current Password"
-                  name="currentPassword"
-                  type={showCurrent ? "text" : "password"}
-                  value={values.currentPassword}
-                  onChange={handleFieldChange}
-                  onBlur={handleBlur}
-                  error={touched.currentPassword && Boolean(errors.currentPassword)}
-                  helperText={touched.currentPassword && errors.currentPassword ? String(errors.currentPassword) : ''}
-                  fullWidth
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      backgroundColor: 'transparent',
-                      color: 'var(--text-primary)',
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#F97C1B',
+              <Form>
+                <DialogContent className="flex flex-col gap-3 min-w-[300px]">
+                  <TextField
+                    label="Current Password"
+                    name="currentPassword"
+                    type={showCurrent ? "text" : "password"}
+                    value={values.currentPassword}
+                    onChange={handleFieldChange}
+                    onBlur={handleBlur}
+                    error={touched.currentPassword && Boolean(errors.currentPassword)}
+                    helperText={touched.currentPassword && errors.currentPassword ? String(errors.currentPassword) : ''}
+                    fullWidth
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: 'transparent',
+                        color: 'var(--text-primary)',
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#F97C1B',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#F97C1B',
+                        }
                       },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#F97C1B',
-                      }
-                    },
-                    '& .MuiInputLabel-root': {
-                      color: 'var(--text-secondary)',
-                      '&.Mui-focused': {
-                        color: '#F97C1B',
-                      }
-                    },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'var(--border-color)',
-                    },
-                    '& .MuiFormHelperText-root': {
-                      color: 'var(--text-secondary)',
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle current password visibility"
-                          onClick={() => setShowCurrent((show) => !show)}
-                          edge="end"
-                          sx={{ color: isDarkMode ? 'var(--text-primary)' : '#000000' }}
-                        >
-                          {showCurrent ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <TextField
-                  label="New Password"
-                  name="newPassword"
-                  type={showNew ? "text" : "password"}
-                  value={values.newPassword}
-                  onChange={handleFieldChange}
-                  onBlur={handleBlur}
-                  error={touched.newPassword && Boolean(errors.newPassword)}
-                  helperText={touched.newPassword && errors.newPassword}
-                  fullWidth
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      backgroundColor: 'var(--card-bg)',
-                      color: 'var(--text-primary)',
-                      border: '1px solid var(--border-color)',
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#F97C1B',
+                      '& .MuiInputLabel-root': {
+                        color: 'var(--text-secondary)',
+                        '&.Mui-focused': {
+                          color: '#F97C1B',
+                        }
                       },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#F97C1B',
-                      }
-                    },
-                    '& .MuiInputLabel-root': {
-                      color: 'var(--text-secondary)',
-                      '&.Mui-focused': {
-                        color: '#F97C1B',
-                      }
-                    },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'var(--border-color)',
-                    },
-                    '& .MuiFormHelperText-root': {
-                      color: 'var(--text-secondary)',
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle new password visibility"
-                          onClick={() => setShowNew((show) => !show)}
-                          edge="end"
-                          sx={{ color: isDarkMode ? 'var(--text-primary)' : '#000000' }}
-                        >
-                          {showNew ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <TextField
-                  label="Confirm New Password"
-                  name="confirmPassword"
-                  type={showConfirm ? "text" : "password"}
-                  value={values.confirmPassword}
-                  onChange={handleFieldChange}
-                  onBlur={handleBlur}
-                  error={touched.confirmPassword && Boolean(errors.confirmPassword)}
-                  helperText={touched.confirmPassword && errors.confirmPassword}
-                  fullWidth
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      backgroundColor: 'var(--card-bg)',
-                      color: 'var(--text-primary)',
-                      border: '1px solid var(--border-color)',
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#F97C1B',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'var(--border-color)',
                       },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#F97C1B',
-                      }
-                    },
-                    '& .MuiInputLabel-root': {
-                      color: 'var(--text-secondary)',
-                      '&.Mui-focused': {
-                        color: '#F97C1B',
-                      }
-                    },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'var(--border-color)',
-                    },
-                    '& .MuiFormHelperText-root': {
-                      color: 'var(--text-secondary)',
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle confirm password visibility"
-                          onClick={() => setShowConfirm((show) => !show)}
-                          edge="end"
-                          sx={{ color: isDarkMode ? 'var(--text-primary)' : '#000000' }}
-                        >
-                          {showConfirm ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button 
-                  onClick={() => setShowPasswordDialog(false)}
-                  sx={{
-                    borderColor: 'var(--btn-secondary)',
-                    color: 'var(--btn-secondary)',
-                    '&:hover': {
-                      borderColor: 'var(--btn-secondary-hover)',
-                      backgroundColor: 'var(--btn-secondary)',
-                      color: '#ffffff',
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  variant="contained" 
-                  disabled={isSubmitting || isChanging}
-                  sx={{
-                    backgroundColor: '#F97C1B',
-                    color: '#FFF8ED',
-                    fontWeight: 'bold',
-                    '&:hover': {
-                      backgroundColor: '#FFB15E',
-                      color: '#3B2200'
-                    },
-                    '&:disabled': {
-                      backgroundColor: 'var(--text-muted)',
-                      color: 'var(--text-secondary)',
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  {isSubmitting || isChanging ? 'Changing...' : 'Change Password'}
-                </Button>
-              </DialogActions>
-            </Form>
+                      '& .MuiFormHelperText-root': {
+                        color: 'var(--text-secondary)',
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle current password visibility"
+                            onClick={() => setShowCurrent((show) => !show)}
+                            edge="end"
+                            sx={{ color: isDarkMode ? 'var(--text-primary)' : '#000000' }}
+                          >
+                            {showCurrent ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    label="New Password"
+                    name="newPassword"
+                    type={showNew ? "text" : "password"}
+                    value={values.newPassword}
+                    onChange={handleFieldChange}
+                    onBlur={handleBlur}
+                    error={touched.newPassword && Boolean(errors.newPassword)}
+                    helperText={touched.newPassword && errors.newPassword}
+                    fullWidth
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: 'var(--card-bg)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--border-color)',
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#F97C1B',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#F97C1B',
+                        }
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'var(--text-secondary)',
+                        '&.Mui-focused': {
+                          color: '#F97C1B',
+                        }
+                      },
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'var(--border-color)',
+                      },
+                      '& .MuiFormHelperText-root': {
+                        color: 'var(--text-secondary)',
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle new password visibility"
+                            onClick={() => setShowNew((show) => !show)}
+                            edge="end"
+                            sx={{ color: isDarkMode ? 'var(--text-primary)' : '#000000' }}
+                          >
+                            {showNew ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    label="Confirm New Password"
+                    name="confirmPassword"
+                    type={showConfirm ? "text" : "password"}
+                    value={values.confirmPassword}
+                    onChange={handleFieldChange}
+                    onBlur={handleBlur}
+                    error={touched.confirmPassword && Boolean(errors.confirmPassword)}
+                    helperText={touched.confirmPassword && errors.confirmPassword}
+                    fullWidth
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: 'var(--card-bg)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--border-color)',
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#F97C1B',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#F97C1B',
+                        }
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'var(--text-secondary)',
+                        '&.Mui-focused': {
+                          color: '#F97C1B',
+                        }
+                      },
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'var(--border-color)',
+                      },
+                      '& .MuiFormHelperText-root': {
+                        color: 'var(--text-secondary)',
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle confirm password visibility"
+                            onClick={() => setShowConfirm((show) => !show)}
+                            edge="end"
+                            sx={{ color: isDarkMode ? 'var(--text-primary)' : '#000000' }}
+                          >
+                            {showConfirm ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button
+                    onClick={() => setShowPasswordDialog(false)}
+                    sx={{
+                      borderColor: 'var(--btn-secondary)',
+                      color: 'var(--btn-secondary)',
+                      '&:hover': {
+                        borderColor: 'var(--btn-secondary-hover)',
+                        backgroundColor: 'var(--btn-secondary)',
+                        color: '#ffffff',
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isSubmitting || isChanging}
+                    sx={{
+                      backgroundColor: '#F97C1B',
+                      color: '#FFF8ED',
+                      fontWeight: 'bold',
+                      '&:hover': {
+                        backgroundColor: '#FFB15E',
+                        color: '#3B2200'
+                      },
+                      '&:disabled': {
+                        backgroundColor: 'var(--text-muted)',
+                        color: 'var(--text-secondary)',
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    {isSubmitting || isChanging ? 'Changing...' : 'Change Password'}
+                  </Button>
+                </DialogActions>
+              </Form>
             );
           }}
         </Formik>
       </Dialog>
 
-      <PreferenceDialog 
+      <PreferenceDialog
         open={isPreferenceDialogOpen}
         onClose={() => setIsPreferenceDialogOpen(false)}
         onSave={handleSavePreference}
         isLoading={isUpdatingPref}
-        initialValues={data?.user?.preference || ['all']}
+        initialValues={Array.isArray(data?.user?.preference) && data.user.preference.length > 0 ? data.user.preference : ['all']}
       />
     </Box>
   );

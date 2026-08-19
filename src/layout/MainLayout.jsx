@@ -141,8 +141,10 @@ const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
                 <div style={{
                   width: '36px',
                   height: '36px',
-                  border: `3px solid ${isDarkMode ? 'rgba(115, 103, 240, 0.2)' : 'rgba(115, 103, 240, 0.15)'}`,
-                  borderTopColor: '#7367f0',
+                  borderTop: '3px solid #7367f0',
+                  borderRight: `3px solid ${isDarkMode ? 'rgba(115, 103, 240, 0.2)' : 'rgba(115, 103, 240, 0.15)'}`,
+                  borderBottom: `3px solid ${isDarkMode ? 'rgba(115, 103, 240, 0.2)' : 'rgba(115, 103, 240, 0.15)'}`,
+                  borderLeft: `3px solid ${isDarkMode ? 'rgba(115, 103, 240, 0.2)' : 'rgba(115, 103, 240, 0.15)'}`,
                   borderRadius: '50%',
                   animation: 'spin 0.8s linear infinite',
                 }} />

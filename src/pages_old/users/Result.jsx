@@ -47,8 +47,9 @@ import RecipeCard from "../../components/common/RecipeCard";
 import { useTheme } from "../../context/ThemeContext";
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
+    setIsMobile(window.innerWidth < 640);
     const handleResize = () => setIsMobile(window.innerWidth < 640);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -463,13 +464,11 @@ const Result = () => {
         processedDataRef.current.add(dataKey);
       } else {
         setAllRecipes((prev) => {
-          const existingIds = new Set(prev.map((recipe) => recipe.id));
-          const newRecipes = searchData.recipes || [];
-          const uniqueNewRecipes = newRecipes.filter(
-            (recipe) => !existingIds.has(recipe.id),
+          const existingIds = new Set(prev.map((r) => r.recipe_id || r.id));
+          const uniqueNew = (searchData.recipes || []).filter(
+            (r) => !existingIds.has(r.recipe_id || r.id)
           );
-          const combinedRecipes = [...prev, ...uniqueNewRecipes];
-          return combinedRecipes;
+          return [...prev, ...uniqueNew];
         });
       }
       const hasMorePages =

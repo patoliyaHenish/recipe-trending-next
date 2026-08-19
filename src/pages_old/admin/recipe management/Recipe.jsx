@@ -191,10 +191,7 @@ const Recipe = () => {
   });
   const [allRecipes, setAllRecipes] = useState([]);
 
-  const [selectionMode, setSelectionMode] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [bulkApproveDialogOpen, setBulkApproveDialogOpen] = useState(false);
-  const [isBulkApproving, setIsBulkApproving] = useState(false);
+
 
   const [deleteId, setDeleteId] = useState(null);
   const [deleteConflict, setDeleteConflict] = useState(null);
@@ -644,42 +641,7 @@ const Recipe = () => {
       setAllRecipes([]);
     }
   }, [data, isFetching]);
-  const handleBulkApprove = async () => {
-    if (!selectedRows.length) return;
-    setIsBulkApproving(true);
-    try {
-      if (!canPublish && !canPublishAll && !isAdmin) {
-        toast.error('You do not have permission to update public approved status');
-        return;
-      }
 
-      const promises = selectedRows.map(row =>
-        updateRecipePublicApprovedStatus({ id: row.recipe_id, public_approved: true }).unwrap()
-      );
-      const responses = await Promise.all(promises);
-
-      const updatedIds = new Set(selectedRows.map(r => r.recipe_id));
-      const firstResponseTime = responses[0]?.public_approved_time;
-
-      setAllRecipes((prev) => prev.map((r) =>
-        updatedIds.has(r.recipe_id)
-          ? {
-            ...r,
-            public_approved: true,
-            public_approved_time: firstResponseTime || new Date().toISOString()
-          }
-          : r
-      ));
-      toast.success(`${selectedRows.length} recipes approved successfully`);
-      setSelectedRows([]);
-      setSelectionMode(false);
-      setBulkApproveDialogOpen(false);
-    } catch (error) {
-      toast.error(error?.data?.message || 'Failed to bulk approve recipes');
-    } finally {
-      setIsBulkApproving(false);
-    }
-  };
 
 
 
@@ -1027,8 +989,7 @@ const Recipe = () => {
         },
         cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
         headerClass: 'ag-header-center',
-        checkboxSelection: selectionMode,
-        headerCheckboxSelection: selectionMode,
+
       },
       {
         headerName: 'Approved Date',
@@ -1489,50 +1450,7 @@ const Recipe = () => {
                     >
                         <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
                     </Button>
-                    {selectionMode && selectedRows.length > 0 && (
-                        <Button
-                            variant="contained"
-                            onClick={() => setBulkApproveDialogOpen(true)}
-                            sx={{
-                                height: '38px',
-                                textTransform: 'none',
-                                px: 3,
-                                fontSize: '15px',
-                                bgcolor: '#10b981',
-                                boxShadow: 'none',
-                                '&:hover': { bgcolor: '#059669', boxShadow: 'none' },
-                            }}
-                        >
-                            Make Public ({selectedRows.length})
-                        </Button>
-                    )}
-                    {(isAdmin || canPublish || canPublishAll) && (
-                        <Button
-                            variant={selectionMode ? "contained" : "outlined"}
-                            onClick={() => {
-                                setSelectionMode(!selectionMode);
-                                if (selectionMode) setSelectedRows([]);
-                            }}
-                            sx={{
-                                height: '38px',
-                                textTransform: 'none',
-                                px: 3,
-                                fontSize: '15px',
-                                borderRadius: '4px',
-                                bgcolor: selectionMode ? '#7367f0' : 'transparent',
-                                color: selectionMode ? '#ffffff' : (isDarkMode ? '#e2e8f0' : '#1e293b'),
-                                borderColor: selectionMode ? 'transparent' : (isDarkMode ? '#404656' : '#d8d6de'),
-                                boxShadow: 'none',
-                                '&:hover': { 
-                                    bgcolor: selectionMode ? '#5e50ee' : (isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'), 
-                                    borderColor: selectionMode ? 'transparent' : (isDarkMode ? '#d0d2d6' : '#4b4b4b'),
-                                    boxShadow: 'none' 
-                                },
-                            }}
-                        >
-                            {selectionMode ? "Cancel Selection" : "Selection Mode"}
-                        </Button>
-                    )}
+
                     {canCreate && (
                         <Button
                             variant="contained"
@@ -2943,14 +2861,7 @@ const Recipe = () => {
                 {(isAdmin || canPublish || canPublishAll) && (
                     <>
                         <TableCell align="center">
-                            {selectionMode && (
-                                <Checkbox
-                                    size="small"
-                                    checked={displayedRecipes.length > 0 && selectedRows.length === displayedRecipes.filter(r => r.is_admin_approved && !r.public_approved).length}
-                                    onChange={handleSelectAll}
-                                    sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}
-                                />
-                            )}
+
                             Public Approved
                         </TableCell>
                         <TableCell align="center" sx={{ minWidth: 190 }}>Approved Date</TableCell>
@@ -3086,14 +2997,7 @@ const Recipe = () => {
                                 <>
                                     <TableCell align="center">
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                                            {selectionMode && recipe.is_admin_approved && !recipe.public_approved && (
-                                                <Checkbox
-                                                    size="small"
-                                                    checked={selectedRows.some(r => r.recipe_id === recipe.recipe_id)}
-                                                    onChange={(e) => handleSelectRow(e, recipe)}
-                                                    sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', p: 0, mr: 1 }}
-                                                />
-                                            )}
+
                                             {recipe.is_admin_approved ? (
                                                 <Switch
                                                     checked={!!recipe.public_approved}
@@ -3394,22 +3298,7 @@ const Recipe = () => {
         const canModifyEdit = isAdmin || canUpdateAll || Number(viewData?.created_by) === Number(user?.user_id);
         const canModifyDelete = isAdmin || canDeleteAll || Number(viewData?.created_by) === Number(user?.user_id);
       
-  const handleSelectAll = (event) => {
-    if (event.target.checked) {
-      const selectable = displayedRecipes.filter(row => row.is_admin_approved && !row.public_approved);
-      setSelectedRows(selectable);
-    } else {
-      setSelectedRows([]);
-    }
-  };
 
-  const handleSelectRow = (event, row) => {
-    if (event.target.checked) {
-      setSelectedRows(prev => [...prev, row]);
-    } else {
-      setSelectedRows(prev => prev.filter(r => r.recipe_id !== row.recipe_id));
-    }
-  };
 
   return (
           <ViewRecipeDialog
@@ -3701,22 +3590,7 @@ const Recipe = () => {
         severity="primary"
       />
 
-      <ConfirmDialog
-        open={bulkApproveDialogOpen}
-        onClose={() => setBulkApproveDialogOpen(false)}
-        onConfirm={handleBulkApprove}
-        title="Bulk Approve Recipes"
-        message={
-          <>
-            Are you sure you want to grant public approval for <strong>{selectedRows.length}</strong> selected recipe{selectedRows.length !== 1 ? 's' : ''}?
-          </>
-        }
-        confirmText="Approve All"
-        cancelText="Cancel"
-        isLoading={isBulkApproving}
-        loadingText="Approving..."
-        severity="success"
-      />
+
 
     </Box>
   );

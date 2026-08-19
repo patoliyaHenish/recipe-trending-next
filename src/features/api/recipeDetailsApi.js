@@ -3,6 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const RECIPE_DETAILS_API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/recipe`;
 
+
 export const recipeDetailsApi = createApi({
     reducerPath: "recipeDetailsApi",
     tagTypes: ["RecipeDetails", "SavedRecipes"],
@@ -58,6 +59,7 @@ export const recipeDetailsApi = createApi({
                     method: 'GET',
                 };
             },
+            providesTags: ['SavedRecipes'],
         }),
         getSubCategoryPage: builder.query({
             query: ({ slug, page = 1, limit = 20, preference = '' }) => {
@@ -70,6 +72,7 @@ export const recipeDetailsApi = createApi({
                     method: 'GET',
                 };
             },
+            providesTags: ['SavedRecipes'],
         }),
         getPublicRecipesByKeywords: builder.query({
             query: ({ keywords, page = 1, limit = 20, preference = '' }) => {
@@ -88,12 +91,14 @@ export const recipeDetailsApi = createApi({
                     method: "GET",
                 };
             },
+            providesTags: ['SavedRecipes'],
         }),
         getRecipeSuggestions: builder.query({
             query: ({ recipeId, limit = 16 }) => ({
                 url: `/get-recipe-suggestions?recipeId=${recipeId}&limit=${limit}`,
                 method: "GET",
             }),
+            providesTags: ['SavedRecipes'],
         }),
     })
 });
@@ -109,5 +114,3 @@ export const {
     useGetPublicRecipesByKeywordsQuery,
     useGetRecipeSuggestionsQuery,
 } = recipeDetailsApi;
-
-

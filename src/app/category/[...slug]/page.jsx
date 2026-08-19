@@ -14,7 +14,8 @@ async function getCategoryDetails(slugArray) {
     // Read user preference from cookies if available
     const cookieStore = await cookies();
     const preference = cookieStore.get('userPreference')?.value || '';
-    
+    const cookieHeader = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join('; ');
+
     const params = new URLSearchParams();
     params.append('page', '1');
     params.append('limit', '12'); // Same as RECIPES_PER_PAGE in CategoryPage
@@ -31,8 +32,12 @@ async function getCategoryDetails(slugArray) {
     }
 
     const res = await fetch(url, {
-      cache: 'no-store'
+      cache: 'no-store',
+      headers: {
+        'Cookie': cookieHeader
+      }
     });
+
     
     if (!res.ok) {
       return null;
