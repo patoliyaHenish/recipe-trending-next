@@ -35,6 +35,13 @@ export const recipeDetailsApi = createApi({
             }),
             providesTags: ["SavedRecipes"],
         }),
+        getSavedRecipeIds: builder.query({
+            query: () => ({
+                url: `/saved-ids`,
+                method: "GET",
+            }),
+            providesTags: ["SavedRecipes"],
+        }),
         getRecipeDetailsBySlug: builder.query({
             query: (slug) => ({
                 url: `/slug/${slug}`,
@@ -107,6 +114,7 @@ export const {
     useGetRecipeDetailsBySlugQuery,
     useLazyGetRecipeNutritionBySlugQuery,
     useGetSavedRecipesQuery,
+    useGetSavedRecipeIdsQuery,
     useSaveRecipeMutation,
     useUnsaveRecipeMutation,
     useGetCategoryPageQuery,

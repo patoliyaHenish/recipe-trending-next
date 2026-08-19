@@ -52,6 +52,7 @@ import { useTheme } from "../../context/ThemeContext";
 import {
   useSaveRecipeMutation,
   useUnsaveRecipeMutation,
+  useGetSavedRecipeIdsQuery,
 } from "../../features/api/recipeDetailsApi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -144,6 +145,17 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
       setIsRecipeSaved(!!recipeData.data.is_saved);
     }
   }, [recipeData?.data?.is_saved]);
+
+  const { data: savedIdsResponse } = useGetSavedRecipeIdsQuery(undefined, { skip: !user });
+  const savedIds = savedIdsResponse?.data || [];
+
+  useEffect(() => {
+    if (user && savedIdsResponse?.success) {
+      setIsRecipeSaved(savedIds.includes(Number(recipe?.recipe_id)));
+    } else if (!user) {
+      setIsRecipeSaved(false);
+    }
+  }, [user, savedIdsResponse, recipe?.recipe_id]);
 
     useEffect(() => {
       if (!recipe) return;

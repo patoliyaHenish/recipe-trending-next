@@ -17,7 +17,7 @@ import noImageFound from '../../assets/no-image-found.png';
 import { useTheme } from '../../context/ThemeContext';
 import { useUser } from '../../context/useUser';
 import AuthModal from '../AuthModal';
-import { useSaveRecipeMutation, useUnsaveRecipeMutation } from '../../features/api/recipeDetailsApi';
+import { useSaveRecipeMutation, useUnsaveRecipeMutation, useGetSavedRecipeIdsQuery } from '../../features/api/recipeDetailsApi';
 import { toast } from '../../utils/toast';
 
 const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRemoveIcon = false, hideBadge = false, hideVideoIcon = false }) => {
@@ -43,6 +43,17 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
   const imageSrc = imgUrl || noImageFound?.src || noImageFound;
   const name = recipe.title || recipe.name;
   const recipeId = recipe.recipe_id || recipe.id;
+
+  const { data: savedIdsResponse } = useGetSavedRecipeIdsQuery(undefined, { skip: !user });
+  const savedIds = savedIdsResponse?.data || [];
+
+  useEffect(() => {
+    if (user && savedIdsResponse?.success) {
+      setIsSaved(savedIds.includes(Number(recipeId)));
+    } else if (!user) {
+      setIsSaved(false);
+    }
+  }, [user, savedIdsResponse, recipeId]);
   const linkPath = `/${recipe.slug}`;
   const category = recipe.sub_category_name || recipe.category_name || recipe.category || 'Quick Snacks';
   const foodTypeRaw = recipe.food_type || recipe.foodType || '';
