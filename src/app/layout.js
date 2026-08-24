@@ -48,6 +48,7 @@ export default async function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <head>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/ .js?client=ca-pub-1177726665963445" crossOrigin="anonymous"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
