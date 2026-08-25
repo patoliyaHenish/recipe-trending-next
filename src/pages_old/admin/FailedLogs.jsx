@@ -396,7 +396,7 @@ const FailedLogs = () => {
                                                 {row.log_type === 'login' ? 'LOGIN' : 'API ERROR'}
                                             </Typography>
                                         </TableCell>
-                                        <TableCell align="center">{row.user_email || 'Guest'}</TableCell>
+                                        <TableCell align="center">{row.user_email || row.details?.email || 'Guest'}</TableCell>
                                         <TableCell align="center">{row.ip_address || '-'}</TableCell>
                                         <TableCell align="center">{row.api_url || '-'}</TableCell>
                                         <TableCell align="center">
@@ -630,7 +630,7 @@ const FailedLogs = () => {
             </Box>
             <Box>
               <Typography variant="caption" sx={{ fontWeight: 600, color: isDarkMode ? '#9ca3af' : '#6b7280', letterSpacing: 0.5, textTransform: 'uppercase' }}>User Email</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e5e7eb' : '#111827' }}>{viewLog?.user_email || 'Guest'}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e5e7eb' : '#111827' }}>{viewLog?.user_email || viewLog?.details?.email || 'Guest'}</Typography>
             </Box>
             <Box>
               <Typography variant="caption" sx={{ fontWeight: 600, color: isDarkMode ? '#9ca3af' : '#6b7280', letterSpacing: 0.5, textTransform: 'uppercase' }}>IP Address</Typography>
