@@ -429,13 +429,15 @@ const AddEditRecipePage = () => {
         if (key === 'image' && finalValues[key]) {
           formData.append(key, finalValues[key]);
         } else if (key === 'ingredients') {
-          const minimalIngredients = finalValues.ingredients.map(ing => ({
-            ingredient_id: ing.ingredient_id || null,
-            quantity: ing.quantity || '',
-            unit_id: ing.unit_id || null,
-            is_free_text: ing.is_free_text || false,
-            free_text: ing.free_text || null
-          }));
+          const minimalIngredients = finalValues.ingredients.map(ing => {
+            if (ing.is_free_text) {
+              return { is_free_text: true, free_text: ing.free_text };
+            }
+            const structured = { ingredient_id: ing.ingredient_id };
+            if (ing.quantity) structured.quantity = ing.quantity;
+            if (ing.unit_id) structured.unit_id = ing.unit_id;
+            return structured;
+          });
           formData.append(key, JSON.stringify(minimalIngredients));
         } else if (key === 'recipe_instructions' || key === 'keywords') {
           formData.append(key, JSON.stringify(finalValues[key]));
