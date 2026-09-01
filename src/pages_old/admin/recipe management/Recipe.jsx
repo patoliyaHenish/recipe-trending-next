@@ -431,7 +431,7 @@ const Recipe = () => {
   const [updateRecipeBadge] = useUpdateRecipeBadgeMutation();
 
   const { data: editRecipeData } = useGetRecipeByIdForAdminQuery(editId, { skip: !editId || isSubmitting });
-  const { data: viewRecipeData, isLoading: isViewLoading, refetch: refetchViewRecipe } = useGetRecipeByIdForAdminQuery(viewId, { skip: !viewId });
+  const { data: viewRecipeData, isFetching: isViewLoading, refetch: refetchViewRecipe } = useGetRecipeByIdForAdminQuery(viewId, { skip: !viewId });
 
   const isAnyDialogOpen = addOpen || !!editId || !!viewId || !!deleteId;
   const pagination = data?.pagination || { total: 0, page: 1, totalPages: 1 };
@@ -3312,6 +3312,7 @@ const Recipe = () => {
               refetch();
               refetchViewRecipe();
             }}
+            onRefresh={() => refetchViewRecipe()}
             canViewAnalytics={canViewAnalytics}
             isAdmin={isAdmin}
             canPublish={canPublish}

@@ -7,6 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import NoteAltOutlinedIcon from '@mui/icons-material/NoteAltOutlined';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTheme } from '../../../context/ThemeContext';
 import { getYouTubeThumbnail, getYouTubeVideoTitle, getImage } from '../../../utils/helper';
 import { AdminApprovedToggle, PublicApprovedToggle } from '../../../components/common';
@@ -30,6 +31,7 @@ const ViewRecipeDialog = ({
   canDelete,
   canViewNotes,
   onViewNotes,
+  onRefresh,
 }) => {
   const { isDarkMode } = useTheme();
   const muiTheme = useMuiTheme();
@@ -56,6 +58,13 @@ const ViewRecipeDialog = ({
     setCopyIngSuccess(true);
     toast.success("Ingredients copied successfully!");
     setTimeout(() => setCopyIngSuccess(false), 2000);
+  };
+
+  const handleRefresh = async () => {
+    if (onRefresh) {
+      await onRefresh();
+      toast.success("Data refreshed successfully");
+    }
   };
 
   const handleCopyVideoUrl = () => {
@@ -193,6 +202,14 @@ const ViewRecipeDialog = ({
             <IconButton onClick={() => { onViewNotes(data?.recipe_id); }} size="small" sx={{ color: isDarkMode ? '#10b981' : '#059669', '&:hover': { color: isDarkMode ? '#34d399' : '#047857', backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } }} title="View Notes">
               <NoteAltOutlinedIcon fontSize="small" />
             </IconButton>
+          )}
+
+          {onRefresh && (
+            <Tooltip title="Refresh Data" arrow>
+              <IconButton onClick={handleRefresh} size="small" sx={{ color: isDarkMode ? '#8b5cf6' : '#7c3aed', '&:hover': { color: isDarkMode ? '#a78bfa' : '#a855f7', backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } }}>
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           )}
 
           {canEdit && onEdit && (
