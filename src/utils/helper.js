@@ -70,9 +70,11 @@ export const createSlug = (text) => {
 };
 
 export const trackPageView = (url) => {
-  window.gtag("config", process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID, {
-    page_path: url,
-  });
+  if (typeof window !== 'undefined' && window.gtag && window.location.hostname.includes('recipetrending.com')) {
+    window.gtag("config", process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID, {
+      page_path: url,
+    });
+  }
 };
 
 export function formatFraction(num) {

@@ -126,7 +126,7 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
     if (pageData) {
       if (isSubCategoryView && pageData.subCategory?.sub_category_id) {
         
-        if (window.gtag) {
+        if (typeof window !== 'undefined' && window.gtag && window.location.hostname.includes('recipetrending.com')) {
         window.gtag("event", "sub_category_view", {
           page_type: "sub_category",
           category_id: pageData.subCategory.category_id,
@@ -137,7 +137,7 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
         }
       } else if (!isSubCategoryView && pageData.category?.category_id) {
         
-        if (window.gtag) {
+        if (typeof window !== 'undefined' && window.gtag && window.location.hostname.includes('recipetrending.com')) {
           window.gtag("event", "category_view", {
             page_type: "category",
             category_id: pageData.category.category_id,
