@@ -85,7 +85,6 @@ import RecipeNotesDialog from './RecipeNotesDialog';
 
 
 
-
 const CustomPickerDay = (props) => {
   const { day, selected, outsideCurrentMonth, rangeStart, rangeEnd, isDarkMode, ...other } = props;
   
@@ -447,6 +446,8 @@ const Recipe = () => {
       setLastUpdatedRecipeId(null);
     }
   }, [viewId, lastUpdatedRecipeId, refetchViewRecipe]);
+
+
 
 
   const filterTimerRef = useRef(null);
@@ -1208,7 +1209,7 @@ const Recipe = () => {
     ] : []),
     {
       headerName: 'Actions',
-      width: canNotesList ? 240 : 210,
+      width: canNotesList ? 280 : 250,
       cellRenderer: (params) => {
         const canModifyEdit = isAdmin || canUpdateAll || Number(params.data.created_by) === Number(user?.user_id);
         const canModifyDelete = isAdmin || canDeleteAll || Number(params.data.created_by) === Number(user?.user_id);
@@ -1262,6 +1263,7 @@ const Recipe = () => {
                 </IconButton>
               </Tooltip>
             )}
+
             {canNotesList && (
               <IconButton
                 onClick={() => setNoteRecipeId(params.data.recipe_id)}
@@ -3364,12 +3366,15 @@ const Recipe = () => {
             onEdit={(recipeId) => { setViewId(null); navigate('/manage-recipes/edit/' + recipeId, { state: { returnTo: location.search } }); }}
             onDelete={(recipeId) => { setViewId(null); setDeleteId(recipeId); }}
             onViewNotes={(recipeId) => { setViewId(null); setNoteRecipeId(recipeId); }}
+
             canEdit={canUpdate && canModifyEdit}
             canDelete={canDelete && canModifyDelete}
             canViewNotes={canNotesList}
           />
         );
       })()}
+      
+
       {deleteId && !deleteConflict && (
         <ConfirmDialog
           open={!!deleteId}

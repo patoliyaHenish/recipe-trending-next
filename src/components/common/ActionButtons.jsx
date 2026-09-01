@@ -9,15 +9,18 @@ const ActionButtons = ({
   onView,
   onEdit,
   onDelete,
+
   disabled = false,
   showView = true,
   showEdit = true,
   showDelete = true,
+
   size = 'small',
   className = '',
   viewTooltip = 'View',
   editTooltip = 'Edit',
   deleteTooltip = 'Delete',
+
 }) => {
   const { isDarkMode } = useTheme();
   return (
@@ -90,6 +93,8 @@ const ActionButtons = ({
           </IconButton>
         </Tooltip>
       )}
+
+
     </div>
   );
 };

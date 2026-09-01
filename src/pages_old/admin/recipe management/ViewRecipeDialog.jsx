@@ -194,6 +194,7 @@ const ViewRecipeDialog = ({
               <NoteAltOutlinedIcon fontSize="small" />
             </IconButton>
           )}
+
           {canEdit && onEdit && (
             <IconButton onClick={() => { onEdit(data?.recipe_id); }} size="small" sx={{ color: isDarkMode ? '#3b82f6' : '#2563eb', '&:hover': { color: isDarkMode ? '#60a5fa' : '#1d4ed8', backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } }} title="Edit">
               <EditIcon fontSize="small" />
@@ -320,33 +321,7 @@ const ViewRecipeDialog = ({
                 )}
               </Box>
 
-              <Box sx={{ mt: 1 }}>
-                  <DetailRow label="Created By">
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
-                        {data.created_by_name || '-'}
-                      </Typography>
-                  </DetailRow>
-              </Box>
 
-              <Box sx={{ mt: 1 }}>
-                  <DetailRow label="Updated By">
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
-                        {data.updated_by_name || '-'}
-                      </Typography>
-                  </DetailRow>
-              </Box>
-
-              <DetailRow label="Created At">
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
-                    {formatDateTime(data.created_at)}
-                  </Typography>
-              </DetailRow>
-
-              <DetailRow label="Updated At">
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
-                    {formatDateTime(data.updated_at)}
-                  </Typography>
-              </DetailRow>
             </Box>
 
             {data.video_url && (
@@ -366,6 +341,19 @@ const ViewRecipeDialog = ({
                           <ContentCopyIcon sx={{ fontSize: '1.1rem' }} />
                         </IconButton>
                       </Tooltip>
+                    </Box>
+                    <Box sx={{ mt: 1, mb: 1 }}>
+                        <img 
+                            src={getYouTubeThumbnail(data.video_url)} 
+                            alt={videoTitle || 'Video Thumbnail'} 
+                            style={{ 
+                                width: '100%', 
+                                maxWidth: '320px', 
+                                borderRadius: '8px',
+                                objectFit: 'cover',
+                                aspectRatio: '16 / 9'
+                            }} 
+                        />
                     </Box>
                     <DetailRow label="Video URL">
                       <a href={data.video_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 underline">
@@ -559,6 +547,45 @@ const ViewRecipeDialog = ({
                 {data.meta_description && <DetailRow label="Meta Description" value={data.meta_description} />}
               </Box>
             )}
+
+            <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)' }, 
+                gap: 3,
+                bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.04)' : 'rgba(115, 103, 240, 0.04)',
+                p: 2.5,
+                borderRadius: 2,
+                border: `1px solid ${isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.12)'}`,
+            }}>
+              <Box sx={{ mt: 1 }}>
+                  <DetailRow label="Created By">
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
+                        {data.created_by_name || '-'}
+                      </Typography>
+                  </DetailRow>
+              </Box>
+
+              <Box sx={{ mt: 1 }}>
+                  <DetailRow label="Updated By">
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
+                        {data.updated_by_name || '-'}
+                      </Typography>
+                  </DetailRow>
+              </Box>
+
+              <DetailRow label="Created At">
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
+                    {formatDateTime(data.created_at)}
+                  </Typography>
+              </DetailRow>
+
+              <DetailRow label="Updated At">
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
+                    {formatDateTime(data.updated_at)}
+                  </Typography>
+              </DetailRow>
+            </Box>
+
 
             <Box sx={{ 
                 display: 'grid', 
