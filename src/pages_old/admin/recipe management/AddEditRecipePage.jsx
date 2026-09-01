@@ -263,8 +263,8 @@ const getValidationSchema = (mode) => Yup.object().shape({
     .nullable()
     .test(
       'fileSize',
-      'File size is too large (max 2MB)',
-      (value) => !value || (value instanceof File && value.size <= 2 * 1024 * 1024)
+      'File size is too large (max 10MB)',
+      (value) => !value || (value instanceof File && value.size <= 10 * 1024 * 1024)
     )
     .test(
       'fileType',
@@ -452,10 +452,12 @@ const AddEditRecipePage = () => {
           deleteDraft();
           navigate(returnToUrl);
         }).catch((err) => {
-          if (err?.data?.errors && Array.isArray(err.data.errors) && err.data.errors.length > 0) {
+          if (err?.status === 413 || err?.originalStatus === 413) {
+            toast.error("Payload Too Large: The uploaded image/data exceeds the server limit.");
+          } else if (err?.data?.errors && Array.isArray(err.data.errors) && err.data.errors.length > 0) {
             err.data.errors.forEach(errorMsg => toast.error(errorMsg));
           } else {
-            toast.error(err?.data?.error || err?.data?.message || "Failed to add recipe");
+            toast.error(err?.data?.error || err?.data?.message || err?.error || "Failed to add recipe");
           }
         });
       } else {
@@ -463,10 +465,12 @@ const AddEditRecipePage = () => {
           toast.success("Recipe updated successfully");
           navigate(returnToUrl);
         }).catch((err) => {
-          if (err?.data?.errors && Array.isArray(err.data.errors) && err.data.errors.length > 0) {
+          if (err?.status === 413 || err?.originalStatus === 413) {
+            toast.error("Payload Too Large: The uploaded image/data exceeds the server limit.");
+          } else if (err?.data?.errors && Array.isArray(err.data.errors) && err.data.errors.length > 0) {
             err.data.errors.forEach(errorMsg => toast.error(errorMsg));
           } else {
-            toast.error(err?.data?.error || err?.data?.message || "Failed to update recipe");
+            toast.error(err?.data?.error || err?.data?.message || err?.error || "Failed to update recipe");
           }
         });
       }

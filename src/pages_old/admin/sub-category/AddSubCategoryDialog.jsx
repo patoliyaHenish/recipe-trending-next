@@ -52,11 +52,11 @@ const getValidationSchema = (mode) => Yup.object().shape({
   image: mode === 'add'
     ? Yup.mixed()
         .required('Image is required')
-        .test('fileSize', 'File size is too large (max 2MB)', (value) => !value || value.size <= 2 * 1024 * 1024)
+        .test('fileSize', 'File size is too large (max 10MB)', (value) => !value || value.size <= 10 * 1024 * 1024)
         .test('fileType', 'Unsupported file format (JPEG, PNG, JPG, WEBP only)', (value) => !value || ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(value.type))
     : Yup.mixed()
         .nullable()
-        .test('fileSize', 'File size is too large (max 2MB)', (value) => !value || value.size <= 2 * 1024 * 1024)
+        .test('fileSize', 'File size is too large (max 10MB)', (value) => !value || value.size <= 10 * 1024 * 1024)
         .test('fileType', 'Unsupported file format (JPEG, PNG, JPG, WEBP only)', (value) => !value || ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(value.type)),
 });
 

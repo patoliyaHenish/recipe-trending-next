@@ -55,7 +55,7 @@ const validationSchema = Yup.object().shape({
     .max(300, 'Description must be at most 300 characters'),
   image: Yup.mixed()
     .nullable()
-    .test('fileSize', 'File size is too large (max 2MB)', (value) => !value || value.size <= 2 * 1024 * 1024)
+    .test('fileSize', 'File size is too large (max 10MB)', (value) => !value || value.size <= 10 * 1024 * 1024)
     .test(
       'fileType',
       'Unsupported file format (JPEG, PNG, JPG, WEBP only)',
@@ -1064,6 +1064,7 @@ const RecipeCategory = () => {
                         freeSolo
                         size="small"
                         options={[10, 25, 50, 100, 150, 200, 250, 300, 350]}
+                        getOptionLabel={(option) => String(option)}
                         value={limit || 10}
                         onChange={(event, newValue) => {
                             if (newValue) {

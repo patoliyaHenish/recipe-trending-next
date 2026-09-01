@@ -43,7 +43,6 @@ const AddFeatureSectionDialog = ({ open, onClose, nextPosition = 0, mode = 'add'
   const [dragActive, setDragActive] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
-
   const validationSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
     type: Yup.string().oneOf(['recipe', 'keyword']).required('Type is required'),
@@ -59,8 +58,8 @@ const AddFeatureSectionDialog = ({ open, onClose, nextPosition = 0, mode = 'add'
       )
       .test(
         'fileSize',
-        'File size is too large (max 2MB)',
-        (value) => !value || !(value instanceof File) || value.size <= 2 * 1024 * 1024
+        'File size is too large (max 10MB)',
+        (value) => !value || !(value instanceof File) || value.size <= 10 * 1024 * 1024
       )
       .test(
         'fileType',
@@ -79,8 +78,6 @@ const AddFeatureSectionDialog = ({ open, onClose, nextPosition = 0, mode = 'add'
       position: mode === 'edit' ? (section?.position ?? nextPosition) : nextPosition,
       is_active: mode === 'edit' ? (section?.is_active ?? false) : false,
     },
-
-
     enableReinitialize: true,
     validationSchema,
     onSubmit: async (values, { resetForm }) => {

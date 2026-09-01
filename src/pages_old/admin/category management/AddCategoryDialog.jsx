@@ -24,63 +24,6 @@ const CategoryDialog = ({
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [createCategory, { isLoading: isCreating }] = useCreateRecipeCategoryMutation();
-
-  const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .required('Category name is required')
-      .min(2, 'Category name must be at least 2 characters')
-      .max(45, 'Category name must be at most 45 characters'),
-    slug: Yup.string()
-      .required('Slug is required')
-      .matches(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens')
-      .max(100, 'Slug must be at most 100 characters'),
-    meta_title: Yup.string()
-      .required('Meta Title is required')
-      .test('min-length', 'Meta title (with suffix) must be at least 30 characters', (val) => (val?.length || 0) + 18 >= 30)
-      .max(47, 'Base Meta title must be at most 47 characters'),
-    meta_description: Yup.string()
-      .required('Meta Description is required')
-      .min(120, 'Meta description must be at least 120 characters')
-      .max(160, 'Meta description must be at most 160 characters'),
-    description: Yup.string()
-      .required('Description is required')
-      .min(150, 'Description must be at least 150 characters')
-      .max(300, 'Description must be at most 300 characters'),
-    image: mode === 'add'
-      ? Yup.mixed()
-          .required('Image is required')
-          .test(
-            'fileSize',
-            'File size is too large (max 2MB)',
-            (value) => !value || value.size <= 2 * 1024 * 1024
-          )
-          .test(
-            'fileType',
-            'Unsupported file format (JPEG, PNG, JPG, WEBP only)',
-            (value) => !value || ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(value.type)
-          )
-      : Yup.mixed()
-          .nullable()
-          .test(
-            'fileSize',
-            'File size is too large (max 2MB)',
-            (value) => !value || value.size <= 2 * 1024 * 1024
-          )
-          .test(
-            'fileType',
-            'Unsupported file format (JPEG, PNG, JPG, WEBP only)',
-            (value) => !value || ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(value.type)
-          )
-  });
-
-  const fileInputRef = useRef();
-  const [dragActive, setDragActive] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
-
-  const [updateRecipeCategoryById, { isLoading: isUpdating }] = useUpdateRecipeCategoryByIdMutation();
-  const [isEditingSlug, setIsEditingSlug] = useState(false);
-  const [isEditingMeta, setIsEditingMeta] = useState(true);
-  const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState(true);
   const [isAutoSyncMetaEnabled, setIsAutoSyncMetaEnabled] = useState(false);
 
   const formik = useFormik({

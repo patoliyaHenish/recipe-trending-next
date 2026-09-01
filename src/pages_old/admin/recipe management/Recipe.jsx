@@ -713,12 +713,14 @@ const Recipe = () => {
       handleAddClose();
       resetForm();
     } catch (error) {
-      if (error?.data?.errors && Array.isArray(error.data.errors) && error.data.errors.length > 0) {
+      if (error?.status === 413 || error?.originalStatus === 413) {
+        toast.error("Payload Too Large: The uploaded image/data exceeds the server limit.");
+      } else if (error?.data?.errors && Array.isArray(error.data.errors) && error.data.errors.length > 0) {
         error.data.errors.forEach(errorMsg => {
           toast.error(errorMsg);
         });
       } else {
-        toast.error(error?.data?.message || 'Failed to add recipe');
+        toast.error(error?.data?.error || error?.data?.message || error?.error || 'Failed to add recipe');
       }
     }
   };
@@ -805,12 +807,14 @@ const Recipe = () => {
       setEditId(null);
       resetForm();
     } catch (error) {
-      if (error?.data?.errors && Array.isArray(error.data.errors) && error.data.errors.length > 0) {
+      if (error?.status === 413 || error?.originalStatus === 413) {
+        toast.error("Payload Too Large: The uploaded image/data exceeds the server limit.");
+      } else if (error?.data?.errors && Array.isArray(error.data.errors) && error.data.errors.length > 0) {
         error.data.errors.forEach(errorMsg => {
           toast.error(errorMsg);
         });
       } else {
-        toast.error(error?.data?.message || 'Failed to update recipe');
+        toast.error(error?.data?.error || error?.data?.message || error?.error || 'Failed to update recipe');
       }
     } finally {
       setIsSubmitting(false);
