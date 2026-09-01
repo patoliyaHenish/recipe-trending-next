@@ -1,18 +1,20 @@
 "use client";
-import React from "react";
-import { Box, Typography } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Typography, Button, CircularProgress } from "@mui/material";
 import { useGetRecipeSuggestionsQuery } from "../features/api/recipeDetailsApi";
 import { useSearchRecipesQuery } from "../features/api/searchApi";
 import RecipeCard from "./common/RecipeCard";
 import RecipeGridSkeleton from "./common/RecipeGridSkeleton";
 
 const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions, initialFallback }) => {
-  const { data: fetchedSuggestions, isLoading: isLoadingSuggestions, isError: isErrorSuggestions } = 
-    useGetRecipeSuggestionsQuery({ recipeId: recipeId, limit: 16 }, { skip: !!initialSuggestions || !recipeId });
+  const [limit, setLimit] = useState(16);
 
-  const suggestionsData = initialSuggestions || fetchedSuggestions;
+  const { data: fetchedSuggestions, isLoading: isLoadingSuggestions, isFetching: isFetchingSuggestions, isError: isErrorSuggestions } = 
+    useGetRecipeSuggestionsQuery({ recipeId: recipeId, limit }, { skip: (!!initialSuggestions && limit === 16) || !recipeId });
+
+  const suggestionsData = (initialSuggestions && limit === 16) ? initialSuggestions : fetchedSuggestions;
   const suggestions = suggestionsData?.data || [];
-  const needFallback = !initialSuggestions && !isLoadingSuggestions && !isErrorSuggestions && suggestions.length === 0;
+  const needFallback = !(initialSuggestions && limit === 16) && !isLoadingSuggestions && !isErrorSuggestions && suggestions.length === 0;
 
   const { data: fetchedFallback, isLoading: isLoadingFallback } = useSearchRecipesQuery(
     { sortBy: 'total_views', limit: 12, preference: foodType },
@@ -22,7 +24,13 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
   const fallbackData = initialFallback || fetchedFallback;
   const fallbackRecipes = fallbackData?.recipes || fallbackData?.data?.recipes || (Array.isArray(fallbackData?.data) ? fallbackData.data : []);
   const displayRecipes = suggestions.length > 0 ? suggestions : fallbackRecipes;
-  const isLoading = (!initialSuggestions && isLoadingSuggestions) || (!initialFallback && needFallback && isLoadingFallback);
+  
+  // isLoading is for the initial load
+  const isLoading = ((!initialSuggestions && limit === 16) && isLoadingSuggestions) || (!initialFallback && needFallback && isLoadingFallback);
+
+  const handleLoadMore = () => {
+    setLimit((prev) => prev + 16);
+  };
 
   if (isLoading) {
     return (
@@ -59,6 +67,54 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
           />
         ))}
       </div>
+      
+      {suggestions.length > 0 && suggestions.length >= limit && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 5, md: 7 }, mb: 4 }}>
+          <Button
+            variant="contained"
+            onClick={handleLoadMore}
+            disabled={isFetchingSuggestions}
+            sx={{
+              px: { xs: 3, md: 5 },
+              py: { xs: 0.8, md: 1.1 },
+              bgcolor: isDarkMode ? 'rgba(202,96,20,0.15)' : '#FEE7D6',
+              color: isDarkMode ? '#FFEFD9' : '#CA6014',
+              border: `1.5px solid ${isDarkMode ? 'rgba(202,96,20,0.4)' : '#CA6014'}`,
+              borderRadius: '8px',
+              fontFamily: "'Basic', sans-serif",
+              fontSize: { xs: '0.9rem', md: '1rem' },
+              fontWeight: 600,
+              letterSpacing: '0.05em',
+              textTransform: 'none',
+              cursor: isFetchingSuggestions ? 'not-allowed' : 'pointer',
+              opacity: isFetchingSuggestions ? 0.7 : 1,
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: isDarkMode ? 'none' : '0 4px 14px rgba(202, 96, 20, 0.15)',
+              '&:hover': {
+                bgcolor: isFetchingSuggestions ? undefined : '#CA6014',
+                color: isFetchingSuggestions ? undefined : '#fff',
+                transform: isFetchingSuggestions ? 'none' : 'translateY(-2px)',
+                boxShadow: isFetchingSuggestions ? 'none' : '0 6px 20px rgba(202, 96, 20, 0.25)',
+              },
+              '&:active': {
+                transform: 'translateY(0)',
+              }
+            }}
+          >
+            {isFetchingSuggestions ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <CircularProgress size={20} sx={{ color: 'inherit' }} />
+                <span>Loading...</span>
+              </Box>
+            ) : (
+              <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+                <span>Load More</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↓</span>
+              </Box>
+            )}
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };
