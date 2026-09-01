@@ -385,6 +385,23 @@ const AssignedRecipes = () => {
                     >
                         Assigned Recipes
                     </Typography>
+                    {data?.unassignedCount !== undefined && (
+                        <Typography
+                            variant="subtitle1"
+                            sx={{
+                                color: isDarkMode ? '#ef4444' : '#ef4444',
+                                fontWeight: 500,
+                                ml: 1,
+                                bgcolor: isDarkMode ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: 1.5,
+                                fontSize: { xs: '0.875rem', sm: '1rem' }
+                            }}
+                        >
+                            {data.unassignedCount} Unassigned
+                        </Typography>
+                    )}
                 </Box>
                 <Box className="flex gap-2 sm:gap-4 flex-wrap items-center">
                     <Button
