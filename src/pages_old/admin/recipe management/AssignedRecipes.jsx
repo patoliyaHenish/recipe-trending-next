@@ -48,6 +48,7 @@ import { useGetAllUsersQuery } from "../../../features/api/authApi";
 import { useGetRecipeCategoryDropdownQuery } from "../../../features/api/categoryApi";
 import AddEditAssignedRecipeDialog from "./AddEditAssignedRecipeDialog";
 import ViewAssignedRecipeDialog from "./ViewAssignedRecipeDialog";
+import AssignRecipesDialog from "./AssignRecipesDialog";
 
 
 const STATUS_OPTIONS = [
@@ -243,6 +244,8 @@ const AssignedRecipes = () => {
     setDialogOpen(true);
   };
 
+  const [openAssignDialog, setOpenAssignDialog] = useState(false);
+
   const handleOpenEdit = useCallback((row) => {
     setEditRow(row);
     setDialogMode("edit");
@@ -403,6 +406,24 @@ const AssignedRecipes = () => {
                     >
                         <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{showFilters ? 'Hide Filters' : 'Show Filters'}</Box>
                     </Button>
+                    {canCreate && (
+                        <Button
+                            variant="contained"
+                            onClick={() => setOpenAssignDialog(true)}
+                            sx={{
+                                height: '38px',
+                                textTransform: 'none',
+                                px: { xs: 2, sm: 3 },
+                                fontSize: { xs: '14px', sm: '16px' },
+                                bgcolor: '#ff9f43',
+                                color: '#fff',
+                                boxShadow: 'none',
+                                '&:hover': { bgcolor: '#e08a38', boxShadow: 'none' },
+                            }}
+                        >
+                            Assign
+                        </Button>
+                    )}
                     {canCreate && (
                         <Button
                             variant="contained"
@@ -1054,6 +1075,11 @@ const AssignedRecipes = () => {
         isLoading={isDeleting}
         loadingText="Deleting..."
         severity="error"
+      />
+
+      <AssignRecipesDialog
+        open={openAssignDialog}
+        onClose={() => setOpenAssignDialog(false)}
       />
     </Box>
   );

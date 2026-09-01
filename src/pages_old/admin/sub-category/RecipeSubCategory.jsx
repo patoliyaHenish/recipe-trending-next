@@ -343,12 +343,7 @@ const RecipeSubCategory = () => {
       field: 'name',
       flex: 1,
       minWidth: 180,
-      cellStyle: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-      },
+      cellStyle: { display: 'flex', alignItems: 'center', textAlign: 'center' },
       headerClass: 'ag-header-center',
     },
     {
@@ -356,35 +351,18 @@ const RecipeSubCategory = () => {
       field: 'category_name',
       flex: 1,
       minWidth: 180,
-      cellStyle: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-      },
+      cellStyle: { display: 'flex', alignItems: 'center', textAlign: 'center' },
       headerClass: 'ag-header-center',
     },
     {
       headerName: 'Image',
       field: 'image',
-      width: 140,
-      cellStyle: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-      },
+      width: 100,
+      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
       headerClass: 'ag-header-center',
       cellRenderer: (params) => {
         const img = params.value;
-        if (!img) {
-          return (
-            <Typography variant="caption" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
-              No Image
-            </Typography>
-          );
-        }
-        return (
+        return img ? (
           <Box
             component="img"
             src={getImage(img)}
@@ -392,6 +370,10 @@ const RecipeSubCategory = () => {
             sx={{ width: 40, height: 40, objectFit: 'cover', borderRadius: '50%' }}
             loading="lazy"
           />
+        ) : (
+          <Typography variant="caption" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
+            No Image
+          </Typography>
         );
       },
     },
@@ -399,24 +381,14 @@ const RecipeSubCategory = () => {
       headerName: 'Recipes',
       field: 'recipe_count',
       width: 100,
-      cellStyle: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-      },
+      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
       headerClass: 'ag-header-center',
     },
     {
       headerName: 'Status',
       field: 'is_active',
       width: 100,
-      cellStyle: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-      },
+      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
       headerClass: 'ag-header-center',
       cellRenderer: (params) => (
         <Typography
@@ -433,12 +405,7 @@ const RecipeSubCategory = () => {
     {
       headerName: 'Actions',
       width: 170,
-      cellStyle: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-      },
+      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
       headerClass: 'ag-header-center',
       hide: !(canView || canUpdate || canDelete),
       cellRenderer: (params) => {
@@ -1012,12 +979,7 @@ const RecipeSubCategory = () => {
                                 color: isDarkMode ? '#b4b7bd' : '#6e6b7b'
                             }
                         }}
-                        ListboxProps={{
-                            sx: {
-                                bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                            }
-                        }}
+
                         slotProps={{
                             paper: {
                                 sx: {

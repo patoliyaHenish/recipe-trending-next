@@ -528,7 +528,7 @@ const IngredientInput = ({ value = [], onChange, disabled = false, dialogOpen, e
               if (newValue && newValue.isAddNew) { handleCreateNewIngredient(); return; }
               if (newValue && typeof newValue === 'object') { handleIngredientSelect(newValue); }
             }}
-            ListboxProps={{ style: { maxHeight: 300, overflow: 'auto' } }}
+            slotProps={{ listbox: { style: { maxHeight: 300, overflow: 'auto' } } }}
             renderInput={(params) => (
               <TextField
                 {...params}

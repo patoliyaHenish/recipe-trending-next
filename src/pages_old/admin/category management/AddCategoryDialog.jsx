@@ -11,6 +11,25 @@ import { useTheme } from '../../../context/ThemeContext';
 import CloseIcon from '@mui/icons-material/Close';
 import { Edit, Save } from "@mui/icons-material";
 
+const validationSchema = Yup.object().shape({
+  name: Yup.string()
+    .required('Category name is required')
+    .min(2, 'Category name must be at least 2 characters')
+    .max(100, 'Category name must be at most 100 characters'),
+  description: Yup.string()
+    .required('Description is required')
+    .min(150, 'Description must be at least 150 characters')
+    .max(300, 'Description must be at most 300 characters'),
+  image: Yup.mixed()
+    .nullable()
+    .test('fileSize', 'File size is too large (max 10MB)', (value) => !value || value.size <= 10 * 1024 * 1024)
+    .test(
+      'fileType',
+      'Unsupported file format (JPEG, PNG, JPG, WEBP only)',
+      (value) => !value || ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(value.type)
+    ),
+});
+
 const CategoryDialog = ({
   open,
   onClose,
@@ -24,7 +43,14 @@ const CategoryDialog = ({
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [createCategory, { isLoading: isCreating }] = useCreateRecipeCategoryMutation();
+  const [updateRecipeCategoryById, { isLoading: isUpdating }] = useUpdateRecipeCategoryByIdMutation();
   const [isAutoSyncMetaEnabled, setIsAutoSyncMetaEnabled] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isEditingSlug, setIsEditingSlug] = useState(false);
+  const [isEditingMeta, setIsEditingMeta] = useState(false);
+  const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef(null);
 
   const formik = useFormik({
     initialValues: {
@@ -172,11 +198,21 @@ const CategoryDialog = ({
     }
   };
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+  };
+
   const handleClose = () => {
     onClose();
     setImagePreview(null);
     setIsFormDirty(false);
-    formik.resetForm({ values: { name: '', description: '', is_active: true, image: null } });
+    formik.resetForm({ values: { name: '', description: '', is_active: true, image: null, slug: '', meta_title: '', meta_description: '' } });
   };
 
   const customInputSx = {
@@ -440,8 +476,8 @@ const CategoryDialog = ({
               />
             </Box>
             <Box
-              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-              onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
               sx={{

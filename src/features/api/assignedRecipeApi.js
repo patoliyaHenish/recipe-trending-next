@@ -19,6 +19,14 @@ export const assignedRecipeApi = createApi({
             }),
             invalidatesTags: ['Refetch_AssignedRecipe'],
         }),
+        batchAssignRecipes: builder.mutation({
+            query: (inputData) => ({
+                url: '/batch-assign',
+                method: 'POST',
+                body: inputData,
+            }),
+            invalidatesTags: ['Refetch_AssignedRecipe'],
+        }),
         getAssignedRecipes: builder.query({
             query: ({ search = '', page = 1, limit = 10, status = '', assignedTo = '', category = '', subCategory = '', created = '' } = {}) => {
                 const params = new URLSearchParams({
@@ -79,6 +87,5 @@ export const {
     useLazyGetAssignedRecipeByIdQuery,
     useUpdateAssignedRecipeByIdMutation,
     useDeleteAssignedRecipeByIdMutation,
+    useBatchAssignRecipesMutation,
 } = assignedRecipeApi;
-
-

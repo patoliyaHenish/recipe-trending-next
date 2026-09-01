@@ -1,4 +1,4 @@
-"use client";
+  "use client";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
@@ -510,74 +510,6 @@ const AddEditAssignedRecipeDialog = ({
             )}
           </Box>
 
-          <Autocomplete
-            fullWidth
-            options={STATUS_OPTIONS}
-            getOptionLabel={(opt) => opt.label || ""}
-            isOptionEqualToValue={(a, b) => a.value === b.value}
-            value={STATUS_OPTIONS.find((s) => s.value === formik.values.status) || STATUS_OPTIONS[0]}
-            onChange={(_, v) => {
-              formik.setFieldValue("status", v ? v.value : "assigned");
-              markDirty();
-            }}
-            disabled={isCreating || isUpdating}
-            disableClearable
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Status"
-                margin="none"
-                error={Boolean(formik.touched.status && formik.errors.status)}
-                helperText={formik.touched.status && formik.errors.status}
-                sx={customInputSx}
-              />
-            )}
-            sx={autocompleteSx}
-            slotProps={autocompleteSlotProps}
-          />
-
-          {canUserList ? (
-            <Autocomplete
-              fullWidth
-              options={users}
-              getOptionLabel={(opt) => (opt && opt.email ? `${opt.name} (${opt.email})` : opt?.name || "")}
-              isOptionEqualToValue={(a, b) => Number(a?.user_id) === Number(b?.user_id)}
-              value={assignUserOption}
-              onChange={(_, v) => {
-                setAssignUserOption(v);
-                formik.setFieldValue("assign_user_id", v?.user_id ?? null);
-                markDirty();
-              }}
-              disabled={isCreating || isUpdating}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Assign to user (optional)"
-                  margin="none"
-                  sx={customInputSx}
-                />
-              )}
-              sx={autocompleteSx}
-              slotProps={autocompleteSlotProps}
-            />
-          ) : (
-            <TextField
-              label="Assign user ID (optional)"
-              type="number"
-              value={formik.values.assign_user_id ?? ""}
-              onChange={(e) => {
-                const v = e.target.value;
-                formik.setFieldValue("assign_user_id", v === "" ? null : Number(v));
-                markDirty();
-              }}
-              onBlur={formik.handleBlur}
-              helperText="Requires user.list to search by name"
-              fullWidth
-              margin="none"
-              disabled={isCreating || isUpdating}
-              sx={customInputSx}
-            />
-          )}
 
           <Autocomplete
             fullWidth

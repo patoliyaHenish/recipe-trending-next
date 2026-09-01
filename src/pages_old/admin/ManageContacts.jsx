@@ -919,12 +919,7 @@ const ManageContacts = () => {
                                     color: isDarkMode ? '#b4b7bd' : '#6e6b7b'
                                 }
                             }}
-                            ListboxProps={{
-                                sx: {
-                                    bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                                    color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                }
-                            }}
+
                             slotProps={{
                                 paper: {
                                     sx: {

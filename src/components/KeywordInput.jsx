@@ -117,9 +117,11 @@ const KeywordInput = ({ value = [], onChange, disabled = false, dialogOpen, erro
           onChange(syncValues);
           setSearchQuery('');
         }}
-        ListboxProps={{
-          onScroll: handleListScroll,
-          style: { maxHeight: 300, overflow: 'auto' },
+        slotProps={{
+          listbox: {
+            onScroll: handleListScroll,
+            style: { maxHeight: 300, overflow: 'auto' },
+          }
         }}
         renderTags={(tagValue, getTagProps) =>
           tagValue.map((option, index) => (
