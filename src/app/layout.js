@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Recipe Trending | Find Your Next Favorite Recipe",
+  title: "Recipe Trending",
   description: "Join Recipe Trending to find amazing recipes based on ingredients you have. Explore diverse cuisines, save your favorites, and enjoy cooking made simple.",
 };
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
