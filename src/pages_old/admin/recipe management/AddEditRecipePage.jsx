@@ -452,16 +452,22 @@ const AddEditRecipePage = () => {
           deleteDraft();
           navigate(returnToUrl);
         }).catch((err) => {
-          const errorMessage = err?.data?.errors?.[0] || err?.data?.error || err?.data?.message || "Failed to add recipe";
-          toast.error(errorMessage);
+          if (err?.data?.errors && Array.isArray(err.data.errors) && err.data.errors.length > 0) {
+            err.data.errors.forEach(errorMsg => toast.error(errorMsg));
+          } else {
+            toast.error(err?.data?.error || err?.data?.message || "Failed to add recipe");
+          }
         });
       } else {
         updateRecipe({ id, inputData: formData }).unwrap().then(() => {
           toast.success("Recipe updated successfully");
           navigate(returnToUrl);
         }).catch((err) => {
-          const errorMessage = err?.data?.errors?.[0] || err?.data?.error || err?.data?.message || "Failed to update recipe";
-          toast.error(errorMessage);
+          if (err?.data?.errors && Array.isArray(err.data.errors) && err.data.errors.length > 0) {
+            err.data.errors.forEach(errorMsg => toast.error(errorMsg));
+          } else {
+            toast.error(err?.data?.error || err?.data?.message || "Failed to update recipe");
+          }
         });
       }
     },
