@@ -404,13 +404,37 @@ const ViewRecipeDialog = ({
                 border: `1px solid ${isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.12)'}`,
             }}>
                <Typography variant="subtitle2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280', fontWeight: 700, mb: -1, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Recipe Instructions</Typography>
-               <Box component="ol" sx={{ pl: 2, m: 0 }}>
-                 {(data.instructions || []).map((instr, idx) => (
-                   <li key={idx} style={{ marginBottom: '0.5rem', color: isDarkMode ? '#d1d5db' : '#374151' }}>
-                      <Typography component="span" variant="body2" sx={{ fontWeight: 600, mr: 1, color: isDarkMode ? '#9ca3af' : '#6b7280' }}>Step {idx + 1}:</Typography>
-                      {instr.instruction_text || instr}
-                   </li>
-                 ))}
+               <Box sx={{ pl: 0, m: 0 }}>
+                 {(() => {
+                   let subStepCounter = 0;
+                   return (data.instructions || []).map((instr, idx) => {
+                     const text = typeof instr === 'string' ? instr : instr?.instruction_text || instr?.text || '';
+                     const isStepHeader = /^step\s+\d+/i.test(text.trim());
+                     
+                     if (isStepHeader) {
+                       subStepCounter = 0;
+                       const match = text.match(/^(step\s+\d+)\s*[:\-–—]?\s*(.*)/i);
+                       const stepLabel = match ? match[1] : text;
+                       const stepTitle = match ? match[2] : '';
+                       return (
+                         <Box key={idx} sx={{ mt: idx === 0 ? 0 : 2, mb: 1, backgroundColor: isDarkMode ? 'rgba(255, 140, 0, 0.1)' : 'rgba(255, 140, 0, 0.07)', borderLeft: '4px solid #FF8C00', borderRadius: '0 6px 6px 0', padding: '6px 12px' }}>
+                           <Typography variant="body2" sx={{ fontWeight: 700, color: isDarkMode ? '#fbbf24' : '#b45309' }}>
+                             <Box component="span" sx={{ textTransform: 'capitalize' }}>{stepLabel}</Box>
+                             {stepTitle && <Box component="span" sx={{ color: isDarkMode ? '#e5e7eb' : '#1e293b', fontWeight: 600, ml: 1 }}>— {stepTitle}</Box>}
+                           </Typography>
+                         </Box>
+                       );
+                     }
+
+                     subStepCounter += 1;
+                     return (
+                       <Box key={idx} sx={{ display: 'flex', mb: 1, color: isDarkMode ? '#d1d5db' : '#374151' }}>
+                         <Typography component="span" variant="body2" sx={{ fontWeight: 600, mr: 1, color: isDarkMode ? '#9ca3af' : '#6b7280', minWidth: '45px' }}>Step {subStepCounter}:</Typography>
+                         <Typography variant="body2">{text}</Typography>
+                       </Box>
+                     );
+                   });
+                 })()}
                </Box>
             </Box>
 
