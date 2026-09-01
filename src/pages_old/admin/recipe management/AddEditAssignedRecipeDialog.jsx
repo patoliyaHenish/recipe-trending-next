@@ -478,6 +478,21 @@ const AddEditAssignedRecipeDialog = ({
                   margin="none"
                   fullWidth
                   sx={customInputSx}
+                  onPaste={(e) => {
+                    if (mode === "add") {
+                      const pastedText = e.clipboardData.getData("text");
+                      if (pastedText && pastedText.includes("\n")) {
+                        e.preventDefault();
+                        const currentNames = formik.values.recipe_name || [];
+                        const pastedNames = pastedText.split(/\r?\n/).map(n => n.trim()).filter(n => n !== "");
+                        const newNames = pastedNames.filter(n => !currentNames.includes(n));
+                        if (newNames.length > 0) {
+                          formik.setFieldValue("recipe_name", [...currentNames, ...newNames]);
+                          markDirty();
+                        }
+                      }
+                    }
+                  }}
                 />
               )}
             />
