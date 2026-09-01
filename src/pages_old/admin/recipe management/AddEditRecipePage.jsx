@@ -678,7 +678,7 @@ const AddEditRecipePage = () => {
     });
   };
 
-const handleImageChange = async (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     formik.setFieldValue('image', file);
     if (file) {
@@ -837,21 +837,21 @@ const handleImageChange = async (e) => {
             variant="outlined"
             startIcon={<ArrowBack />}
             onClick={() => navigate(returnToUrl)}
-          size="medium"
-          sx={{
-            borderColor: isDarkMode ? '#4b5563' : '#d1d5db',
-            color: isDarkMode ? '#e5e7eb' : '#374151',
-            textTransform: 'none',
-            borderRadius: 1,
-            px: 2,
-            transition: 'all 0.2s ease-in-out',
-            '&:hover': {
-              borderColor: isDarkMode ? '#9ca3af' : '#6b7280',
-              backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
-            }
-          }}
-        >
-          Back
+            size="medium"
+            sx={{
+              borderColor: isDarkMode ? '#4b5563' : '#d1d5db',
+              color: isDarkMode ? '#e5e7eb' : '#374151',
+              textTransform: 'none',
+              borderRadius: 1,
+              px: 2,
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                borderColor: isDarkMode ? '#9ca3af' : '#6b7280',
+                backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+              }
+            }}
+          >
+            Back
           </Button>
         </Box>
       </Box>
@@ -1561,7 +1561,7 @@ const handleImageChange = async (e) => {
           </Box>
         </Paper>
       </form>
-      
+
       <ConfirmDialog
         open={isClearDraftDialogOpen}
         onClose={() => setIsClearDraftDialogOpen(false)}
