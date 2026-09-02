@@ -43,6 +43,7 @@ import FilterAltOutlined from '@mui/icons-material/FilterAltOutlined';
 import FilterAltOffOutlined from '@mui/icons-material/FilterAltOffOutlined';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import CloseIcon from '@mui/icons-material/Close';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
@@ -92,6 +93,7 @@ const SearchResults = () => {
     const [customEndDate, setCustomEndDate] = useState(moment());
     
     const [selectedQuery, setSelectedQuery] = useState(null);
+    const [selectedPageInfo, setSelectedPageInfo] = useState(null);
 
     const { data: searchResultsData, isLoading, isFetching, refetch } = useGetSearchResultsQuery({
         period,
@@ -819,6 +821,7 @@ const SearchResults = () => {
                                             '& td': {
                                                 borderColor: isDarkMode ? '#3b4253' : '#ebe9f1',
                                                 color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                py: 1,
                                             }
                                         }}
                                     >
@@ -854,24 +857,19 @@ const SearchResults = () => {
                                                             src={getImage(row.image)}
                                                             alt={row.title || "Recipe"}
                                                             sx={{
-                                                                width: 96,
-                                                                height: 54,
+                                                                width: 64,
+                                                                height: 36,
                                                                 borderRadius: '6px',
                                                                 objectFit: 'cover',
                                                                 flexShrink: 0
                                                             }}
                                                         />
                                                     )}
-                                                    <Box>
-                                                        {row.title && <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>{row.title}</Typography>}
-                                                        <Typography variant="caption" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', wordBreak: 'break-all', display: 'block' }}>{row.dimensionValue}</Typography>
-                                                        {(row.created_at || row.updated_at) && (
-                                                            <Typography variant="caption" sx={{ color: isDarkMode ? '#94a3b8' : '#94a3b8', display: 'block', mt: 0.5, fontSize: '0.7rem' }}>
-                                                                {row.created_at && `Added: ${moment(row.created_at).format('MMM DD, YYYY')}`}
-                                                                {row.created_at && row.updated_at && ' • '}
-                                                                {row.updated_at && `Updated: ${moment(row.updated_at).format('MMM DD, YYYY')}`}
-                                                            </Typography>
-                                                        )}
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        {row.title && <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>{row.title}</Typography>}
+                                                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); setSelectedPageInfo(row); }} sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                                                            <InfoOutlinedIcon fontSize="small" />
+                                                        </IconButton>
                                                     </Box>
                                                 </Box>
                                             ) : (
@@ -1092,6 +1090,62 @@ const SearchResults = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!selectedPageInfo} onClose={() => setSelectedPageInfo(null)} maxWidth="sm" fullWidth>
+                <DialogTitle sx={{ backgroundColor: isDarkMode ? '#283046' : '#ffffff', color: isDarkMode ? '#d0d2d6' : '#1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    Page Details
+                    <IconButton onClick={() => setSelectedPageInfo(null)} size="small" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent sx={{ backgroundColor: isDarkMode ? '#283046' : '#ffffff', padding: 3, pt: 2 }}>
+                    {selectedPageInfo && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {selectedPageInfo.image && (
+                                <Box
+                                    component="img"
+                                    src={getImage(selectedPageInfo.image)}
+                                    alt={selectedPageInfo.title || "Recipe"}
+                                    sx={{
+                                        width: '100%',
+                                        height: 200,
+                                        borderRadius: '8px',
+                                        objectFit: 'cover'
+                                    }}
+                                />
+                            )}
+                            <Box>
+                                <Typography variant="subtitle2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', mb: 0.5 }}>Recipe Name</Typography>
+                                <Typography variant="body1" sx={{ fontWeight: 600, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>{selectedPageInfo.title || 'Unknown'}</Typography>
+                            </Box>
+                            <Box>
+                                <Typography variant="subtitle2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', mb: 0.5 }}>URL</Typography>
+                                <Typography variant="body2" sx={{ color: isDarkMode ? '#d0d2d6' : '#1e293b', wordBreak: 'break-all' }}>
+                                    <a href={selectedPageInfo.dimensionValue} target="_blank" rel="noreferrer" style={{ color: '#7367f0', textDecoration: 'none' }}>
+                                        {selectedPageInfo.dimensionValue}
+                                    </a>
+                                </Typography>
+                            </Box>
+                            {(selectedPageInfo.created_at || selectedPageInfo.updated_at) && (
+                                <Box sx={{ display: 'flex', gap: 4 }}>
+                                    {selectedPageInfo.created_at && (
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', mb: 0.5 }}>Added Date</Typography>
+                                            <Typography variant="body2" sx={{ color: isDarkMode ? '#d0d2d6' : '#1e293b' }}>{moment(selectedPageInfo.created_at).format('MMM DD, YYYY')}</Typography>
+                                        </Box>
+                                    )}
+                                    {selectedPageInfo.updated_at && (
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', mb: 0.5 }}>Updated Date</Typography>
+                                            <Typography variant="body2" sx={{ color: isDarkMode ? '#d0d2d6' : '#1e293b' }}>{moment(selectedPageInfo.updated_at).format('MMM DD, YYYY')}</Typography>
+                                        </Box>
+                                    )}
+                                </Box>
+                            )}
+                        </Box>
                     )}
                 </DialogContent>
             </Dialog>
