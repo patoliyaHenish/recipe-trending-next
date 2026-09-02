@@ -19,8 +19,8 @@ import { useUser } from '../../context/useUser';
 import AuthModal from '../AuthModal';
 import { useSaveRecipeMutation, useUnsaveRecipeMutation, useGetSavedRecipeIdsQuery } from '../../features/api/recipeDetailsApi';
 import { toast } from '../../utils/toast';
-
-const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRemoveIcon = false, hideBadge = false, hideVideoIcon = false }) => {
+import { trackEvent } from '../../utils/analytics';
+const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRemoveIcon = false, hideBadge = false, hideVideoIcon = false, isRelated = false }) => {
   const { isDarkMode } = useTheme();
   const { user } = useUser();
   const router = useRouter();
@@ -164,7 +164,14 @@ const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRem
 
   return (
     <>
-      <Link href={linkPath} className="recipe-card-container" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+      <Link 
+        href={linkPath} 
+        className="recipe-card-container" 
+        style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}
+        onClick={() => {
+          trackEvent(isRelated ? 'related_recipe_click' : 'recipe_click', { recipe_id: recipeId, recipe_name: name });
+        }}
+      >
         <Box
           sx={{
             position: 'relative',

@@ -3,9 +3,12 @@ import React, { useEffect } from 'react'
 import Banner from '../components/home-page/Banner'
 import SearchByIngredients from '../components/home-page/SearchByIngredients'
 import HomeSections from '../components/home-page/HomeSections'
+import { trackEvent } from '../utils/analytics'
 
 const Home = () => {
     useEffect(() => {
+        trackEvent("page_view", { page: "home" });
+
         const title = "Recipe Trending | Find Your Next Favorite Recipe";
         const metaDesc = "Join Recipe Trending to find amazing recipes based on ingredients you have. Explore diverse cuisines, save your favorites, and enjoy cooking made simple.";
         
@@ -37,5 +40,3 @@ const Home = () => {
 }
 
 export default Home
-
-

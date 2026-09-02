@@ -64,6 +64,7 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
             key={recipe.recipe_id || recipe.id}
             recipe={recipe}
             mobileLayout="vertical"
+            isRelated={true}
           />
         ))}
       </div>

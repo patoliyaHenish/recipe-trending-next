@@ -56,6 +56,7 @@ import {
 } from "../../features/api/recipeDetailsApi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { trackEvent } from "../../utils/analytics";
 import { getImage, formatFraction } from "../../utils/helper";
 import Footer from "../../components/Footer";
 import Image from "next/image";
@@ -108,6 +109,23 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
   const [saveRecipe, { isLoading: isSaving }] = useSaveRecipeMutation();
 
   const recipe = recipeData?.data || recipeData;
+
+  useEffect(() => {
+    if (recipe?.recipe_id) {
+        trackEvent("recipe_view", { recipe_id: recipe.recipe_id, recipe_name: recipe.title });
+        
+        const ft = (recipe.food_type || '').toLowerCase();
+        if (ft.includes('veg') || ft.includes('egg') || ft.includes('non')) {
+            trackEvent("food_type", { recipe_id: recipe.recipe_id, food_type: recipe.food_type });
+        }
+
+        if (window.performance) {
+            const timeSincePageLoad = Math.round(performance.now());
+            trackEvent("page_load_time", { page: "recipe_details", load_time_ms: timeSincePageLoad });
+        }
+    }
+  }, [recipe?.recipe_id]);
+
 
   const engagementData = useMemo(() => {
     if (!recipe?.recipe_id) return null;
@@ -308,12 +326,14 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
     try {
       if (isRecipeSaved) {
         const res = await unsaveRecipe(recipe.recipe_id).unwrap();
+        trackEvent("recipe_unsave", { recipe_id: recipe.recipe_id });
         if (res.success) {
           setIsRecipeSaved(false);
         }
         toast.success(res.message || "Recipe removed from saved!");
       } else {
         const res = await saveRecipe(recipe.recipe_id).unwrap();
+        trackEvent("recipe_save", { recipe_id: recipe.recipe_id });
         if (res.success) {
           setIsRecipeSaved(true);
         }
@@ -344,11 +364,11 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
 
               if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({
-                  title: recipeTitle,
-                  text: messageText,
-                  url: recipeUrl,
-                  files: [file],
+                  title: `Check out ${recipe?.title} on Recipe Trending`,
+                  text: `I found this amazing recipe for ${recipe?.title}!`,
+                  files: [file]
                 });
+                trackEvent("recipe_share", { recipe_id: recipe.recipe_id, method: "native_with_image" });
                 return;
               }
             }
@@ -359,12 +379,14 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
 
         // Fallback to standard link share
         await navigator.share({
-          title: recipeTitle,
-          text: messageText,
-          url: recipeUrl,
+          title: `Check out ${recipe?.title} on Recipe Trending`,
+          text: `I found this amazing recipe for ${recipe?.title}!`,
+          url: window.location.href,
         });
+        trackEvent("recipe_share", { recipe_id: recipe.recipe_id, method: "native_link" });
       } else {
         await navigator.clipboard.writeText(recipeUrl);
+        trackEvent("recipe_share", { recipe_id: recipe.recipe_id, method: "clipboard" });
         toast.success("Link copied to clipboard!", {
           position: "bottom-center",
           autoClose: 2000,

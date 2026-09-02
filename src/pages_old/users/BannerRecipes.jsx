@@ -14,6 +14,7 @@ import noImageFound from '../../assets/no-image-found.png';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { toast } from '../../utils/toast';
+import { trackEvent } from '../../utils/analytics';
 
 const RECIPES_PER_PAGE    = 12;
 const COLLECTION_PER_PAGE = 12;
@@ -54,6 +55,7 @@ const BannerRecipes = ({ bannerTitle, bannerImage, bannerKeywords }) => {
 
   useEffect(() => {
     document.title = `${pageTitle} | Recipe Trending`;
+    trackEvent("page_view", { page: "recipe_spotlight", title: pageTitle });
     
     // SEO & Social Sharing Meta Tags
     const imgVal = bannerImage || section?.image || section?.background_image || navState?.image;

@@ -14,6 +14,7 @@ import { getImage } from '../../utils/helper';
 import noImageFound from '../../assets/no-image-found.png';
 import Cookies from 'js-cookie';
 import useTrackEngagement from '../../hooks/useTrackEngagement';
+import { trackEvent } from '../../utils/analytics';
 
 const RECIPES_PER_PAGE = 12;
 
@@ -125,11 +126,15 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
   useEffect(() => {
     if (pageData) {
       if (isSubCategoryView && pageData.subCategory?.sub_category_id) {
-        
-
+        trackEvent('sub_category_view', { 
+            sub_category_id: pageData.subCategory.sub_category_id, 
+            sub_category_name: pageData.subCategory.name 
+        });
       } else if (!isSubCategoryView && pageData.category?.category_id) {
-        
-
+        trackEvent('category_view', { 
+            category_id: pageData.category.category_id, 
+            category_name: pageData.category.name 
+        });
       }
     }
   }, [pageData, isSubCategoryView]);

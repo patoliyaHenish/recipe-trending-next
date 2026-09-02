@@ -45,6 +45,7 @@ import {
 import RecipeGridSkeleton from "../../components/common/RecipeGridSkeleton";
 import RecipeCard from "../../components/common/RecipeCard";
 import { useTheme } from "../../context/ThemeContext";
+import { trackEvent } from "../../utils/analytics";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -178,16 +179,19 @@ const Result = () => {
   }, [searchParams, router, pathname]);
 
   const handleFilterChange = useCallback((key, value) => {
-    if (key === 'preference') {
-      if (value) {
-        Cookies.set('userPreference', value, { expires: 365 });
-      } else {
-        Cookies.remove('userPreference');
-      }
-      window.dispatchEvent(new Event('userPreferenceChanged'));
+    if (key === "preference" && value) {
+        trackEvent("food_type", { filter_value: value });
     }
-    setFilters(prev => {
+    setFilters((prev) => {
       const nextFilters = { ...prev, [key]: value };
+      if (key === 'preference') {
+        if (value) {
+          Cookies.set('userPreference', value, { expires: 365 });
+        } else {
+          Cookies.remove('userPreference');
+        }
+        window.dispatchEvent(new Event('userPreferenceChanged'));
+      }
       updateSearchParams({ [key]: value, page: 1 });
       setPage(1);
       setAllRecipes([]);
@@ -453,6 +457,12 @@ const Result = () => {
 
   useEffect(() => {
     if (searchData && searchData.pagination?.currentPage === page) {
+      if (page === 1) {
+          trackEvent("search_query", { query: executedSearchQuery || "empty" });
+          if (!searchData.recipes || searchData.recipes.length === 0) {
+              trackEvent("search_no_result", { query: executedSearchQuery || "empty" });
+          }
+      }
       const dataKey = `${searchData.pagination.currentPage}-${searchData.recipes?.length || 0}`;
       if (processedDataRef.current.has(dataKey)) {
         return;
