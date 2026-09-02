@@ -33,21 +33,8 @@ const useTrackEngagement = (pageData) => {
 
         return () => {
             window.removeEventListener('scroll', calculateScrollDepth);
-
-            const timeSpent = Math.max(0, Math.round((Date.now() - startTimeRef.current) / 1000));
-            const finalScrollDepth = scrollDepthRef.current;
-
-            if (typeof window !== 'undefined' && window.gtag && window.location.hostname.includes('recipetrending.com') && pageData) {
-                window.gtag("event", "content_engagement", {
-                    ...pageData,
-                    scroll_depth: finalScrollDepth,
-                    reading_time: timeSpent
-                });
-            }
         };
     }, [pathname, pageData]);
 };
 
 export default useTrackEngagement;
-
-

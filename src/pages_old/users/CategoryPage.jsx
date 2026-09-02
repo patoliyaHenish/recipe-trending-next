@@ -126,24 +126,10 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
     if (pageData) {
       if (isSubCategoryView && pageData.subCategory?.sub_category_id) {
         
-        if (typeof window !== 'undefined' && window.gtag && window.location.hostname.includes('recipetrending.com')) {
-        window.gtag("event", "sub_category_view", {
-          page_type: "sub_category",
-          category_id: pageData.subCategory.category_id,
-          category_name: pageData.subCategory.category_name,
-          sub_category_id: pageData.subCategory.sub_category_id,
-          sub_category_name: pageData.subCategory.name,
-        });
-        }
+
       } else if (!isSubCategoryView && pageData.category?.category_id) {
         
-        if (typeof window !== 'undefined' && window.gtag && window.location.hostname.includes('recipetrending.com')) {
-          window.gtag("event", "category_view", {
-            page_type: "category",
-            category_id: pageData.category.category_id,
-            category_name: pageData.category.name,
-          });
-        }
+
       }
     }
   }, [pageData, isSubCategoryView]);

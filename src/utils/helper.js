@@ -69,13 +69,6 @@ export const createSlug = (text) => {
     .replace(/--+/g, "-");
 };
 
-export const trackPageView = (url) => {
-  if (typeof window !== 'undefined' && window.gtag && window.location.hostname.includes('recipetrending.com')) {
-    window.gtag("config", process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID, {
-      page_path: url,
-    });
-  }
-};
 
 export function formatFraction(num) {
   if (num === null || num === undefined || num === '') return '';
