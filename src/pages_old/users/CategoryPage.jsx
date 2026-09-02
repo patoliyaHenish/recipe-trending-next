@@ -116,8 +116,6 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
   const responseData = skipQuery ? initialData : (isSubCategoryView ? subCategoryData : categoryData);
 
   const isInitialLoading = (isLoading || isFetching) && allRecipes.length === 0 && page === 1;
-  
-  console.log("SSR DEBUG:", { skipQuery, isLoading, isFetching, isError, isInitialLoading, allRecipesLength: allRecipes.length, pageDataExists: !!responseData?.data, initialDataExists: !!initialData });
 
   const pageData = responseData?.data || initialPageData;
   const showSubCategories = !isSubCategoryView && pageData?.type === 'sub_categories';
