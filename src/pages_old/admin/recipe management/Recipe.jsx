@@ -3042,7 +3042,7 @@ const Recipe = () => {
                             <TableCell align="center">
                                 {recipe.is_admin_approved && recipe.admin_approved_time ? (
                                     <span style={{ color: isDarkMode ? '#f9a8d4' : '#db2777', fontWeight: 500 }}>
-                                        {new Date(recipe.admin_approved_time).toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}
+                                        {new Date(recipe.admin_approved_time).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
                                     </span>
                                 ) : '-'}
                             </TableCell>
@@ -3050,7 +3050,7 @@ const Recipe = () => {
                             <TableCell align="center">
                                 {recipe.created_at ? (
                                     <span style={{ color: isDarkMode ? '#9ca3af' : '#4b5563', fontWeight: 500 }}>
-                                        {new Date(recipe.created_at).toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}
+                                        {new Date(recipe.created_at).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
                                     </span>
                                 ) : '-'}
                             </TableCell>
@@ -3058,7 +3058,7 @@ const Recipe = () => {
                             <TableCell align="center">
                                 {recipe.updated_at ? (
                                     <span style={{ color: isDarkMode ? '#9ca3af' : '#4b5563', fontWeight: 500 }}>
-                                        {new Date(recipe.updated_at).toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}
+                                        {new Date(recipe.updated_at).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
                                     </span>
                                 ) : '-'}
                             </TableCell>
