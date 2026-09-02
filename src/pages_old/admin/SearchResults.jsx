@@ -995,8 +995,8 @@ const SearchResults = () => {
                     ) : relatedPages.length === 0 ? (
                         <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', textAlign: 'center', py: 4 }}>No related pages found.</Typography>
                     ) : (
-                        <TableContainer component={Paper} elevation={0} sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
-                            <Table size="small">
+                        <TableContainer component={Paper} elevation={0} sx={{ backgroundColor: 'transparent', boxShadow: 'none', overflowX: 'auto' }}>
+                            <Table size="small" sx={{ minWidth: 450 }}>
                                 <TableHead>
                                     <TableRow>
                                         <TableCell sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>Page</TableCell>
