@@ -9,7 +9,7 @@ import { ThemeProvider } from "../context/ThemeContext";
 import StoreProvider from "../redux/StoreProvider";
 import { UserProvider } from "../context/UserContext";
 import MainLayout from "../layout/MainLayout";
-
+import Analytics from "../components/Analytics";
 import ProgressBar from "../components/ProgressBar";
 import { MuiToastContainer } from "../utils/toast";
 
@@ -49,17 +49,7 @@ export default async function RootLayout({ children }) {
     >
       <head>
         {process.env.NEXT_GOOGLE_ANALYTICS_ID && process.env.NODE_ENV === 'production' && (
-          <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_GOOGLE_ANALYTICS_ID}`}></script>
-            <script dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${process.env.NEXT_GOOGLE_ANALYTICS_ID}');
-              `
-            }} />
-          </>
+           <Analytics gaId={process.env.NEXT_GOOGLE_ANALYTICS_ID} />
         )}
         {process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT_ID && process.env.NODE_ENV === 'production' && (
           <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT_ID}`} crossOrigin="anonymous"></script>
