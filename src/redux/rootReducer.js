@@ -28,6 +28,7 @@ import { paymentSlipApi } from "../features/api/paymentSlipApi";
 import { assignedRecipeApi } from "../features/api/assignedRecipeApi";
 import { notificationApi } from "../features/api/notificationApi";
 import { dashboardApi } from "../features/api/dashboardApi";
+import { analyticsApi } from "../features/api/analyticsApi";
 
 const rootReducer = combineReducers({
     [authApi.reducerPath]: authApi.reducer,
@@ -57,6 +58,7 @@ const rootReducer = combineReducers({
     [assignedRecipeApi.reducerPath]: assignedRecipeApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
+    [analyticsApi.reducerPath]: analyticsApi.reducer,
     auth: authReducer,
     global: globalReducer,
 })

@@ -27,6 +27,7 @@ import { paymentSlipApi } from "../features/api/paymentSlipApi";
 import { assignedRecipeApi } from "../features/api/assignedRecipeApi";
 import { notificationApi } from "../features/api/notificationApi";
 import { dashboardApi } from "../features/api/dashboardApi";
+import { analyticsApi } from "../features/api/analyticsApi";
 
 
 import { rtkQueryErrorMiddleware } from "./middleware";
@@ -63,6 +64,7 @@ export const appStore = configureStore({
             assignedRecipeApi.middleware,
             notificationApi.middleware,
             dashboardApi.middleware,
+            analyticsApi.middleware,
         )
 
 });

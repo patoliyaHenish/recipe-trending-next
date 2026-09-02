@@ -45,8 +45,9 @@ const adminLinks = [
   {
     label: 'Analytics',
     icon: <Analytics />,
-    permission: ['engagement.analytics', 'search_failed.list', 'inquiry.list'],
+    permission: ['engagement.analytics', 'search_console.view', 'search_failed.list', 'inquiry.list'],
     subLinks: [
+      { label: 'Search Console', icon: <Analytics />, to: '/admin/search-results', permission: 'search_console.view' },
       { label: 'Failed Searches', icon: <Analytics />, to: '/admin/failed-searches', permission: 'search_failed.list' },
       { label: 'Inquiries', icon: <Message />, to: '/admin/manage-contacts', permission: 'inquiry.list' },
     ],
