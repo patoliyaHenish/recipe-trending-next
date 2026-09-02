@@ -735,6 +735,7 @@ const SearchResults = () => {
                                 }
                             }}>
                                 <TableCell align="center" width={70}>#</TableCell>
+                                {dimension === 'country' && <TableCell align="center" width={70}>FLAG</TableCell>}
                                 <TableCell sortDirection={sortConfig.key === 'dimensionValue' ? sortConfig.direction : false}>
                                     <TableSortLabel
                                         active={sortConfig.key === 'dimensionValue'}
@@ -826,10 +827,58 @@ const SearchResults = () => {
                                                 {index + 1}
                                             </Typography>
                                         </TableCell>
+                                        {dimension === 'country' && (
+                                            <TableCell align="center">
+                                                {(() => {
+                                                    const alpha2 = countries.alpha3ToAlpha2(row.dimensionValue.toUpperCase());
+                                                    if (alpha2) {
+                                                        return (
+                                                            <Box 
+                                                                component="img" 
+                                                                src={`https://flagcdn.com/w40/${alpha2.toLowerCase()}.png`} 
+                                                                alt={alpha2}
+                                                                sx={{ width: 28, height: 20, objectFit: 'cover', borderRadius: '2px', display: 'inline-block' }}
+                                                            />
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
+                                            </TableCell>
+                                        )}
                                         <TableCell>
-                                            <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: dimension === 'page' ? 'monospace' : 'inherit' }}>
-                                                {dimension === 'country' ? (countries.getName(row.dimensionValue.toUpperCase(), 'en') || row.dimensionValue) : row.dimensionValue}
-                                            </Typography>
+                                            {dimension === 'page' ? (
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                    {row.image && (
+                                                        <Box
+                                                            component="img"
+                                                            src={getImage(row.image)}
+                                                            alt={row.title || "Recipe"}
+                                                            sx={{
+                                                                width: 96,
+                                                                height: 54,
+                                                                borderRadius: '6px',
+                                                                objectFit: 'cover',
+                                                                flexShrink: 0
+                                                            }}
+                                                        />
+                                                    )}
+                                                    <Box>
+                                                        {row.title && <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>{row.title}</Typography>}
+                                                        <Typography variant="caption" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', wordBreak: 'break-all', display: 'block' }}>{row.dimensionValue}</Typography>
+                                                        {(row.created_at || row.updated_at) && (
+                                                            <Typography variant="caption" sx={{ color: isDarkMode ? '#94a3b8' : '#94a3b8', display: 'block', mt: 0.5, fontSize: '0.7rem' }}>
+                                                                {row.created_at && `Added: ${moment(row.created_at).format('MMM DD, YYYY')}`}
+                                                                {row.created_at && row.updated_at && ' • '}
+                                                                {row.updated_at && `Updated: ${moment(row.updated_at).format('MMM DD, YYYY')}`}
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                </Box>
+                                            ) : (
+                                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                                    {dimension === 'country' ? (countries.getName(row.dimensionValue.toUpperCase(), 'en') || row.dimensionValue) : row.dimensionValue}
+                                                </Typography>
+                                            )}
                                         </TableCell>
                                         <TableCell align="center">
                                             <Typography variant="body2">{row.clicks.toLocaleString()}</Typography>
