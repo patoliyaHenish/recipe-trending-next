@@ -12,10 +12,10 @@ export const analyticsApi = createApi({
     tagTypes: ['Analytics'],
     endpoints: (builder) => ({
         getSearchResults: builder.query({
-            query: ({ period = '7d', dimension = 'query', startDate, endDate }) => ({
+            query: ({ period = '7d', dimension = 'query', startDate, endDate, queryFilter }) => ({
                 url: '/analytics/search-results',
                 method: 'GET',
-                params: { period, dimension, startDate, endDate },
+                params: { period, dimension, startDate, endDate, queryFilter },
             }),
             providesTags: ['Analytics'],
         }),

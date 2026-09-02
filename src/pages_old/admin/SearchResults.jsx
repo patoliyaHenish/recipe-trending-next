@@ -26,7 +26,11 @@ import {
     Tooltip,
     Grid,
     Card,
-    CardContent
+    CardContent,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 import MouseOutlinedIcon from '@mui/icons-material/MouseOutlined';
@@ -38,12 +42,14 @@ import WebOutlinedIcon from '@mui/icons-material/WebOutlined';
 import FilterAltOutlined from '@mui/icons-material/FilterAltOutlined';
 import FilterAltOffOutlined from '@mui/icons-material/FilterAltOffOutlined';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
+import CloseIcon from '@mui/icons-material/Close';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import moment from 'moment';
 import { useTheme } from '../../context/ThemeContext';
 import { toast } from '../../utils/toast';
+import { getImage } from '../../utils/helper';
 import { useGetSearchResultsQuery } from '../../features/api/analyticsApi';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -84,6 +90,8 @@ const SearchResults = () => {
 
     const [customStartDate, setCustomStartDate] = useState(moment().subtract(7, 'days'));
     const [customEndDate, setCustomEndDate] = useState(moment());
+    
+    const [selectedQuery, setSelectedQuery] = useState(null);
 
     const { data: searchResultsData, isLoading, isFetching, refetch } = useGetSearchResultsQuery({
         period,
@@ -91,6 +99,18 @@ const SearchResults = () => {
         startDate: period === 'custom' && customStartDate ? customStartDate.format('YYYY-MM-DD') : undefined,
         endDate: period === 'custom' && customEndDate ? customEndDate.format('YYYY-MM-DD') : undefined,
     });
+
+    const { data: relatedPagesResponse, isFetching: isFetchingRelated } = useGetSearchResultsQuery({
+        period,
+        dimension: 'page',
+        startDate: period === 'custom' && customStartDate ? customStartDate.format('YYYY-MM-DD') : undefined,
+        endDate: period === 'custom' && customEndDate ? customEndDate.format('YYYY-MM-DD') : undefined,
+        queryFilter: selectedQuery,
+    }, { skip: !selectedQuery });
+
+    const relatedPages = useMemo(() => {
+        return relatedPagesResponse?.data || [];
+    }, [relatedPagesResponse]);
 
     const handleRefresh = async () => {
         try {
@@ -784,8 +804,14 @@ const SearchResults = () => {
                                 results.map((row, index) => (
                                     <TableRow
                                         key={index}
+                                        onClick={() => {
+                                            if (dimension === 'query') {
+                                                setSelectedQuery(row.dimensionValue);
+                                            }
+                                        }}
                                         sx={{
                                             'height': '60px',
+                                            cursor: dimension === 'query' ? 'pointer' : 'default',
                                             '&:hover': {
                                                 backgroundColor: isDarkMode ? '#2f3851' : '#f8f8f8',
                                             },
@@ -953,6 +979,73 @@ const SearchResults = () => {
                     </>
                 )}
             </Box>
+
+            <Dialog open={!!selectedQuery} onClose={() => setSelectedQuery(null)} maxWidth="md" fullWidth>
+                <DialogTitle sx={{ backgroundColor: isDarkMode ? '#283046' : '#ffffff', color: isDarkMode ? '#d0d2d6' : '#1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    Pages for "{selectedQuery}"
+                    <IconButton onClick={() => setSelectedQuery(null)} size="small" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent sx={{ backgroundColor: isDarkMode ? '#283046' : '#ffffff', padding: 3, pt: 1 }}>
+                    {isFetchingRelated ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                            <CircularProgress size={30} sx={{ color: '#7367f0' }} />
+                        </Box>
+                    ) : relatedPages.length === 0 ? (
+                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', textAlign: 'center', py: 4 }}>No related pages found.</Typography>
+                    ) : (
+                        <TableContainer component={Paper} elevation={0} sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>Page</TableCell>
+                                        <TableCell align="center" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>Clicks</TableCell>
+                                        <TableCell align="center" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>Impressions</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {relatedPages.map((rp, i) => (
+                                        <TableRow key={i} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                            <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#1e293b', borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`, maxWidth: 400 }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                    {rp.image && (
+                                                        <Box
+                                                            component="img"
+                                                            src={getImage(rp.image)}
+                                                            alt={rp.title || "Recipe"}
+                                                            sx={{
+                                                                width: 96,
+                                                                height: 54,
+                                                                borderRadius: '6px',
+                                                                objectFit: 'cover',
+                                                                flexShrink: 0
+                                                            }}
+                                                        />
+                                                    )}
+                                                    <Box>
+                                                        {rp.title && <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>{rp.title}</Typography>}
+                                                        <Typography variant="caption" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', wordBreak: 'break-all', display: 'block' }}>{rp.dimensionValue}</Typography>
+                                                        {(rp.created_at || rp.updated_at) && (
+                                                            <Typography variant="caption" sx={{ color: isDarkMode ? '#94a3b8' : '#94a3b8', display: 'block', mt: 0.5, fontSize: '0.7rem' }}>
+                                                                {rp.created_at && `Added: ${moment(rp.created_at).format('MMM DD, YYYY')}`}
+                                                                {rp.created_at && rp.updated_at && ' • '}
+                                                                {rp.updated_at && `Updated: ${moment(rp.updated_at).format('MMM DD, YYYY')}`}
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell align="center" sx={{ color: isDarkMode ? '#d0d2d6' : '#1e293b', borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>{rp.clicks.toLocaleString()}</TableCell>
+                                            <TableCell align="center" sx={{ color: isDarkMode ? '#d0d2d6' : '#1e293b', borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>{rp.impressions.toLocaleString()}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+                </DialogContent>
+            </Dialog>
         </Box>
     );
 };
