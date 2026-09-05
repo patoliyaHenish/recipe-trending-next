@@ -55,7 +55,7 @@ const BannerRecipes = ({ bannerTitle, bannerImage, bannerKeywords }) => {
 
   useEffect(() => {
     document.title = `${pageTitle} | Recipe Trending`;
-    trackEvent("page_view", { page: "recipe_spotlight", title: pageTitle });
+    trackEvent("page_view", { page: "recipe_spotlight", page_title: pageTitle });
     
     // SEO & Social Sharing Meta Tags
     const imgVal = bannerImage || section?.image || section?.background_image || navState?.image;
