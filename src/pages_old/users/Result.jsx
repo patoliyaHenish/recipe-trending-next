@@ -180,7 +180,7 @@ const Result = () => {
 
   const handleFilterChange = useCallback((key, value) => {
     if (key === "preference" && value) {
-        trackEvent("food_type", { filter_value: value });
+        trackEvent("food_type", { food_type_filter: value });
     }
     setFilters((prev) => {
       const nextFilters = { ...prev, [key]: value };

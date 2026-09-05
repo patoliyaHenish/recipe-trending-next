@@ -116,7 +116,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
         
         const ft = (recipe.food_type || '').toLowerCase();
         if (ft.includes('veg') || ft.includes('egg') || ft.includes('non')) {
-            trackEvent("food_type", { recipe_id: recipe.recipe_id, food_type: recipe.food_type });
+            trackEvent("food_type", { recipe_id: recipe.recipe_id, recipe_food_type: recipe.food_type });
         }
 
         if (window.performance) {
