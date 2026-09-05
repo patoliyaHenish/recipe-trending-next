@@ -385,7 +385,7 @@ const AssignedRecipes = () => {
                     >
                         Assigned Recipes
                     </Typography>
-                    {data?.unassignedCount !== undefined && (
+                    {canCreate && data?.unassignedCount !== undefined && (
                         <Typography
                             variant="subtitle1"
                             sx={{
