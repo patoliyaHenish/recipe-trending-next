@@ -213,7 +213,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
         tag.setAttribute('content', content);
       };
 
-      updateTag('property', 'og:title', metaTitle);
+      updateTag('property', 'og:title', title);
       updateTag('property', 'og:description', metaDesc);
       updateTag('property', 'og:url', window.location.href);
       updateTag('property', 'og:type', 'article');
@@ -233,7 +233,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
         imageSrcLink.href = recipeImageUrl;
       }
       updateTag('name', 'twitter:card', 'summary_large_image');
-      updateTag('name', 'twitter:title', metaTitle);
+      updateTag('name', 'twitter:title', title);
       updateTag('name', 'twitter:description', metaDesc);
 
       let metaAuthorTag = document.querySelector('meta[name="author"]');
