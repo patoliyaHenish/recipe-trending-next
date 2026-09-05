@@ -1282,7 +1282,7 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Box
                     component="img"
-                    src={navLogo}
+                    src={navLogo?.src || navLogo}
                     alt="Recipe Trending"
                     sx={{
                       height: { xs: 34, sm: 40 },
