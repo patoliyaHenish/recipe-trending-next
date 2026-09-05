@@ -209,16 +209,14 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
     : category?.name;
 
   useEffect(() => {
-    const metaTitle = isSubCategoryView 
-      ? (subCategory?.meta_title || subCategory?.name)
-      : (category?.meta_title || category?.name);
+    const title = isSubCategoryView ? subCategory?.name : category?.name;
       
     const metaDesc = isSubCategoryView 
       ? (subCategory?.meta_description || subCategory?.description || 'Delicious recipes from Recipe Trending')
       : (category?.meta_description || category?.description || 'Delicious recipes from Recipe Trending');
 
-    if (metaTitle) {
-      document.title = metaTitle;
+    if (title) {
+      document.title = title;
     }
 
     let metaDescriptionTag = document.querySelector('meta[name="description"]');

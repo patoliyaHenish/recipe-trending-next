@@ -84,6 +84,7 @@ const SearchResults = () => {
     
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         document.title = 'Search Results Analytics';
@@ -197,6 +198,13 @@ const SearchResults = () => {
 
     const sortedResults = useMemo(() => {
         let sortableItems = [...allResults];
+        
+        if (searchQuery) {
+            sortableItems = sortableItems.filter(item => 
+                item.dimensionValue && item.dimensionValue.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
         if (sortConfig.key !== null) {
             sortableItems.sort((a, b) => {
                 const aValue = a[sortConfig.key];
@@ -706,6 +714,31 @@ const SearchResults = () => {
                     </Box>
                 ) : (
                     <>
+                        <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>
+                            <TextField
+                                size="small"
+                                placeholder={`Search ${dimension}...`}
+                                value={searchQuery}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setPage(1);
+                                }}
+                                sx={{ 
+                                    width: 250, 
+                                    '& .MuiOutlinedInput-root': { 
+                                        bgcolor: isDarkMode ? '#283046' : '#fff', 
+                                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b', 
+                                        '& fieldset': { borderColor: isDarkMode ? '#404656' : '#d8d6de' }, 
+                                        '&:hover fieldset': { borderColor: '#7367f0' }, 
+                                        '&.Mui-focused fieldset': { borderColor: '#7367f0' } 
+                                    }, 
+                                    '& input': { padding: '8px 14px', color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important' } 
+                                }}
+                                InputProps={{
+                                    startAdornment: <SearchOutlinedIcon sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', mr: 1, fontSize: 20 }} />
+                                }}
+                            />
+                        </Box>
                         {/* Table */}
                         <TableContainer
                     component={Paper}

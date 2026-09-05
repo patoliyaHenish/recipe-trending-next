@@ -177,10 +177,8 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
 
     useEffect(() => {
       if (!recipe) return;
-      const metaTitle = recipe?.meta_title 
-        ? recipe.meta_title
-        : (recipe?.title || "Recipe Trending");
-      document.title = metaTitle;
+      const title = recipe?.title || "Recipe Trending";
+      document.title = title;
 
       let metaDescriptionTag = document.querySelector('meta[name="description"]');
       if (!metaDescriptionTag) {
