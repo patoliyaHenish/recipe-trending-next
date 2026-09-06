@@ -85,6 +85,19 @@ const SearchResults = () => {
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
     const [searchQuery, setSearchQuery] = useState('');
+    const searchDate = searchParams.get('date') || '';
+    const setSearchDate = (newDate) => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            if (newDate) {
+                next.set('date', newDate);
+            } else {
+                next.delete('date');
+            }
+            return next;
+        });
+        setPage(1);
+    };
 
     useEffect(() => {
         document.title = 'Search Results Analytics';
@@ -205,6 +218,12 @@ const SearchResults = () => {
             );
         }
 
+        if (searchDate) {
+            sortableItems = sortableItems.filter(item =>
+                item.date && item.date === searchDate
+            );
+        }
+
         if (sortConfig.key !== null) {
             sortableItems.sort((a, b) => {
                 const aValue = a[sortConfig.key];
@@ -219,7 +238,7 @@ const SearchResults = () => {
             });
         }
         return sortableItems;
-    }, [allResults, sortConfig]);
+    }, [allResults, sortConfig, searchQuery, searchDate]);
 
     const pagination = useMemo(() => {
         const total = sortedResults.length;
@@ -714,7 +733,45 @@ const SearchResults = () => {
                     </Box>
                 ) : (
                     <>
-                        <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>
+                        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`, flexWrap: 'wrap' }}>
+                            <Box>
+                                {(dimension === 'query' || dimension === 'page') && (
+                                    <Typography variant="body1" sx={{ color: isDarkMode ? '#e2e8f0' : '#1e293b', fontWeight: 500 }}>
+                                        Total {dimension === 'query' ? 'Queries' : 'Pages'}: {pagination.total || 0}
+                                    </Typography>
+                                )}
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                {(dimension === 'query' || dimension === 'page') && (
+                                    <TextField
+                                        type="date"
+                                        size="small"
+                                    value={searchDate}
+                                    onChange={(e) => {
+                                        setSearchDate(e.target.value);
+                                        setPage(1);
+                                    }}
+                                    sx={{
+                                        width: 155,
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: isDarkMode ? '#283046' : '#fff',
+                                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                            '& fieldset': { borderColor: isDarkMode ? '#404656' : '#d8d6de' },
+                                            '&:hover fieldset': { borderColor: '#7367f0' },
+                                            '&.Mui-focused fieldset': { borderColor: '#7367f0' }
+                                        },
+                                        '& input': {
+                                            padding: '8px 14px',
+                                            color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
+                                            WebkitTextFillColor: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
+                                        },
+                                        '& input::-webkit-calendar-picker-indicator': {
+                                            filter: isDarkMode ? 'invert(1) brightness(1.5)' : 'none',
+                                            cursor: 'pointer'
+                                        }
+                                    }}
+                                />
+                            )}
                             <TextField
                                 size="small"
                                 placeholder={`Search ${dimension}...`}
@@ -738,6 +795,7 @@ const SearchResults = () => {
                                     startAdornment: <SearchOutlinedIcon sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', mr: 1, fontSize: 20 }} />
                                 }}
                             />
+                            </Box>
                         </Box>
                         {/* Table */}
                         <TableContainer
@@ -781,6 +839,18 @@ const SearchResults = () => {
                                                 {dimension.toUpperCase()}
                                             </TableSortLabel>
                                         </TableCell>
+                                        {(dimension === 'query' || dimension === 'page') && (
+                                            <TableCell align="center" sortDirection={sortConfig.key === 'date' ? sortConfig.direction : false}>
+                                                <TableSortLabel
+                                                    active={sortConfig.key === 'date'}
+                                                    direction={sortConfig.key === 'date' ? sortConfig.direction : 'asc'}
+                                                    onClick={() => handleSort('date')}
+                                                    sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
+                                                >
+                                                    DATE
+                                                </TableSortLabel>
+                                            </TableCell>
+                                        )}
                                         <TableCell align="center" sortDirection={sortConfig.key === 'clicks' ? sortConfig.direction : false}>
                                             <TableSortLabel
                                                 active={sortConfig.key === 'clicks'}
@@ -911,6 +981,13 @@ const SearchResults = () => {
                                                         </Typography>
                                                     )}
                                                 </TableCell>
+                                                {(dimension === 'query' || dimension === 'page') && (
+                                                    <TableCell align="center">
+                                                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                                                            {row.date ? moment(row.date).format('MMM DD, YYYY') : '—'}
+                                                        </Typography>
+                                                    </TableCell>
+                                                )}
                                                 <TableCell align="center">
                                                     <Typography variant="body2">{row.clicks.toLocaleString()}</Typography>
                                                 </TableCell>
