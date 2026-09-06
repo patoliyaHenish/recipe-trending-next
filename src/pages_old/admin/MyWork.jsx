@@ -917,7 +917,7 @@ const MyWork = () => {
                 >
                   <TableCell width="60" align="center">#</TableCell>
                   <TableCell>METRIC NAME</TableCell>
-                  <TableCell align="center">TOTAL COUNT</TableCell>
+<TableCell align="center">TOTAL COUNT</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -954,6 +954,30 @@ const MyWork = () => {
                     chipBg: isDarkMode ? "rgba(0,207,221,0.15)" : "#e0f2fe",
                     chipText: "#00cfdd",
                   },
+                  {
+                    id: 5,
+                    label: "Avg. Recipes Completed / Day",
+                    count: stats.avgPerDay,
+                    icon: <HourglassEmpty sx={{ fontSize: 20, color: "#ff9f43" }} />,
+                    chipBg: isDarkMode ? "rgba(255,159,67,0.15)" : "#fff7ed",
+                    chipText: "#ff9f43",
+                  },
+                  {
+                    id: 6,
+                    label: "Paid Recipes",
+                    count: stats.paidRecipes,
+                    icon: <CheckCircle sx={{ fontSize: 20, color: "#28c76f" }} />,
+                    chipBg: isDarkMode ? "rgba(40,199,111,0.15)" : "#d1fae5",
+                    chipText: "#28c76f",
+                  },
+                  {
+                    id: 7,
+                    label: "Payment Pending / Left Recipes",
+                    count: stats.leftRecipes,
+                    icon: <PauseCircle sx={{ fontSize: 20, color: "#ea5455" }} />,
+                    chipBg: isDarkMode ? "rgba(234,84,85,0.15)" : "#fee2e2",
+                    chipText: "#ea5455",
+                  },
                 ].map((row, index) => (
                   <TableRow
                     key={row.id}
@@ -964,7 +988,7 @@ const MyWork = () => {
                         backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.02)",
                       },
                       "& td": {
-                        borderBottom: index === 3
+                        borderBottom: index === 6
                           ? "none"
                           : isDarkMode
                             ? "1px solid rgba(255, 255, 255, 0.15)"
@@ -1173,6 +1197,47 @@ const MyWork = () => {
                     })
                   )}
                 </TableBody>
+                {data?.paymentSlips && data.paymentSlips.length > 0 && (
+                  <TableHead>
+                    <TableRow
+                      sx={{
+                        height: "50px",
+                        backgroundColor: "transparent",
+                        "& th, & td": {
+                          fontWeight: 700,
+                          fontSize: "0.85rem",
+                          color: isDarkMode ? "#e2e8f0" : "#1e293b",
+                          borderTop: isDarkMode
+                            ? "1px solid rgba(255, 255, 255, 0.2)"
+                            : "1px solid rgba(0, 0, 0, 0.15)",
+                          borderBottom: "none",
+                          borderRight: isDarkMode
+                            ? "1px solid rgba(255, 255, 255, 0.12)"
+                            : "1px solid rgba(0, 0, 0, 0.1)",
+                          py: 1.5,
+                          px: 3,
+                          "&:last-child": {
+                            borderRight: "none",
+                          },
+                        },
+                      }}
+                    >
+                      <TableCell colSpan={2} align="center" />
+                      <TableCell
+                        align="center"
+                        sx={{
+                          fontWeight: 700,
+                          color: isDarkMode ? "#d0d2d6" : "#4b4b4b",
+                        }}
+                      >
+                        {data.paymentSlips
+                          .filter(s => (s.status || "").toLowerCase() === "paid")
+                          .reduce((sum, s) => sum + (Number(s.admin_approved_count) || 0), 0)} Recipes
+                      </TableCell>
+                      <TableCell colSpan={3} align="center" />
+                    </TableRow>
+                  </TableHead>
+                )}
               </Table>
             </TableContainer>
           </Box>
