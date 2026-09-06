@@ -21,7 +21,7 @@ const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
 
   const isAdminRoute = pathname?.startsWith('/admin');
   const isStaff = !!(user?.role && user.role !== 'user');
-  const isAdminMode = (isStaff || isImpersonating) && isAdminRoute;
+  const isAdminMode = isStaff || isImpersonating;
 
 
 
