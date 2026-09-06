@@ -22,6 +22,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Close,
+  Work as WorkIcon,
 } from '@mui/icons-material';
 import AnnouncementIcon from '@mui/icons-material/Announcement';
 import { Box } from '@mui/material';
@@ -34,6 +35,12 @@ const adminLinks = [
     icon: <Dashboard />,
     to: '/admin/dashboard',
     permission: 'dashboard.view',
+  },
+  {
+    label: 'My Work',
+    icon: <WorkIcon />,
+    to: '/admin/my-work',
+    permission: 'my_work.view',
   },
   {
     label: 'User List',

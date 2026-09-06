@@ -36,6 +36,7 @@ import RecipeSubCategory from '../../pages_old/admin/sub-category/RecipeSubCateg
 import Dashboard from '../../pages_old/admin/Dashboard';
 import SearchResults from '../../pages_old/admin/SearchResults';
 import WebAnalytics from '../../pages_old/admin/WebAnalytics';
+import MyWork from '../../pages_old/admin/MyWork';
 
 export default function AdminRouter() {
   return (
@@ -43,6 +44,7 @@ export default function AdminRouter() {
       <Routes>
         <Route path="/" element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="my-work" element={<MyWork />} />
         
         {/* Core Management */}
         <Route path="manage-users" element={<UserManagement />} />

@@ -987,13 +987,9 @@ const Recipe = () => {
         width: 190,
         cellRenderer: (params) => {
           if (params.data && params.data.public_approved && params.data.public_approved_time) {
-            const date = new Date(params.data.public_approved_time);
             return (
               <span style={{ color: isDarkMode ? '#fef08a' : '#2563eb', fontWeight: 500 }}>
-                {date.toLocaleString(undefined, {
-                  year: 'numeric', month: '2-digit', day: '2-digit',
-                  hour: '2-digit', minute: '2-digit', hour12: true
-                })}
+                {moment(params.data.public_approved_time).format('h:mm A, D MMM YYYY')}
               </span>
             );
           }
@@ -1033,13 +1029,9 @@ const Recipe = () => {
       width: 190,
       cellRenderer: (params) => {
         if (params.data && params.data.is_admin_approved && params.data.admin_approved_time) {
-          const date = new Date(params.data.admin_approved_time);
           return (
             <span style={{ color: isDarkMode ? '#f9a8d4' : '#db2777', fontWeight: 500 }}>
-              {date.toLocaleString(undefined, {
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit', hour12: true
-              })}
+              {moment(params.data.admin_approved_time).format('h:mm A, D MMM YYYY')}
             </span>
           );
         }
@@ -1054,13 +1046,9 @@ const Recipe = () => {
       width: 190,
       cellRenderer: (params) => {
         if (params.value) {
-          const date = new Date(params.value);
           return (
             <span style={{ color: isDarkMode ? '#9ca3af' : '#4b5563', fontWeight: 500 }}>
-              {date.toLocaleString(undefined, {
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit', hour12: true
-              })}
+              {moment(params.value).format('h:mm A, D MMM YYYY')}
             </span>
           );
         }
@@ -1075,13 +1063,9 @@ const Recipe = () => {
       width: 190,
       cellRenderer: (params) => {
         if (params.value) {
-          const date = new Date(params.value);
           return (
             <span style={{ color: isDarkMode ? '#9ca3af' : '#4b5563', fontWeight: 500 }}>
-              {date.toLocaleString(undefined, {
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit', hour12: true
-              })}
+              {moment(params.value).format('h:mm A, D MMM YYYY')}
             </span>
           );
         }
@@ -1195,7 +1179,7 @@ const Recipe = () => {
               </Tooltip>
             )}
 
-            {canNotesList && (
+            {canNotesList && !params.data.is_admin_approved && (
               <IconButton
                 onClick={() => setNoteRecipeId(params.data.recipe_id)}
                 size="small"
@@ -2757,7 +2741,7 @@ const Recipe = () => {
                                     <TableCell align="center">
                                         {recipe.public_approved && recipe.public_approved_time ? (
                                             <span style={{ color: isDarkMode ? '#fef08a' : '#2563eb', fontWeight: 500 }}>
-                                                {new Date(recipe.public_approved_time).toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}
+                                                {moment(recipe.public_approved_time).format('h:mm A, D MMM YYYY')}
                                             </span>
                                         ) : '-'}
                                     </TableCell>
@@ -2779,7 +2763,7 @@ const Recipe = () => {
                             <TableCell align="center">
                                 {recipe.is_admin_approved && recipe.admin_approved_time ? (
                                     <span style={{ color: isDarkMode ? '#f9a8d4' : '#db2777', fontWeight: 500 }}>
-                                        {new Date(recipe.admin_approved_time).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
+                                        {moment(recipe.admin_approved_time).format('h:mm A, D MMM YYYY')}
                                     </span>
                                 ) : '-'}
                             </TableCell>
@@ -2787,7 +2771,7 @@ const Recipe = () => {
                             <TableCell align="center">
                                 {recipe.created_at ? (
                                     <span style={{ color: isDarkMode ? '#9ca3af' : '#4b5563', fontWeight: 500 }}>
-                                        {new Date(recipe.created_at).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
+                                        {moment(recipe.created_at).format('h:mm A, D MMM YYYY')}
                                     </span>
                                 ) : '-'}
                             </TableCell>
@@ -2795,7 +2779,7 @@ const Recipe = () => {
                             <TableCell align="center">
                                 {recipe.updated_at ? (
                                     <span style={{ color: isDarkMode ? '#9ca3af' : '#4b5563', fontWeight: 500 }}>
-                                        {new Date(recipe.updated_at).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
+                                        {moment(recipe.updated_at).format('h:mm A, D MMM YYYY')}
                                     </span>
                                 ) : '-'}
                             </TableCell>
@@ -2822,8 +2806,7 @@ const Recipe = () => {
 
                                 </>
                             )}
-                            
-                            <TableCell align="center">
+                        <TableCell align="center">
                                 <Box className="flex gap-2 justify-center items-center h-full">
                                     <ActionButtons
                                         onView={() => setViewId(recipe.recipe_id)}
@@ -2833,7 +2816,7 @@ const Recipe = () => {
                                         showEdit={canUpdate && canModifyEdit}
                                         showDelete={canDelete && canModifyDelete}
                                     />
-                                    {canNotesList && (
+                                    {canNotesList && !recipe.is_admin_approved && (
                                         <IconButton
                                             onClick={() => setNoteRecipeId(recipe.recipe_id)}
                                             size="small"

@@ -27,7 +27,7 @@ import { assignedRecipeApi } from "../features/api/assignedRecipeApi";
 import { notificationApi } from "../features/api/notificationApi";
 import { dashboardApi } from "../features/api/dashboardApi";
 import { analyticsApi } from "../features/api/analyticsApi";
-
+import { myWorkApi } from "../features/api/myWorkApi";
 
 import { rtkQueryErrorMiddleware } from "./middleware";
 
@@ -63,6 +63,7 @@ export const appStore = configureStore({
             notificationApi.middleware,
             dashboardApi.middleware,
             analyticsApi.middleware,
+            myWorkApi.middleware,
         )
 
 });

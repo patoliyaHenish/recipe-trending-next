@@ -28,6 +28,7 @@ import { assignedRecipeApi } from "../features/api/assignedRecipeApi";
 import { notificationApi } from "../features/api/notificationApi";
 import { dashboardApi } from "../features/api/dashboardApi";
 import { analyticsApi } from "../features/api/analyticsApi";
+import { myWorkApi } from "../features/api/myWorkApi";
 
 const rootReducer = combineReducers({
     [authApi.reducerPath]: authApi.reducer,
@@ -57,6 +58,7 @@ const rootReducer = combineReducers({
     [notificationApi.reducerPath]: notificationApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
     [analyticsApi.reducerPath]: analyticsApi.reducer,
+    [myWorkApi.reducerPath]: myWorkApi.reducer,
     auth: authReducer,
     global: globalReducer,
 })
