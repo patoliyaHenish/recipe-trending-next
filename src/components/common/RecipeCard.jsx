@@ -20,7 +20,7 @@ import AuthModal from '../AuthModal';
 import { useSaveRecipeMutation, useUnsaveRecipeMutation, useGetSavedRecipeIdsQuery } from '../../features/api/recipeDetailsApi';
 import { toast } from '../../utils/toast';
 import { trackEvent } from '../../utils/analytics';
-const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRemoveIcon = false, hideBadge = false, hideVideoIcon = false, isRelated = false }) => {
+const RecipeCard = ({ recipe, mobileLayout = 'horizontal', onSaveChange, showRemoveIcon = false, hideBadge = false, hideVideoIcon = true, isRelated = false }) => {
   const { isDarkMode } = useTheme();
   const { user } = useUser();
   const router = useRouter();
