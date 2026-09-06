@@ -17,7 +17,7 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
   const needFallback = !(initialSuggestions && limit === 16) && !isLoadingSuggestions && !isErrorSuggestions && suggestions.length === 0;
 
   const { data: fetchedFallback, isLoading: isLoadingFallback } = useSearchRecipesQuery(
-    { sortBy: 'total_views', limit: 12, preference: foodType },
+    { limit: 12, preference: foodType },
     { skip: !!initialFallback || !needFallback || !foodType }
   );
 
@@ -56,7 +56,7 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
         }}
         className="text-5xl md:text-6xl"
       >
-        {suggestions.length > 0 ? "You’ll Also Love" : "Most Viewed"}
+        {suggestions.length > 0 ? "You’ll Also Love" : "Recommended"}
       </Typography>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {displayRecipes.map((recipe) => (

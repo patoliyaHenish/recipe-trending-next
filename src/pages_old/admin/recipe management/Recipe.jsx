@@ -209,9 +209,6 @@ const Recipe = () => {
   const [adminApproved, setAdminApproved] = useState(() => searchParams.get('admin_approved') || '');
   const [foodType, setFoodType] = useState(() => searchParams.get('food_type') || '');
   const [badge, setBadge] = useState(() => searchParams.get('badge') || '');
-  const [viewFilterType, setViewFilterType] = useState(() => searchParams.get('view_type') || '');
-  const [viewFilterOp, setViewFilterOp] = useState(() => searchParams.get('view_op') || '');
-  const [viewFilterValue, setViewFilterValue] = useState(() => searchParams.get('view_value') || '');
   const [category, setCategory] = useState(() => searchParams.get('category') || '');
   const [categorySearchInput, setCategorySearchInput] = useState('');
   const [categoryAnchorEl, setCategoryAnchorEl] = useState(null);
@@ -353,9 +350,6 @@ const Recipe = () => {
     updatedFrom: searchParams.get('updated_from') || '',
     updatedTo: searchParams.get('updated_to') || '',
     badge: searchParams.get('badge') || '',
-    viewType: searchParams.get('view_type') || '',
-    viewOp: searchParams.get('view_op') || '',
-    viewValue: searchParams.get('view_value') || '',
     createdBy: searchParams.get('created_by') || '',
     keyword: searchParams.get('keyword') || '',
     pendingNotesOnly: searchParams.get('pending_notes') === 'true',
@@ -481,9 +475,6 @@ const Recipe = () => {
         setOrDelete('keyword', filters.keyword);
         setOrDelete('show_analytics', filters.showAnalyticsColumns ? 'true' : '');
         setOrDelete('sort_by', filters.sortBy);
-        setOrDelete('view_type', filters.viewType);
-        setOrDelete('view_op', filters.viewOp);
-        setOrDelete('view_value', filters.viewValue);
       }
       return next;
     });
@@ -495,9 +486,6 @@ const Recipe = () => {
       search, category, subCategory, publicApproved, adminApproved, foodType, approvedFrom, approvedTo, adminApprovedFrom, adminApprovedTo, createdFrom, createdTo, updatedFrom, updatedTo, badge, createdBy, sortBy,
       pendingNotesOnly, keyword, hasUpdatesAfterNotes,
       showAnalyticsColumns,
-      viewType: viewFilterType,
-      viewOp: viewFilterOp,
-      viewValue: viewFilterValue,
       ...overrides
     };
     setApiFilters(current);
@@ -549,10 +537,7 @@ const Recipe = () => {
     setHasUpdatesAfterNotes(false);
     setShowAnalyticsColumns(false);
     setPage(1);
-    setViewFilterType('');
-    setViewFilterOp('');
-    setViewFilterValue('');
-    setApiFilters({ search: '', category: '', subCategory: '', publicApproved: '', adminApproved: '', viewType: '', viewOp: '', viewValue: '', foodType: '', approvedFrom: '', approvedTo: '', adminApprovedFrom: '', adminApprovedTo: '', createdFrom: '', createdTo: '', updatedFrom: '', updatedTo: '', badge: '', createdBy: '', keyword: '', pendingNotesOnly: false, hasUpdatesAfterNotes: false, showAnalyticsColumns: false, sortBy: 'created_at' });
+    setApiFilters({ search: '', category: '', subCategory: '', publicApproved: '', adminApproved: '', foodType: '', approvedFrom: '', approvedTo: '', adminApprovedFrom: '', adminApprovedTo: '', createdFrom: '', createdTo: '', updatedFrom: '', updatedTo: '', badge: '', createdBy: '', keyword: '', pendingNotesOnly: false, hasUpdatesAfterNotes: false, showAnalyticsColumns: false, sortBy: 'created_at' });
     setSearchParams({});
   };
 
@@ -1150,66 +1135,8 @@ const Recipe = () => {
         cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
         headerClass: 'ag-header-center',
       },
-      ...(canViewAnalytics ? [
-        {
-          headerName: 'Total Views',
-          field: 'total_views',
-          width: 120,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (p) => (
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {p.value?.toLocaleString() || 0}
-            </Typography>
-          ),
-        },
-        {
-          headerName: 'Views (24h)',
-          field: 'views_last_24h',
-          width: 120,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (p) => (
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {p.value?.toLocaleString() || 0}
-            </Typography>
-          ),
-        },
-        {
-          headerName: 'Views (7d)',
-          field: 'views_last_7d',
-          width: 120,
-          cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-          headerClass: 'ag-header-center',
-          cellRenderer: (p) => (
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {p.value?.toLocaleString() || 0}
-            </Typography>
-          ),
-        }
-      ] : []),
-      {
-        headerName: 'Rank',
-        field: 'view_rank',
-        width: 70,
-        cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
-        headerClass: 'ag-header-center',
-        cellRenderer: (p) => (
-          <Box sx={{
-            bgcolor: p.value <= 3 ? (isDarkMode ? '#059669' : '#dcfce7') : 'transparent',
-            color: p.value <= 3 ? (isDarkMode ? '#fff' : '#166534') : 'inherit',
-            px: 1,
-            py: 0,
-            borderRadius: 0.5,
-            fontWeight: 700,
-            fontSize: '0.7rem',
-            lineHeight: 1.2,
-            border: p.value <= 3 ? 'none' : `1px solid ${isDarkMode ? '#4b5563' : '#d1d5db'}`
-          }}>
-            #{p.value || '-'}
-          </Box>
-        ),
-      }
+
+
     ] : []),
     {
       headerName: 'Actions',
@@ -1351,25 +1278,6 @@ const Recipe = () => {
 
   const sourceRecipes = allRecipes.length === 0 && data?.data?.length > 0 ? data.data : allRecipes;
   let displayedRecipes = sourceRecipes;
-  if (viewFilterType && viewFilterValue !== '') {
-    const numericVal = parseInt(viewFilterValue, 10);
-    if (!Number.isNaN(numericVal)) {
-      displayedRecipes = sourceRecipes.filter(r => {
-        let v = 0;
-        if (viewFilterType === 'total') v = Number(r.total_views || 0);
-        else if (viewFilterType === 'views_24h') v = Number(r.views_24h || 0);
-        else if (viewFilterType === 'views_7d') v = Number(r.views_7d || 0);
-        switch (viewFilterOp) {
-          case '<=': return v <= numericVal;
-          case '<': return v < numericVal;
-          case '=': return v === numericVal;
-          case '>=': return v >= numericVal;
-          case '>': return v > numericVal;
-          default: return true;
-        }
-      });
-    }
-  }
   const hasNotesForRecipe = (recipe) =>
     (Array.isArray(recipe?.notes) && recipe.notes.length > 0) ||
     (typeof recipe?.notes_count === 'number' && recipe.notes_count > 0) ||
@@ -2219,9 +2127,9 @@ const Recipe = () => {
                 <FormControl size="small" sx={{ minWidth: 160, flex: { xs: 1, sm: '0 1 auto' } }}>
               <Autocomplete
                 size="small"
-                options={[{ label: 'Latest Created', value: 'created_at' }, { label: 'Most Viewed (Total)', value: 'total_views' }, { label: 'Most Viewed (24h)', value: 'views_24h' }, { label: 'Most Viewed (7d)', value: 'views_7d' }]}
+                options={[{ label: 'Latest Created', value: 'created_at' }]}
                 getOptionLabel={(option) => option.label || ''}
-                value={[{ label: 'Latest Created', value: 'created_at' }, { label: 'Most Viewed (Total)', value: 'total_views' }, { label: 'Most Viewed (24h)', value: 'views_24h' }, { label: 'Most Viewed (7d)', value: 'views_7d' }].find(opt => opt.value === sortBy) || null}
+                value={[{ label: 'Latest Created', value: 'created_at' }].find(opt => opt.value === sortBy) || null}
                 onChange={(_, newValue) => {
                   const val = newValue ? newValue.value : '';
                   setSortBy(val);
@@ -2292,170 +2200,7 @@ const Recipe = () => {
                 }}
               />
                 </FormControl>
-                <FormControl size="small" sx={{ minWidth: 160, flex: { xs: 1, sm: '0 1 auto' } }}>
-              <Autocomplete
-                size="small"
-                options={[{ label: 'Total', value: 'total' }, { label: 'Last 24h', value: 'views_24h' }, { label: 'Last 7d', value: 'views_7d' }]}
-                getOptionLabel={(option) => option.label || ''}
-                value={[{ label: 'Total', value: 'total' }, { label: 'Last 24h', value: 'views_24h' }, { label: 'Last 7d', value: 'views_7d' }].find(opt => opt.value === viewFilterType) || null}
-                onChange={(_, newValue) => {
-                  const val = newValue ? newValue.value : '';
-                  setViewFilterType(val);
-                  applyFilters({ viewType: val });
-                }}
-                isOptionEqualToValue={(option, value) => option.value === value.value}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder="View Type"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        padding: '0 39px 0 0 !important',
-                        height: 38,
-                        ...dropdownSx,
-                      },
-                      '& .MuiInputBase-input': {
-                        padding: '8px 14px !important',
-                        height: 'auto',
-                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                        '&::placeholder': {
-                          color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                          opacity: 1,
-                        }
-                      }
-                    }}
-                  />
-                )}
-                disablePortal={true}
-                slotProps={{
-                  paper: {
-                    sx: {
-                      bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                      color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                      borderRadius: '6px',
-                      border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
-                      boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
-                      '& .MuiAutocomplete-listbox': {
-                        padding: '0',
-                        '& .MuiAutocomplete-option': {
-                          fontSize: '0.9rem',
-                          color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                          '&[aria-selected="true"]': {
-                            bgcolor: 'rgba(115, 103, 240, 0.12) !important',
-                            color: '#7367f0 !important',
-                            fontWeight: 500,
-                            '&.Mui-focused': {
-                              bgcolor: 'rgba(115, 103, 240, 0.16) !important'
-                            }
-                          },
-                          '&:hover': {
-                            bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
-                            color: '#7367f0 !important'
-                          },
-                          '&.Mui-focused': {
-                            bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
-                            color: '#7367f0 !important'
-                          }
-                        }
-                      }
-                    }
-                  }
-                }}
-                sx={{
-                  width: '100%',
-                  '& .MuiAutocomplete-popupIndicator': { color: isDarkMode ? '#d0d2d6' : '#6e6b7b' },
-                  '& .MuiAutocomplete-clearIndicator': { color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }
-                }}
-              />
-                </FormControl>
-                <FormControl size="small" sx={{ minWidth: 110, flex: { xs: 1, sm: '0 1 auto' } }}>
-              <Autocomplete
-                size="small"
-                options={[{ label: '<=', value: '<=' }, { label: '=', value: '=' }, { label: '>=', value: '>=' }, { label: '>', value: '>' }, { label: '<', value: '<' }]}
-                getOptionLabel={(option) => option.label || ''}
-                value={[{ label: '<=', value: '<=' }, { label: '=', value: '=' }, { label: '>=', value: '>=' }, { label: '>', value: '>' }, { label: '<', value: '<' }].find(opt => opt.value === viewFilterOp) || null}
-                onChange={(_, newValue) => {
-                  const val = newValue ? newValue.value : '';
-                  setViewFilterOp(val);
-                  applyFilters({ viewOp: val });
-                }}
-                isOptionEqualToValue={(option, value) => option.value === value.value}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder="Op"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        padding: '0 39px 0 0 !important',
-                        height: 38,
-                        ...dropdownSx,
-                      },
-                      '& .MuiInputBase-input': {
-                        padding: '8px 14px !important',
-                        height: 'auto',
-                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                        '&::placeholder': {
-                          color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                          opacity: 1,
-                        }
-                      }
-                    }}
-                  />
-                )}
-                disablePortal={true}
-                slotProps={{
-                  paper: {
-                    sx: {
-                      bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                      color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                      borderRadius: '6px',
-                      border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
-                      boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
-                      '& .MuiAutocomplete-listbox': {
-                        padding: '0',
-                        '& .MuiAutocomplete-option': {
-                          fontSize: '0.9rem',
-                          color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                          '&[aria-selected="true"]': {
-                            bgcolor: 'rgba(115, 103, 240, 0.12) !important',
-                            color: '#7367f0 !important',
-                            fontWeight: 500,
-                            '&.Mui-focused': {
-                              bgcolor: 'rgba(115, 103, 240, 0.16) !important'
-                            }
-                          },
-                          '&:hover': {
-                            bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
-                            color: '#7367f0 !important'
-                          },
-                          '&.Mui-focused': {
-                            bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
-                            color: '#7367f0 !important'
-                          }
-                        }
-                      }
-                    }
-                  }
-                }}
-                sx={{
-                  width: '100%',
-                  '& .MuiAutocomplete-popupIndicator': { color: isDarkMode ? '#d0d2d6' : '#6e6b7b' },
-                  '& .MuiAutocomplete-clearIndicator': { color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }
-                }}
-              />
-                </FormControl>
-                <TextField
-                  label="Views"
-                  size="small"
-                  type="number"
-                  value={viewFilterValue}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setViewFilterValue(val);
-                    applyFilters({ viewValue: val });
-                  }}
-                  sx={textFieldSx}
-                />
+
               </>
             )}
             <TextField
@@ -2739,7 +2484,7 @@ const Recipe = () => {
               >
                 Search
               </Button>
-              {(category || subCategory || publicApproved || adminApproved || viewFilterType || viewFilterOp || viewFilterValue || foodType || badge || approvedFrom || approvedTo || adminApprovedFrom || adminApprovedTo || createdFrom || createdTo || updatedFrom || updatedTo || search || createdBy || keyword?.length > 0 || pendingNotesOnly || hasUpdatesAfterNotes || showAnalyticsColumns || (sortBy && sortBy !== 'created_at')) && (
+              {(category || subCategory || publicApproved || adminApproved || foodType || badge || approvedFrom || approvedTo || adminApprovedFrom || adminApprovedTo || createdFrom || createdTo || updatedFrom || updatedTo || search || createdBy || keyword?.length > 0 || pendingNotesOnly || hasUpdatesAfterNotes || showAnalyticsColumns || (sortBy && sortBy !== 'created_at')) && (
                 <Button
                   aria-label="clear all filters"
                   onClick={handleClearFilters}
@@ -2883,14 +2628,6 @@ const Recipe = () => {
                 {showAnalyticsColumns && (
                     <>
                         <TableCell align="center">Badge</TableCell>
-                        {canViewAnalytics && (
-                            <>
-                                <TableCell align="center">Total Views</TableCell>
-                                <TableCell align="center">Views (24h)</TableCell>
-                                <TableCell align="center">Views (7d)</TableCell>
-                            </>
-                        )}
-                        <TableCell align="center">Rank</TableCell>
                     </>
                 )}
                 <TableCell align="center">Actions</TableCell>
@@ -3081,25 +2818,8 @@ const Recipe = () => {
                                         ) : '-'}
                                     </TableCell>
                                     
-                                    {canViewAnalytics && (
-                                        <>
-                                            <TableCell align="center"><Typography variant="body2" sx={{ fontWeight: 600 }}>{recipe.total_views?.toLocaleString() || 0}</Typography></TableCell>
-                                            <TableCell align="center"><Typography variant="body2" sx={{ fontWeight: 600 }}>{recipe.views_last_24h?.toLocaleString() || 0}</Typography></TableCell>
-                                            <TableCell align="center"><Typography variant="body2" sx={{ fontWeight: 600 }}>{recipe.views_last_7d?.toLocaleString() || 0}</Typography></TableCell>
-                                        </>
-                                    )}
-                                    
-                                    <TableCell align="center">
-                                        <Box sx={{
-                                            bgcolor: recipe.view_rank <= 3 ? (isDarkMode ? '#059669' : '#dcfce7') : 'transparent',
-                                            color: recipe.view_rank <= 3 ? (isDarkMode ? '#fff' : '#166534') : 'inherit',
-                                            px: 1, py: 0, borderRadius: 0.5, fontWeight: 700, fontSize: '0.7rem', lineHeight: 1.2,
-                                            border: recipe.view_rank <= 3 ? 'none' : `1px solid ${isDarkMode ? '#4b5563' : '#d1d5db'}`,
-                                            display: 'inline-block'
-                                        }}>
-                                            #{recipe.view_rank || '-'}
-                                        </Box>
-                                    </TableCell>
+
+
                                 </>
                             )}
                             

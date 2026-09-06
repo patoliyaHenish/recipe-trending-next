@@ -39,7 +39,7 @@ async function getRecipeSuggestions(recipeId) {
 async function getFallbackRecipes(foodType) {
   try {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5050';
-    const res = await fetch(`${backendUrl}/api/search/recipes?preference=${foodType || ''}&limit=12&sortBy=total_views`, {
+    const res = await fetch(`${backendUrl}/api/search/recipes?preference=${foodType || ''}&limit=12`, {
       cache: 'no-store'
     });
     if (!res.ok) return null;

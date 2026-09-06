@@ -361,8 +361,6 @@ const CronLogs = () => {
                                 options={[
                                     { label: 'All Jobs', value: '' },
                                     { label: 'unverified_user_cleanup', value: 'unverified_user_cleanup' },
-                                    { label: 'reset_recipe_view_stats_24h', value: 'reset_recipe_view_stats_24h' },
-                                    { label: 'reset_recipe_view_stats_7d', value: 'reset_recipe_view_stats_7d' },
                                     { label: 'api_trigger_daily', value: 'api_trigger_daily' },
                                     { label: 'api_trigger_weekly', value: 'api_trigger_weekly' }
                                 ]}
@@ -371,8 +369,6 @@ const CronLogs = () => {
                                     [
                                         { label: 'All Jobs', value: '' },
                                         { label: 'unverified_user_cleanup', value: 'unverified_user_cleanup' },
-                                        { label: 'reset_recipe_view_stats_24h', value: 'reset_recipe_view_stats_24h' },
-                                        { label: 'reset_recipe_view_stats_7d', value: 'reset_recipe_view_stats_7d' },
                                         { label: 'api_trigger_daily', value: 'api_trigger_daily' },
                                         { label: 'api_trigger_weekly', value: 'api_trigger_weekly' }
                                     ].find(opt => opt.value === jobNameSearch) || { label: 'All Jobs', value: '' }
