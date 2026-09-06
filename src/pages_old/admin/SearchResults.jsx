@@ -733,7 +733,7 @@ const SearchResults = () => {
                     </Box>
                 ) : (
                     <>
-                        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`, flexWrap: 'wrap' }}>
+                        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2, borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>
                             <Box>
                                 {(dimension === 'query' || dimension === 'page') && (
                                     <Typography variant="body1" sx={{ color: isDarkMode ? '#e2e8f0' : '#1e293b', fontWeight: 500 }}>
@@ -741,7 +741,7 @@ const SearchResults = () => {
                                     </Typography>
                                 )}
                             </Box>
-                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: { xs: 'stretch', sm: 'center' }, width: { xs: '100%', sm: 'auto' } }}>
                                 {(dimension === 'query' || dimension === 'page') && (
                                     <TextField
                                         type="date"
@@ -752,7 +752,7 @@ const SearchResults = () => {
                                         setPage(1);
                                     }}
                                     sx={{
-                                        width: 155,
+                                        width: { xs: '100%', sm: 155 },
                                         '& .MuiOutlinedInput-root': {
                                             bgcolor: isDarkMode ? '#283046' : '#fff',
                                             color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
@@ -781,7 +781,7 @@ const SearchResults = () => {
                                     setPage(1);
                                 }}
                                 sx={{
-                                    width: 250,
+                                    width: { xs: '100%', sm: 250 },
                                     '& .MuiOutlinedInput-root': {
                                         bgcolor: isDarkMode ? '#283046' : '#fff',
                                         color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
