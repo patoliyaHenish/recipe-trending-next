@@ -108,13 +108,26 @@ const SearchResults = () => {
 
     const [selectedQuery, setSelectedQuery] = useState(null);
     const [selectedPageInfo, setSelectedPageInfo] = useState(null);
+    const [topQueriesSearch, setTopQueriesSearch] = useState('');
+    const [topQueriesSort, setTopQueriesSort] = useState('impressions');
+
+    // Always fetch query dimension for top-queries tab (regardless of active tab)
+    const queryDimensionForFetch = dimension === 'top-queries' ? 'query' : dimension;
 
     const { data: searchResultsData, isLoading, isFetching, refetch } = useGetSearchResultsQuery({
         period,
-        dimension,
+        dimension: queryDimensionForFetch,
         startDate: period === 'custom' && customStartDate ? customStartDate.format('YYYY-MM-DD') : undefined,
         endDate: period === 'custom' && customEndDate ? customEndDate.format('YYYY-MM-DD') : undefined,
     });
+
+    // Separate query for top-queries tab: always fetch query dimension
+    const { data: topQueriesData, isLoading: isLoadingTopQ, isFetching: isFetchingTopQ } = useGetSearchResultsQuery({
+        period,
+        dimension: 'query',
+        startDate: period === 'custom' && customStartDate ? customStartDate.format('YYYY-MM-DD') : undefined,
+        endDate: period === 'custom' && customEndDate ? customEndDate.format('YYYY-MM-DD') : undefined,
+    }, { skip: dimension !== 'top-queries' });
 
     const { data: relatedPagesResponse, isFetching: isFetchingRelated } = useGetSearchResultsQuery({
         period,
@@ -142,10 +155,35 @@ const SearchResults = () => {
     };
 
     const allResults = useMemo(() => {
-        if (dimension === 'overview') return [];
+        if (dimension === 'overview' || dimension === 'top-queries') return [];
         const data = searchResultsData?.data;
         return Array.isArray(data) ? data : [];
     }, [searchResultsData, dimension]);
+
+    // Aggregate top queries: sum clicks & impressions per unique query across all dates
+    const aggregatedTopQueries = useMemo(() => {
+        const rawData = topQueriesData?.data;
+        if (!Array.isArray(rawData) || rawData.length === 0) return [];
+
+        const map = {};
+        rawData.forEach(row => {
+            const key = row.dimensionValue;
+            if (!map[key]) {
+                map[key] = { query: key, clicks: 0, impressions: 0, ctrSum: 0, positionSum: 0, count: 0 };
+            }
+            map[key].clicks += row.clicks || 0;
+            map[key].impressions += row.impressions || 0;
+            map[key].ctrSum += (row.ctr || 0);
+            map[key].positionSum += (row.position || 0);
+            map[key].count += 1;
+        });
+
+        return Object.values(map).map(q => ({
+            ...q,
+            ctr: q.count > 0 ? q.ctrSum / q.count : 0,
+            position: q.count > 0 ? q.positionSum / q.count : 0,
+        }));
+    }, [topQueriesData]);
 
     const overviewData = useMemo(() => {
         if (dimension === 'overview') return searchResultsData?.data;
@@ -368,6 +406,7 @@ const SearchResults = () => {
                             <Tab label="Device" value="device" component={Link} to="?dimension=device" />
                             <Tab label="Overview" value="overview" component={Link} to="?dimension=overview" />
                             <Tab label="Performance Trend" value="date" component={Link} to="?dimension=date" />
+                            <Tab label="Top Search Queries" value="top-queries" component={Link} to="?dimension=top-queries" />
                         </Tabs>
                     </Box>
 
@@ -525,7 +564,18 @@ const SearchResults = () => {
                     </Box>
                 </Box>
 
-                {dimension === 'overview' ? (
+                {dimension === 'top-queries' ? (
+                    <TopQueriesTab
+                        isDarkMode={isDarkMode}
+                        isLoading={isLoadingTopQ || isFetchingTopQ}
+                        aggregatedTopQueries={aggregatedTopQueries}
+                        topQueriesSearch={topQueriesSearch}
+                        setTopQueriesSearch={setTopQueriesSearch}
+                        topQueriesSort={topQueriesSort}
+                        setTopQueriesSort={setTopQueriesSort}
+                        onQueryClick={(q) => setSelectedQuery(q)}
+                    />
+                ) : dimension === 'overview' ? (
                     <Box sx={{ p: 3, flex: 1, backgroundColor: isDarkMode ? '#283046' : '#ffffff' }}>
                         {(isLoading || isFetching) ? (
                             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
@@ -1135,6 +1185,7 @@ const SearchResults = () => {
                         </Box>
                     </>
                 )}
+                {/* Close top-queries paren from ternary */}
             </Box>
 
             <Dialog open={!!selectedQuery} onClose={() => setSelectedQuery(null)} maxWidth="md" fullWidth>
@@ -1259,6 +1310,302 @@ const SearchResults = () => {
                     )}
                 </DialogContent>
             </Dialog>
+        </Box>
+    );
+};
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Top Search Queries Tab Component
+───────────────────────────────────────────────────────────────────────────── */
+const TopQueriesTab = ({
+    isDarkMode,
+    isLoading,
+    aggregatedTopQueries,
+    topQueriesSearch,
+    setTopQueriesSearch,
+    topQueriesSort,
+    setTopQueriesSort,
+    onQueryClick,
+}) => {
+    const [page, setPage] = useState(1);
+    const PAGE_SIZE = 20;
+
+    const filtered = useMemo(() => {
+        let items = [...aggregatedTopQueries];
+        if (topQueriesSearch.trim()) {
+            items = items.filter(q =>
+                q.query.toLowerCase().includes(topQueriesSearch.toLowerCase())
+            );
+        }
+        items.sort((a, b) => b[topQueriesSort] - a[topQueriesSort]);
+        return items;
+    }, [aggregatedTopQueries, topQueriesSearch, topQueriesSort]);
+
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+    const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    const maxImpressions = filtered[0]?.impressions || 1;
+
+    const sortOptions = [
+        { label: 'Impressions', value: 'impressions' },
+        { label: 'Clicks', value: 'clicks' },
+        { label: 'CTR', value: 'ctr' },
+        { label: 'Avg Position', value: 'position' },
+    ];
+
+    const RANK_COLORS = ['#f59e0b', '#94a3b8', '#cd7f32'];
+
+    return (
+        <Box sx={{ p: { xs: 2, md: 3 }, flex: 1 }}>
+            {/* Controls */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 2,
+                    mb: 3,
+                }}
+            >
+                <Typography variant="h6" sx={{ color: isDarkMode ? '#e2e8f0' : '#1e293b', fontWeight: 700 }}>
+                    Top Search Queries
+                    <Typography component="span" variant="body2" sx={{ ml: 1.5, color: isDarkMode ? '#b4b7bd' : '#6e6b7b', fontWeight: 400 }}>
+                        ({filtered.length} unique {filtered.length === 1 ? 'query' : 'queries'})
+                    </Typography>
+                </Typography>
+
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+                    {/* Sort selector */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {sortOptions.map(opt => (
+                            <Button
+                                key={opt.value}
+                                size="small"
+                                variant={topQueriesSort === opt.value ? 'contained' : 'outlined'}
+                                onClick={() => { setTopQueriesSort(opt.value); setPage(1); }}
+                                sx={{
+                                    textTransform: 'none',
+                                    fontSize: '0.78rem',
+                                    height: 30,
+                                    borderRadius: '6px',
+                                    minWidth: 'auto',
+                                    px: 1.5,
+                                    ...(topQueriesSort === opt.value
+                                        ? { bgcolor: '#7367f0', color: '#fff', '&:hover': { bgcolor: '#5e50ee' }, border: 'none' }
+                                        : { borderColor: isDarkMode ? '#404656' : '#d8d6de', color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&:hover': { borderColor: '#7367f0', color: '#7367f0', bgcolor: 'transparent' } }
+                                    )
+                                }}
+                            >
+                                {opt.label}
+                            </Button>
+                        ))}
+                    </Box>
+
+                    {/* Search */}
+                    <TextField
+                        size="small"
+                        placeholder="Search queries..."
+                        value={topQueriesSearch}
+                        onChange={(e) => { setTopQueriesSearch(e.target.value); setPage(1); }}
+                        sx={{
+                            width: { xs: '100%', sm: 220 },
+                            '& .MuiOutlinedInput-root': {
+                                bgcolor: isDarkMode ? '#283046' : '#fff',
+                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                height: 36,
+                                '& fieldset': { borderColor: isDarkMode ? '#404656' : '#d8d6de' },
+                                '&:hover fieldset': { borderColor: '#7367f0' },
+                                '&.Mui-focused fieldset': { borderColor: '#7367f0' }
+                            },
+                            '& input': { padding: '8px 14px', color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important' }
+                        }}
+                        InputProps={{
+                            startAdornment: <SearchOutlinedIcon sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', mr: 1, fontSize: 18 }} />
+                        }}
+                    />
+                </Box>
+            </Box>
+
+            {isLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+                    <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                </Box>
+            ) : filtered.length === 0 ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 10, gap: 2 }}>
+                    <SearchOutlinedIcon sx={{ fontSize: 56, color: isDarkMode ? '#404656' : '#d8d6de' }} />
+                    <Typography variant="body1" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                        {topQueriesSearch ? 'No queries match your search.' : 'No search query data available for this period.'}
+                    </Typography>
+                </Box>
+            ) : (
+                <>
+                    {/* Query rows */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                        {pageItems.map((item, idx) => {
+                            const globalRank = (page - 1) * PAGE_SIZE + idx + 1;
+                            const barPct = Math.max(2, (item.impressions / maxImpressions) * 100);
+                            const rankColor = globalRank <= 3 ? RANK_COLORS[globalRank - 1] : (isDarkMode ? '#404656' : '#e2e8f0');
+                            const rankTextColor = globalRank <= 3 ? '#fff' : (isDarkMode ? '#94a3b8' : '#64748b');
+
+                            return (
+                                <Box
+                                    key={item.query}
+                                    onClick={() => onQueryClick(item.query)}
+                                    sx={{
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        borderRadius: '10px',
+                                        border: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                                        bgcolor: isDarkMode ? '#1e2a3a' : '#fafafa',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.18s ease',
+                                        '&:hover': {
+                                            border: `1px solid #7367f0`,
+                                            bgcolor: isDarkMode ? 'rgba(115,103,240,0.07)' : 'rgba(115,103,240,0.04)',
+                                        },
+                                    }}
+                                >
+                                    {/* Impression bar background */}
+                                    <Box
+                                        sx={{
+                                            position: 'absolute',
+                                            left: 0,
+                                            top: 0,
+                                            bottom: 0,
+                                            width: `${barPct}%`,
+                                            bgcolor: isDarkMode ? 'rgba(115,103,240,0.07)' : 'rgba(115,103,240,0.05)',
+                                            borderRight: `2px solid ${isDarkMode ? 'rgba(115,103,240,0.25)' : 'rgba(115,103,240,0.15)'}`,
+                                            transition: 'width 0.4s ease',
+                                            pointerEvents: 'none',
+                                        }}
+                                    />
+
+                                    <Box
+                                        sx={{
+                                            position: 'relative',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: { xs: 1.5, sm: 2 },
+                                            px: { xs: 1.5, sm: 2.5 },
+                                            py: 1.5,
+                                            flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                                        }}
+                                    >
+                                        {/* Rank badge */}
+                                        <Box
+                                            sx={{
+                                                minWidth: 34,
+                                                height: 34,
+                                                borderRadius: '50%',
+                                                bgcolor: rankColor,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexShrink: 0,
+                                                boxShadow: globalRank <= 3 ? '0 2px 8px rgba(0,0,0,0.25)' : 'none',
+                                            }}
+                                        >
+                                            <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: rankTextColor, lineHeight: 1 }}>
+                                                #{globalRank}
+                                            </Typography>
+                                        </Box>
+
+                                        {/* Query text */}
+                                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    color: isDarkMode ? '#e2e8f0' : '#1e293b',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    fontSize: '0.875rem',
+                                                }}
+                                                title={item.query}
+                                            >
+                                                {item.query}
+                                            </Typography>
+                                        </Box>
+
+                                        {/* Metrics */}
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                gap: { xs: 1.5, sm: 2.5 },
+                                                flexShrink: 0,
+                                                flexWrap: 'wrap',
+                                            }}
+                                        >
+                                            {[
+                                                { label: 'Impressions', value: item.impressions.toLocaleString(), color: '#00cfe8', icon: <VisibilityOutlinedIcon sx={{ fontSize: 13 }} /> },
+                                                { label: 'Clicks', value: item.clicks.toLocaleString(), color: '#7367f0', icon: <MouseOutlinedIcon sx={{ fontSize: 13 }} /> },
+                                                { label: 'CTR', value: `${(item.ctr * 100).toFixed(2)}%`, color: '#28c76f', icon: <AdsClickOutlinedIcon sx={{ fontSize: 13 }} /> },
+                                                { label: 'Position', value: item.position.toFixed(1), color: '#ff9f43', icon: <FilterCenterFocusOutlinedIcon sx={{ fontSize: 13 }} /> },
+                                            ].map(metric => (
+                                                <Box
+                                                    key={metric.label}
+                                                    sx={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        minWidth: { xs: 56, sm: 68 },
+                                                    }}
+                                                >
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, color: metric.color, mb: 0.25 }}>
+                                                        {metric.icon}
+                                                        <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: metric.color, lineHeight: 1 }}>
+                                                            {metric.value}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Typography sx={{ fontSize: '0.68rem', color: isDarkMode ? '#94a3b8' : '#94a3b8', lineHeight: 1 }}>
+                                                        {metric.label}
+                                                    </Typography>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            );
+                        })}
+                    </Box>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                            <Pagination
+                                count={totalPages}
+                                page={page}
+                                onChange={(_, v) => setPage(v)}
+                                shape="rounded"
+                                showFirstButton
+                                showLastButton
+                                sx={{
+                                    '& .MuiPaginationItem-root': {
+                                        color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+                                        bgcolor: isDarkMode ? '#323a50' : '#f3f2f7',
+                                        border: 'none',
+                                        fontWeight: 500,
+                                        m: 0.2,
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': {
+                                            bgcolor: isDarkMode ? 'rgba(115,103,240,0.18)' : 'rgba(115,103,240,0.1)',
+                                            color: isDarkMode ? '#a5b4fc' : '#7367f0',
+                                        },
+                                        '&.Mui-selected': {
+                                            bgcolor: '#7367f0 !important',
+                                            color: '#fff !important',
+                                            fontWeight: 700,
+                                            '&:hover': { bgcolor: '#5e50ee !important' }
+                                        }
+                                    },
+                                    '& .MuiPaginationItem-ellipsis': { bgcolor: 'transparent' }
+                                }}
+                            />
+                        </Box>
+                    )}
+                </>
+            )}
         </Box>
     );
 };
