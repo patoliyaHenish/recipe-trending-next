@@ -81,7 +81,7 @@ const SearchResults = () => {
     };
 
     const [showFilters, setShowFilters] = useState(true);
-    
+
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
     const [searchQuery, setSearchQuery] = useState('');
@@ -92,7 +92,7 @@ const SearchResults = () => {
 
     const [customStartDate, setCustomStartDate] = useState(moment().subtract(7, 'days'));
     const [customEndDate, setCustomEndDate] = useState(moment());
-    
+
     const [selectedQuery, setSelectedQuery] = useState(null);
     const [selectedPageInfo, setSelectedPageInfo] = useState(null);
 
@@ -139,7 +139,7 @@ const SearchResults = () => {
         if (dimension === 'date') {
             const data = searchResultsData?.data || [];
             if (!Array.isArray(data) || data.length === 0) return null;
-            
+
             let totalClicks = 0;
             let totalImpressions = 0;
             let totalPositionSum = 0;
@@ -185,7 +185,7 @@ const SearchResults = () => {
         });
         return Object.values(grouped);
     }, [allResults, dimension, graphInterval]);
-    
+
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
     const handleSort = (key) => {
@@ -198,9 +198,9 @@ const SearchResults = () => {
 
     const sortedResults = useMemo(() => {
         let sortableItems = [...allResults];
-        
+
         if (searchQuery) {
-            sortableItems = sortableItems.filter(item => 
+            sortableItems = sortableItems.filter(item =>
                 item.dimensionValue && item.dimensionValue.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
@@ -220,7 +220,7 @@ const SearchResults = () => {
         }
         return sortableItems;
     }, [allResults, sortConfig]);
-    
+
     const pagination = useMemo(() => {
         const total = sortedResults.length;
         const totalPages = Math.ceil(total / limit) || 1;
@@ -299,10 +299,10 @@ const SearchResults = () => {
                             Search Console Analytics
                         </Typography>
                         <Tooltip title="Refresh Data" placement="top">
-                            <IconButton 
-                                onClick={handleRefresh} 
+                            <IconButton
+                                onClick={handleRefresh}
                                 disabled={isFetching}
-                                sx={{ 
+                                sx={{
                                     color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
                                     '&:hover': {
                                         color: '#7367f0',
@@ -319,8 +319,8 @@ const SearchResults = () => {
 
                 <Box className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mt-2" sx={{ borderBottom: 1, borderColor: 'divider', width: '100%', px: 2 }}>
                     <Box sx={{ width: { xs: '100%', sm: 'auto' }, maxWidth: '100%' }}>
-                        <Tabs 
-                            value={dimension} 
+                        <Tabs
+                            value={dimension}
                             onChange={(e, newValue) => setDimension(newValue)}
                             variant="scrollable"
                             scrollButtons="auto"
@@ -457,7 +457,7 @@ const SearchResults = () => {
                                             '&:hover fieldset': { borderColor: '#7367f0' },
                                             '&.Mui-focused fieldset': { borderColor: '#7367f0' },
                                         },
-                                        '& input': { 
+                                        '& input': {
                                             padding: '8px 14px',
                                             color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
                                             WebkitTextFillColor: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
@@ -489,7 +489,7 @@ const SearchResults = () => {
                                             '&:hover fieldset': { borderColor: '#7367f0' },
                                             '&.Mui-focused fieldset': { borderColor: '#7367f0' },
                                         },
-                                        '& input': { 
+                                        '& input': {
                                             padding: '8px 14px',
                                             color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
                                             WebkitTextFillColor: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
@@ -670,42 +670,42 @@ const SearchResults = () => {
                                                 data={groupedChartData}
                                                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                                             >
-                                            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#404656' : '#ebe9f1'} vertical={false} />
-                                            <XAxis 
-                                                dataKey="dimensionValue" 
-                                                tickFormatter={(tick) => {
-                                                    if (graphInterval === 'monthly') return moment(tick).format('MMM YYYY');
-                                                    return moment(tick).format('MMM DD');
-                                                }} 
-                                                stroke={isDarkMode ? '#b4b7bd' : '#6e6b7b'}
-                                                tick={{ fill: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}
-                                            />
-                                            <YAxis 
-                                                yAxisId="left" 
-                                                stroke="#7367f0" 
-                                                tick={{ fill: isDarkMode ? '#b4b7bd' : '#6e6b7b' }} 
-                                            />
-                                            <YAxis 
-                                                yAxisId="right" 
-                                                orientation="right" 
-                                                stroke="#00cfe8" 
-                                                tick={{ fill: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}
-                                            />
-                                            <RechartsTooltip 
-                                                contentStyle={{ backgroundColor: isDarkMode ? '#283046' : '#fff', borderColor: isDarkMode ? '#404656' : '#d8d6de', color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }}
-                                                labelFormatter={(label) => {
-                                                    if (graphInterval === 'weekly') {
-                                                        const endOfWeek = moment(label).endOf('isoWeek');
-                                                        return `${moment(label).format('MMM DD')} - ${endOfWeek.format('MMM DD, YYYY')}`;
-                                                    }
-                                                    if (graphInterval === 'monthly') return moment(label).format('MMMM YYYY');
-                                                    return moment(label).format('dddd, MMM DD, YYYY');
-                                                }}
-                                            />
-                                            <Legend wrapperStyle={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }} />
-                                            <Line yAxisId="left" type="monotone" dataKey="clicks" name="Clicks" stroke="#7367f0" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                                            <Line yAxisId="right" type="monotone" dataKey="impressions" name="Impressions" stroke="#00cfe8" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                                        </LineChart>
+                                                <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#404656' : '#ebe9f1'} vertical={false} />
+                                                <XAxis
+                                                    dataKey="dimensionValue"
+                                                    tickFormatter={(tick) => {
+                                                        if (graphInterval === 'monthly') return moment(tick).format('MMM YYYY');
+                                                        return moment(tick).format('MMM DD');
+                                                    }}
+                                                    stroke={isDarkMode ? '#b4b7bd' : '#6e6b7b'}
+                                                    tick={{ fill: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}
+                                                />
+                                                <YAxis
+                                                    yAxisId="left"
+                                                    stroke="#7367f0"
+                                                    tick={{ fill: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}
+                                                />
+                                                <YAxis
+                                                    yAxisId="right"
+                                                    orientation="right"
+                                                    stroke="#00cfe8"
+                                                    tick={{ fill: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}
+                                                />
+                                                <RechartsTooltip
+                                                    contentStyle={{ backgroundColor: isDarkMode ? '#283046' : '#fff', borderColor: isDarkMode ? '#404656' : '#d8d6de', color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }}
+                                                    labelFormatter={(label) => {
+                                                        if (graphInterval === 'weekly') {
+                                                            const endOfWeek = moment(label).endOf('isoWeek');
+                                                            return `${moment(label).format('MMM DD')} - ${endOfWeek.format('MMM DD, YYYY')}`;
+                                                        }
+                                                        if (graphInterval === 'monthly') return moment(label).format('MMMM YYYY');
+                                                        return moment(label).format('dddd, MMM DD, YYYY');
+                                                    }}
+                                                />
+                                                <Legend wrapperStyle={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }} />
+                                                <Line yAxisId="left" type="monotone" dataKey="clicks" name="Clicks" stroke="#7367f0" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                                                <Line yAxisId="right" type="monotone" dataKey="impressions" name="Impressions" stroke="#00cfe8" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                                            </LineChart>
                                         </ResponsiveContainer>
                                     </Box>
                                 </Box>
@@ -723,16 +723,16 @@ const SearchResults = () => {
                                     setSearchQuery(e.target.value);
                                     setPage(1);
                                 }}
-                                sx={{ 
-                                    width: 250, 
-                                    '& .MuiOutlinedInput-root': { 
-                                        bgcolor: isDarkMode ? '#283046' : '#fff', 
-                                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b', 
-                                        '& fieldset': { borderColor: isDarkMode ? '#404656' : '#d8d6de' }, 
-                                        '&:hover fieldset': { borderColor: '#7367f0' }, 
-                                        '&.Mui-focused fieldset': { borderColor: '#7367f0' } 
-                                    }, 
-                                    '& input': { padding: '8px 14px', color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important' } 
+                                sx={{
+                                    width: 250,
+                                    '& .MuiOutlinedInput-root': {
+                                        bgcolor: isDarkMode ? '#283046' : '#fff',
+                                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                        '& fieldset': { borderColor: isDarkMode ? '#404656' : '#d8d6de' },
+                                        '&:hover fieldset': { borderColor: '#7367f0' },
+                                        '&.Mui-focused fieldset': { borderColor: '#7367f0' }
+                                    },
+                                    '& input': { padding: '8px 14px', color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important' }
                                 }}
                                 InputProps={{
                                     startAdornment: <SearchOutlinedIcon sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', mr: 1, fontSize: 20 }} />
@@ -741,321 +741,321 @@ const SearchResults = () => {
                         </Box>
                         {/* Table */}
                         <TableContainer
-                    component={Paper}
-                    elevation={0}
-                    sx={{
-                        flex: 1,
-                        backgroundColor: 'transparent',
-                        backgroundImage: 'none',
-                        boxShadow: 'none',
-                        borderRadius: 0,
-                        overflowX: 'auto',
-                    }}
-                >
-                    <Table stickyHeader sx={{ minWidth: 900, borderCollapse: 'separate', borderSpacing: 0 }}>
-                        <TableHead>
-                            <TableRow sx={{
-                                'height': '48px',
-                                '& th': {
-                                    backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
-                                    color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
-                                    fontWeight: 600,
-                                    fontSize: '0.8rem',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.5px',
-                                    borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
-                                    borderTop: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
-                                    py: 0,
-                                    px: 2,
-                                }
-                            }}>
-                                <TableCell align="center" width={70}>#</TableCell>
-                                {dimension === 'country' && <TableCell align="center" width={70}>FLAG</TableCell>}
-                                <TableCell sortDirection={sortConfig.key === 'dimensionValue' ? sortConfig.direction : false}>
-                                    <TableSortLabel
-                                        active={sortConfig.key === 'dimensionValue'}
-                                        direction={sortConfig.key === 'dimensionValue' ? sortConfig.direction : 'asc'}
-                                        onClick={() => handleSort('dimensionValue')}
-                                        sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
-                                    >
-                                        {dimension.toUpperCase()}
-                                    </TableSortLabel>
-                                </TableCell>
-                                <TableCell align="center" sortDirection={sortConfig.key === 'clicks' ? sortConfig.direction : false}>
-                                    <TableSortLabel
-                                        active={sortConfig.key === 'clicks'}
-                                        direction={sortConfig.key === 'clicks' ? sortConfig.direction : 'asc'}
-                                        onClick={() => handleSort('clicks')}
-                                        sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
-                                    >
-                                        CLICKS
-                                    </TableSortLabel>
-                                </TableCell>
-                                <TableCell align="center" sortDirection={sortConfig.key === 'impressions' ? sortConfig.direction : false}>
-                                    <TableSortLabel
-                                        active={sortConfig.key === 'impressions'}
-                                        direction={sortConfig.key === 'impressions' ? sortConfig.direction : 'asc'}
-                                        onClick={() => handleSort('impressions')}
-                                        sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
-                                    >
-                                        IMPRESSIONS
-                                    </TableSortLabel>
-                                </TableCell>
-                                <TableCell align="center" sortDirection={sortConfig.key === 'ctr' ? sortConfig.direction : false}>
-                                    <TableSortLabel
-                                        active={sortConfig.key === 'ctr'}
-                                        direction={sortConfig.key === 'ctr' ? sortConfig.direction : 'asc'}
-                                        onClick={() => handleSort('ctr')}
-                                        sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
-                                    >
-                                        CTR
-                                    </TableSortLabel>
-                                </TableCell>
-                                <TableCell align="center" sortDirection={sortConfig.key === 'position' ? sortConfig.direction : false}>
-                                    <TableSortLabel
-                                        active={sortConfig.key === 'position'}
-                                        direction={sortConfig.key === 'position' ? sortConfig.direction : 'asc'}
-                                        onClick={() => handleSort('position')}
-                                        sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
-                                    >
-                                        AVG POSITION
-                                    </TableSortLabel>
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {(isLoading || isFetching) ? (
-                                <TableRow sx={{ height: '60px' }}>
-                                    <TableCell colSpan={6} align="center" sx={{ py: 8, borderBottom: 'none' }}>
-                                        <CircularProgress size={40} sx={{ color: '#7367f0' }} />
-                                    </TableCell>
-                                </TableRow>
-                            ) : results.length === 0 ? (
-                                <TableRow sx={{ height: '60px' }}>
-                                    <TableCell colSpan={6} align="center" sx={{ py: 8, color: isDarkMode ? '#b4b7bd' : '#6e6b7b', borderBottom: 'none' }}>
-                                        <Typography variant="body1">No results found.</Typography>
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                results.map((row, index) => (
-                                    <TableRow
-                                        key={index}
-                                        onClick={() => {
-                                            if (dimension === 'query') {
-                                                setSelectedQuery(row.dimensionValue);
-                                            }
-                                        }}
-                                        sx={{
-                                            'height': '60px',
-                                            cursor: dimension === 'query' ? 'pointer' : 'default',
-                                            '&:hover': {
-                                                backgroundColor: isDarkMode ? '#2f3851' : '#f8f8f8',
-                                            },
-                                            '& td': {
-                                                borderColor: isDarkMode ? '#3b4253' : '#ebe9f1',
-                                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                                py: 1,
-                                            }
-                                        }}
-                                    >
-                                        <TableCell align="center">
-                                            <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                                                {index + 1}
-                                            </Typography>
+                            component={Paper}
+                            elevation={0}
+                            sx={{
+                                flex: 1,
+                                backgroundColor: 'transparent',
+                                backgroundImage: 'none',
+                                boxShadow: 'none',
+                                borderRadius: 0,
+                                overflowX: 'auto',
+                            }}
+                        >
+                            <Table stickyHeader sx={{ minWidth: 900, borderCollapse: 'separate', borderSpacing: 0 }}>
+                                <TableHead>
+                                    <TableRow sx={{
+                                        'height': '48px',
+                                        '& th': {
+                                            backgroundColor: isDarkMode ? '#283046' : '#f3f2f7',
+                                            color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+                                            fontWeight: 600,
+                                            fontSize: '0.8rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.5px',
+                                            borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                                            borderTop: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
+                                            py: 0,
+                                            px: 2,
+                                        }
+                                    }}>
+                                        <TableCell align="center" width={70}>#</TableCell>
+                                        {dimension === 'country' && <TableCell align="center" width={70}>FLAG</TableCell>}
+                                        <TableCell sortDirection={sortConfig.key === 'dimensionValue' ? sortConfig.direction : false}>
+                                            <TableSortLabel
+                                                active={sortConfig.key === 'dimensionValue'}
+                                                direction={sortConfig.key === 'dimensionValue' ? sortConfig.direction : 'asc'}
+                                                onClick={() => handleSort('dimensionValue')}
+                                                sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
+                                            >
+                                                {dimension.toUpperCase()}
+                                            </TableSortLabel>
                                         </TableCell>
-                                        {dimension === 'country' && (
-                                            <TableCell align="center">
-                                                {(() => {
-                                                    const alpha2 = countries.alpha3ToAlpha2(row.dimensionValue.toUpperCase());
-                                                    if (alpha2) {
-                                                        return (
-                                                            <Box 
-                                                                component="img" 
-                                                                src={`https://flagcdn.com/w40/${alpha2.toLowerCase()}.png`} 
-                                                                alt={alpha2}
-                                                                sx={{ width: 28, height: 20, objectFit: 'cover', borderRadius: '2px', display: 'inline-block' }}
-                                                            />
-                                                        );
-                                                    }
-                                                    return null;
-                                                })()}
-                                            </TableCell>
-                                        )}
-                                        <TableCell>
-                                            {dimension === 'page' ? (
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                                    {row.image && (
-                                                        <Box
-                                                            component="img"
-                                                            src={getImage(row.image)}
-                                                            alt={row.title || "Recipe"}
-                                                            sx={{
-                                                                width: 64,
-                                                                height: 36,
-                                                                borderRadius: '6px',
-                                                                objectFit: 'cover',
-                                                                flexShrink: 0
-                                                            }}
-                                                        />
-                                                    )}
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        {row.title && <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>{row.title}</Typography>}
-                                                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); setSelectedPageInfo(row); }} sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                                                            <InfoOutlinedIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </Box>
-                                                </Box>
-                                            ) : (
-                                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                                    {dimension === 'country' ? (countries.getName(row.dimensionValue.toUpperCase(), 'en') || row.dimensionValue) : row.dimensionValue}
-                                                </Typography>
-                                            )}
+                                        <TableCell align="center" sortDirection={sortConfig.key === 'clicks' ? sortConfig.direction : false}>
+                                            <TableSortLabel
+                                                active={sortConfig.key === 'clicks'}
+                                                direction={sortConfig.key === 'clicks' ? sortConfig.direction : 'asc'}
+                                                onClick={() => handleSort('clicks')}
+                                                sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
+                                            >
+                                                CLICKS
+                                            </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center">
-                                            <Typography variant="body2">{row.clicks.toLocaleString()}</Typography>
+                                        <TableCell align="center" sortDirection={sortConfig.key === 'impressions' ? sortConfig.direction : false}>
+                                            <TableSortLabel
+                                                active={sortConfig.key === 'impressions'}
+                                                direction={sortConfig.key === 'impressions' ? sortConfig.direction : 'asc'}
+                                                onClick={() => handleSort('impressions')}
+                                                sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
+                                            >
+                                                IMPRESSIONS
+                                            </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center">
-                                            <Typography variant="body2">{row.impressions.toLocaleString()}</Typography>
+                                        <TableCell align="center" sortDirection={sortConfig.key === 'ctr' ? sortConfig.direction : false}>
+                                            <TableSortLabel
+                                                active={sortConfig.key === 'ctr'}
+                                                direction={sortConfig.key === 'ctr' ? sortConfig.direction : 'asc'}
+                                                onClick={() => handleSort('ctr')}
+                                                sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
+                                            >
+                                                CTR
+                                            </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center">
-                                            <Typography variant="body2">{(row.ctr * 100).toFixed(2)}%</Typography>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Typography variant="body2">{row.position.toFixed(2)}</Typography>
+                                        <TableCell align="center" sortDirection={sortConfig.key === 'position' ? sortConfig.direction : false}>
+                                            <TableSortLabel
+                                                active={sortConfig.key === 'position'}
+                                                direction={sortConfig.key === 'position' ? sortConfig.direction : 'asc'}
+                                                onClick={() => handleSort('position')}
+                                                sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b', '&.Mui-active': { color: isDarkMode ? '#e2e8f0' : '#1e293b' }, '& .MuiTableSortLabel-icon': { color: isDarkMode ? '#e2e8f0 !important' : '#1e293b !important' } }}
+                                            >
+                                                AVG POSITION
+                                            </TableSortLabel>
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                </TableHead>
+                                <TableBody>
+                                    {(isLoading || isFetching) ? (
+                                        <TableRow sx={{ height: '60px' }}>
+                                            <TableCell colSpan={6} align="center" sx={{ py: 8, borderBottom: 'none' }}>
+                                                <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : results.length === 0 ? (
+                                        <TableRow sx={{ height: '60px' }}>
+                                            <TableCell colSpan={6} align="center" sx={{ py: 8, color: isDarkMode ? '#b4b7bd' : '#6e6b7b', borderBottom: 'none' }}>
+                                                <Typography variant="body1">No results found.</Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        results.map((row, index) => (
+                                            <TableRow
+                                                key={index}
+                                                onClick={() => {
+                                                    if (dimension === 'query') {
+                                                        setSelectedQuery(row.dimensionValue);
+                                                    }
+                                                }}
+                                                sx={{
+                                                    'height': '60px',
+                                                    cursor: dimension === 'query' ? 'pointer' : 'default',
+                                                    '&:hover': {
+                                                        backgroundColor: isDarkMode ? '#2f3851' : '#f8f8f8',
+                                                    },
+                                                    '& td': {
+                                                        borderColor: isDarkMode ? '#3b4253' : '#ebe9f1',
+                                                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                        py: 1,
+                                                    }
+                                                }}
+                                            >
+                                                <TableCell align="center">
+                                                    <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                                                        {index + 1}
+                                                    </Typography>
+                                                </TableCell>
+                                                {dimension === 'country' && (
+                                                    <TableCell align="center">
+                                                        {(() => {
+                                                            const alpha2 = countries.alpha3ToAlpha2(row.dimensionValue.toUpperCase());
+                                                            if (alpha2) {
+                                                                return (
+                                                                    <Box
+                                                                        component="img"
+                                                                        src={`https://flagcdn.com/w40/${alpha2.toLowerCase()}.png`}
+                                                                        alt={alpha2}
+                                                                        sx={{ width: 28, height: 20, objectFit: 'cover', borderRadius: '2px', display: 'inline-block' }}
+                                                                    />
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })()}
+                                                    </TableCell>
+                                                )}
+                                                <TableCell>
+                                                    {dimension === 'page' ? (
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                            {row.image && (
+                                                                <Box
+                                                                    component="img"
+                                                                    src={getImage(row.image)}
+                                                                    alt={row.title || "Recipe"}
+                                                                    sx={{
+                                                                        width: 64,
+                                                                        height: 36,
+                                                                        borderRadius: '6px',
+                                                                        objectFit: 'cover',
+                                                                        flexShrink: 0
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                {row.title && <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>{row.title}</Typography>}
+                                                                <IconButton size="small" onClick={(e) => { e.stopPropagation(); setSelectedPageInfo(row); }} sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                                                                    <InfoOutlinedIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Box>
+                                                        </Box>
+                                                    ) : (
+                                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                                            {dimension === 'country' ? (countries.getName(row.dimensionValue.toUpperCase(), 'en') || row.dimensionValue) : row.dimensionValue}
+                                                        </Typography>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Typography variant="body2">{row.clicks.toLocaleString()}</Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Typography variant="body2">{row.impressions.toLocaleString()}</Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Typography variant="body2">{(row.ctr * 100).toFixed(2)}%</Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Typography variant="body2">{row.position.toFixed(2)}</Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
 
-                {/* ── Pagination ────────────────────────────────────────── */}
-                <Box
-                    className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0"
-                    sx={{
-                        px: 3,
-                        py: 2,
-                        backgroundColor: isDarkMode ? '#283046' : '#ffffff',
-                        borderTop: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
-                    }}
-                >
-                    <Box className="flex items-center gap-3">
-                        <Autocomplete
-                            freeSolo
-                            size="small"
-                            options={[10, 25, 50, 100, 150, 200, 250, 300, 350]}
-                            getOptionLabel={(option) => String(option)}
-                            value={limit || 10}
-                            onChange={(event, newValue) => {
-                                if (newValue) {
-                                    setLimit(Number(newValue));
-                                    setPage(1);
-                                }
-                            }}
-                            onInputChange={(event, newInputValue) => {
-                                const parsed = Number(newInputValue);
-                                if (!isNaN(parsed) && parsed > 0) {
-                                    setLimit(parsed);
-                                    setPage(1);
-                                }
-                            }}
+                        {/* ── Pagination ────────────────────────────────────────── */}
+                        <Box
+                            className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0"
                             sx={{
-                                width: 100,
-                                '& .MuiAutocomplete-inputRoot': {
-                                    paddingRight: '30px !important'
-                                },
-                                '& .MuiAutocomplete-clearIndicator': {
-                                    color: isDarkMode ? '#b4b7bd' : '#6e6b7b'
-                                },
-                                '& .MuiAutocomplete-popupIndicator': {
-                                    color: isDarkMode ? '#b4b7bd' : '#6e6b7b'
-                                }
+                                px: 3,
+                                py: 2,
+                                backgroundColor: isDarkMode ? '#283046' : '#ffffff',
+                                borderTop: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}`,
                             }}
-
-                            slotProps={{
-                                paper: {
-                                    sx: {
-                                        bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                        border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
-                                        '& .MuiAutocomplete-option': {
-                                            '&[aria-selected="true"]': {
-                                                bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.08)',
-                                                color: '#7367f0',
-                                            },
-                                            '&:hover': {
-                                                bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(0, 0, 0, 0.04)',
-                                            }
-                                        }
-                                    }
-                                }
-                            }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            bgcolor: isDarkMode ? '#283046' : '#fff',
-                                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                            height: 38,
-                                            '& fieldset': { borderColor: isDarkMode ? '#404656' : '#d8d6de' },
-                                            '&:hover fieldset': { borderColor: '#7367f0' },
-                                            '&.Mui-focused fieldset': { borderColor: '#7367f0', borderWidth: '1px' },
-                                        },
-                                        '& input': {
-                                            color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
-                                            WebkitTextFillColor: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
+                        >
+                            <Box className="flex items-center gap-3">
+                                <Autocomplete
+                                    freeSolo
+                                    size="small"
+                                    options={[10, 25, 50, 100, 150, 200, 250, 300, 350]}
+                                    getOptionLabel={(option) => String(option)}
+                                    value={limit || 10}
+                                    onChange={(event, newValue) => {
+                                        if (newValue) {
+                                            setLimit(Number(newValue));
+                                            setPage(1);
                                         }
                                     }}
+                                    onInputChange={(event, newInputValue) => {
+                                        const parsed = Number(newInputValue);
+                                        if (!isNaN(parsed) && parsed > 0) {
+                                            setLimit(parsed);
+                                            setPage(1);
+                                        }
+                                    }}
+                                    sx={{
+                                        width: 100,
+                                        '& .MuiAutocomplete-inputRoot': {
+                                            paddingRight: '30px !important'
+                                        },
+                                        '& .MuiAutocomplete-clearIndicator': {
+                                            color: isDarkMode ? '#b4b7bd' : '#6e6b7b'
+                                        },
+                                        '& .MuiAutocomplete-popupIndicator': {
+                                            color: isDarkMode ? '#b4b7bd' : '#6e6b7b'
+                                        }
+                                    }}
+
+                                    slotProps={{
+                                        paper: {
+                                            sx: {
+                                                bgcolor: isDarkMode ? '#283046' : '#ffffff',
+                                                color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
+                                                '& .MuiAutocomplete-option': {
+                                                    '&[aria-selected="true"]': {
+                                                        bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.08)',
+                                                        color: '#7367f0',
+                                                    },
+                                                    '&:hover': {
+                                                        bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(0, 0, 0, 0.04)',
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    bgcolor: isDarkMode ? '#283046' : '#fff',
+                                                    color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                    height: 38,
+                                                    '& fieldset': { borderColor: isDarkMode ? '#404656' : '#d8d6de' },
+                                                    '&:hover fieldset': { borderColor: '#7367f0' },
+                                                    '&.Mui-focused fieldset': { borderColor: '#7367f0', borderWidth: '1px' },
+                                                },
+                                                '& input': {
+                                                    color: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
+                                                    WebkitTextFillColor: isDarkMode ? '#d0d2d6 !important' : '#6e6b7b !important',
+                                                }
+                                            }}
+                                        />
+                                    )}
                                 />
-                            )}
-                        />
-                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                            Entries per page
-                        </Typography>
-                    </Box>
+                                <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                                    Entries per page
+                                </Typography>
+                            </Box>
 
-                    <Box className="flex items-center gap-4">
-                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                            Showing {Math.min((page - 1) * limit + 1, pagination.total || 0)} to {Math.min(page * limit, pagination.total || 0)} of {pagination.total || 0} entries
-                        </Typography>
-                    </Box>
+                            <Box className="flex items-center gap-4">
+                                <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
+                                    Showing {Math.min((page - 1) * limit + 1, pagination.total || 0)} to {Math.min(page * limit, pagination.total || 0)} of {pagination.total || 0} entries
+                                </Typography>
+                            </Box>
 
-                    <Pagination
-                        count={pagination.totalPages || 1}
-                        page={page || 1}
-                        onChange={(e, value) => setPage(value)}
-                        shape="rounded"
-                        showFirstButton
-                        showLastButton
-                        sx={{
-                            '& .MuiPaginationItem-root': {
-                                color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
-                                bgcolor: isDarkMode ? '#323a50' : '#f3f2f7',
-                                border: 'none',
-                                fontWeight: 500,
-                                m: 0.2,
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                    bgcolor: isDarkMode ? 'rgba(115,103,240,0.18)' : 'rgba(115,103,240,0.1)',
-                                    color: isDarkMode ? '#a5b4fc' : '#7367f0',
-                                },
-                                '&.Mui-selected': {
-                                    bgcolor: '#7367f0 !important',
-                                    color: '#fff !important',
-                                    fontWeight: 700,
-                                    '&:hover': {
-                                        bgcolor: '#5e50ee !important',
+                            <Pagination
+                                count={pagination.totalPages || 1}
+                                page={page || 1}
+                                onChange={(e, value) => setPage(value)}
+                                shape="rounded"
+                                showFirstButton
+                                showLastButton
+                                sx={{
+                                    '& .MuiPaginationItem-root': {
+                                        color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+                                        bgcolor: isDarkMode ? '#323a50' : '#f3f2f7',
+                                        border: 'none',
+                                        fontWeight: 500,
+                                        m: 0.2,
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': {
+                                            bgcolor: isDarkMode ? 'rgba(115,103,240,0.18)' : 'rgba(115,103,240,0.1)',
+                                            color: isDarkMode ? '#a5b4fc' : '#7367f0',
+                                        },
+                                        '&.Mui-selected': {
+                                            bgcolor: '#7367f0 !important',
+                                            color: '#fff !important',
+                                            fontWeight: 700,
+                                            '&:hover': {
+                                                bgcolor: '#5e50ee !important',
+                                            }
+                                        }
+                                    },
+                                    '& .MuiPaginationItem-ellipsis': {
+                                        bgcolor: 'transparent',
                                     }
-                                }
-                            },
-                            '& .MuiPaginationItem-ellipsis': {
-                                bgcolor: 'transparent',
-                            }
-                        }}
-                    />
-                </Box>
+                                }}
+                            />
+                        </Box>
                     </>
                 )}
             </Box>

@@ -35,6 +35,7 @@ import AddEditRecipePage from '../../pages_old/admin/recipe management/AddEditRe
 import RecipeSubCategory from '../../pages_old/admin/sub-category/RecipeSubCategory';
 import Dashboard from '../../pages_old/admin/Dashboard';
 import SearchResults from '../../pages_old/admin/SearchResults';
+import WebAnalytics from '../../pages_old/admin/WebAnalytics';
 
 export default function AdminRouter() {
   return (
@@ -86,6 +87,7 @@ export default function AdminRouter() {
         <Route path="failed-logs" element={<FailedLogs />} />
         <Route path="failed-searches" element={<FailedSearches />} />
         <Route path="search-results" element={<SearchResults />} />
+        <Route path="web-analytics" element={<WebAnalytics />} />
         
         {/* Catch all to redirect to users or a 404 inside admin */}
         <Route path="*" element={<div>Admin Page Not Found</div>} />
