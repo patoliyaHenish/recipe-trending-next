@@ -21,7 +21,6 @@ import { settingsApi } from "../features/api/settingsApi";
 import { contactApi } from "../features/api/contactApi";
 import { failedLogApi } from "../features/api/failedLogApi";
 import { rbacApi } from "../features/api/rbacApi";
-import { adminViewLogsApi } from "../features/api/adminViewLogsApi";
 import { recipeNoteApi } from "../features/api/recipeNoteApi";
 import { paymentSlipApi } from "../features/api/paymentSlipApi";
 import { assignedRecipeApi } from "../features/api/assignedRecipeApi";
@@ -58,7 +57,6 @@ export const appStore = configureStore({
             contactApi.middleware,
             failedLogApi.middleware,
             rbacApi.middleware,
-            adminViewLogsApi.middleware,
             recipeNoteApi.middleware,
             paymentSlipApi.middleware,
             assignedRecipeApi.middleware,

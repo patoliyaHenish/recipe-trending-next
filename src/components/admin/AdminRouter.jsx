@@ -72,7 +72,6 @@ export default function AdminRouter() {
         <Route path="manage-footer" element={<FooterManagement />} />
         <Route path="manage-navbar" element={<NavbarManagement />} />
         <Route path="manage-home-section" element={<HomeSectionManagement />} />
-        <Route path="manage-home-sections" element={<HomeSectionManagement />} />
         <Route path="manage-home-section-items" element={<HomeSectionItemsManagement />} />
         <Route path="manage-home-section-items/:id" element={<HomeSectionItemsManagement />} />
         <Route path="manage-config" element={<ManageConfig />} />
@@ -80,7 +79,6 @@ export default function AdminRouter() {
         {/* System & Logs */}
         <Route path="manage-contacts" element={<ManageContacts />} />
         <Route path="notifications" element={<Notifications />} />
-        <Route path="manage-payroll" element={<PayrollManagement />} />
         <Route path="manage-payment-slips" element={<PayrollManagement />} />
         <Route path="activity-logs" element={<ActivityLogs />} />
         <Route path="cron-logs" element={<CronLogs />} />
