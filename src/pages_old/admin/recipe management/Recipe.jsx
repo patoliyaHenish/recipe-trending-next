@@ -580,7 +580,9 @@ const Recipe = () => {
           ? {
             ...r,
             public_approved: !publicToggleItem.public_approved,
-            public_approved_time: !publicToggleItem.public_approved ? response.public_approved_time : null
+            public_approved_time: !publicToggleItem.public_approved ? response.public_approved_time : null,
+            public_approved_by: !publicToggleItem.public_approved ? response.public_approved_by : null,
+            public_approved_by_name: !publicToggleItem.public_approved ? response.public_approved_by_name : null
           }
           : r
       ));
@@ -608,8 +610,12 @@ const Recipe = () => {
             ...r,
             is_admin_approved: !adminToggleItem.is_admin_approved,
             admin_approved_time: response.admin_approved_time,
+            admin_approved_by: response.admin_approved_by,
+            admin_approved_by_name: response.admin_approved_by_name,
             public_approved: response.public_approved,
-            public_approved_time: response.public_approved_time
+            public_approved_time: response.public_approved_time,
+            public_approved_by: response.public_approved ? r.public_approved_by : null,
+            public_approved_by_name: response.public_approved ? r.public_approved_by_name : null
           }
           : r
       ));
@@ -3030,7 +3036,9 @@ const Recipe = () => {
                     ? {
                       ...r,
                       public_approved: newValue,
-                      public_approved_time: newValue ? response.public_approved_time : null
+                      public_approved_time: newValue ? response.public_approved_time : null,
+                      public_approved_by: newValue ? response.public_approved_by : null,
+                      public_approved_by_name: newValue ? response.public_approved_by_name : null
                     }
                     : r
                 ));
@@ -3054,8 +3062,12 @@ const Recipe = () => {
                       ...r,
                       is_admin_approved: newValue,
                       admin_approved_time: response.admin_approved_time,
+                      admin_approved_by: response.admin_approved_by,
+                      admin_approved_by_name: response.admin_approved_by_name,
                       public_approved: response.public_approved,
-                      public_approved_time: response.public_approved_time
+                      public_approved_time: response.public_approved_time,
+                      public_approved_by: response.public_approved ? r.public_approved_by : null,
+                      public_approved_by_name: response.public_approved ? r.public_approved_by_name : null
                     }
                     : r
                 ));

@@ -627,10 +627,20 @@ const ViewRecipeDialog = ({
                </Box>
                <Box className="flex flex-col gap-3">
                  {(canPublish || isAdmin) && data.public_approved && data.public_approved_time && (
-                   <DetailRow label="Public Approved At" value={formatDateTime(data.public_approved_time)} />
+                   <>
+                     <DetailRow label="Public Approved At" value={formatDateTime(data.public_approved_time)} />
+                     {data.public_approved_by_name && (
+                       <DetailRow label="Public Approved By" value={data.public_approved_by_name} />
+                     )}
+                   </>
                  )}
                  {data.is_admin_approved && data.admin_approved_time && (
-                   <DetailRow label="Admin Approved At" value={formatDateTime(data.admin_approved_time)} />
+                   <>
+                     <DetailRow label="Admin Approved At" value={formatDateTime(data.admin_approved_time)} />
+                     {data.admin_approved_by_name && (
+                       <DetailRow label="Admin Approved By" value={data.admin_approved_by_name} />
+                     )}
+                   </>
                  )}
                </Box>
             </Box>
