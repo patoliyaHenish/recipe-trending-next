@@ -22,24 +22,26 @@ export default async function RootLayout({ children }) {
     apiUrl = `https://${apiUrl}`;
   }
 
-  try {
-    const navRes = await fetch(`${apiUrl}/api/manage-nav-items/get-for-navbar`, { next: { revalidate: 60 } });
-    if (navRes.ok) {
-      const navData = await navRes.json();
-      initialNavItems = navData?.data || [];
+  if (apiUrl) {
+    try {
+      const navRes = await fetch(`${apiUrl}/api/manage-nav-items/get-for-navbar`, { next: { revalidate: 60 } });
+      if (navRes.ok) {
+        const navData = await navRes.json();
+        initialNavItems = navData?.data || [];
+      }
+    } catch (error) {
+      console.error("Failed to fetch nav items for SSR", error);
     }
-  } catch (error) {
-    console.error("Failed to fetch nav items for SSR", error);
-  }
 
-  try {
-    const footerRes = await fetch(`${apiUrl}/api/manage-footer-items/get-for-footer`, { next: { revalidate: 60 } });
-    if (footerRes.ok) {
-      const footerData = await footerRes.json();
-      initialFooterItems = footerData?.data || [];
+    try {
+      const footerRes = await fetch(`${apiUrl}/api/manage-footer-items/get-for-footer`, { next: { revalidate: 60 } });
+      if (footerRes.ok) {
+        const footerData = await footerRes.json();
+        initialFooterItems = footerData?.data || [];
+      }
+    } catch (error) {
+      console.error("Failed to fetch footer items for SSR", error);
     }
-  } catch (error) {
-    console.error("Failed to fetch footer items for SSR", error);
   }
   return (
     <html

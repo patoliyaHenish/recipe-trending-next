@@ -78,10 +78,6 @@ export async function generateMetadata({ params }) {
   };
 }
 
-// Optional: Pre-render top recipes at build time
-export async function generateStaticParams() {
-  return []; // We can add popular slugs here, otherwise they render on demand
-}
 
 export default async function RecipePage({ params }) {
   const { slug } = await params;

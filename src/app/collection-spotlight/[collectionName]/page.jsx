@@ -3,7 +3,7 @@ import BannerRecipes from '../../../pages_old/users/BannerRecipes';
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }) {
-  const { collectionName } = params;
+  const { collectionName } = await params;
   const name = collectionName?.split('-').join(' ') || 'Collection';
   return {
     title: `${name} | Recipe Trending`,
