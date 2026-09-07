@@ -5,6 +5,7 @@ import { useGetRecipeSuggestionsQuery } from "../features/api/recipeDetailsApi";
 import { useSearchRecipesQuery } from "../features/api/searchApi";
 import RecipeCard from "./common/RecipeCard";
 import RecipeGridSkeleton from "./common/RecipeGridSkeleton";
+import { AdsterraNativeBanner } from "./ads";
 
 const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions, initialFallback }) => {
   const [limit, setLimit] = useState(16);
@@ -59,13 +60,19 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
         {suggestions.length > 0 ? "You’ll Also Love" : "Recommended"}
       </Typography>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-        {displayRecipes.map((recipe) => (
-          <RecipeCard
-            key={recipe.recipe_id || recipe.id}
-            recipe={recipe}
-            mobileLayout="vertical"
-            isRelated={true}
-          />
+        {displayRecipes.map((recipe, index) => (
+          <React.Fragment key={recipe.recipe_id || recipe.id || index}>
+            <RecipeCard
+              recipe={recipe}
+              mobileLayout="vertical"
+              isRelated={true}
+            />
+            {(index + 1) % 8 === 0 && (
+              <Box className="col-span-full flex md:hidden justify-center items-center my-4 w-full">
+                <AdsterraNativeBanner />
+              </Box>
+            )}
+          </React.Fragment>
         ))}
       </div>
       
