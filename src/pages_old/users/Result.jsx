@@ -46,6 +46,23 @@ import RecipeGridSkeleton from "../../components/common/RecipeGridSkeleton";
 import RecipeCard from "../../components/common/RecipeCard";
 import { useTheme } from "../../context/ThemeContext";
 import { trackEvent } from "../../utils/analytics";
+import { AdsterraBanner728x90, AdsterraNativeBanner } from "../../components/ads";
+
+const getAdIndices = (items, seed = 1) => {
+  const indices = new Set();
+  if (!items || items.length === 0) return indices;
+  let curr = 0;
+  let s = (seed || 1) * 16807;
+  while (curr < items.length) {
+    s = (s * 9301 + 49297) % 233280;
+    const step = (s / 233280) > 0.5 ? 8 : 12;
+    curr += step;
+    if (curr <= items.length) {
+      indices.add(curr - 1);
+    }
+  }
+  return indices;
+};
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -1512,76 +1529,92 @@ const Result = () => {
           </Alert>
         )}
         {(searchData && searchData.recipes && searchData.recipes.length > 0) || (allRecipes && allRecipes.length > 0) ? (
-          <>
-            <div
-              ref={scrollContainerRef}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
-            >
-              {allRecipes.map((recipe, index) => {
-                const normalizedRecipe = {
-                  ...recipe,
-                  recipe_id: recipe.recipe_id || recipe.id,
-                  title: recipe.title || recipe.name,
-                };
-                return (
-                  <div
-                    key={normalizedRecipe.recipe_id || index}
-                    className="h-full"
-                  >
-                    <RecipeCard recipe={normalizedRecipe} mobileLayout="vertical" hideVideoIcon />
-                  </div>
-                );
-              })}
-            </div>
-
-            {hasMore && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 5, md: 7 }, mb: 4 }}>
-                <Button
-                  variant="contained"
-                  onClick={handleLoadMore}
-                  disabled={searchLoading}
-                  sx={{
-                    px: { xs: 3, md: 5 },
-                    py: { xs: 0.8, md: 1.1 },
-                    bgcolor: isDarkMode ? 'rgba(202,96,20,0.15)' : '#FEE7D6',
-                    color: isDarkMode ? '#FFEFD9' : '#CA6014',
-                    border: `1.5px solid ${isDarkMode ? 'rgba(202,96,20,0.4)' : '#CA6014'}`,
-                    borderRadius: '8px',
-                    fontFamily: "'Basic', sans-serif",
-                    fontSize: { xs: '0.9rem', md: '1rem' },
-                    fontWeight: 600,
-                    letterSpacing: '0.05em',
-                    textTransform: 'none',
-                    cursor: searchLoading ? 'not-allowed' : 'pointer',
-                    opacity: searchLoading ? 0.7 : 1,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    boxShadow: isDarkMode ? 'none' : '0 4px 14px rgba(202, 96, 20, 0.15)',
-                    '&:hover': {
-                      bgcolor: searchLoading ? undefined : '#CA6014',
-                      color: searchLoading ? undefined : '#fff',
-                      transform: searchLoading ? 'none' : 'translateY(-2px)',
-                      boxShadow: searchLoading ? 'none' : '0 6px 20px rgba(202, 96, 20, 0.25)',
-                    },
-                    '&:active': {
-                      transform: 'translateY(0)',
-                    }
-                  }}
+          (() => {
+            const adIndices = getAdIndices(allRecipes, (executedSearchQuery ? executedSearchQuery.length : 1) + 17);
+            return (
+              <>
+                <div
+                  ref={scrollContainerRef}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
                 >
-                  {searchLoading ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <CircularProgress size={20} sx={{ color: 'inherit' }} />
-                      <span>Loading...</span>
-                    </Box>
-                  ) : (
-                    <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                      <span>Load More</span>
-                      <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↓</span>
-                    </Box>
-                  )}
-                </Button>
-              </Box>
-            )}
-          </>
+                  {allRecipes.map((recipe, index) => {
+                    const normalizedRecipe = {
+                      ...recipe,
+                      recipe_id: recipe.recipe_id || recipe.id,
+                      title: recipe.title || recipe.name,
+                    };
+                    const showAd = adIndices.has(index);
+
+                    return (
+                      <React.Fragment key={normalizedRecipe.recipe_id || index}>
+                        <div className="h-full">
+                          <RecipeCard recipe={normalizedRecipe} mobileLayout="vertical" hideVideoIcon />
+                        </div>
+                        {showAd && (
+                          <Box className="col-span-full flex justify-center items-center my-4 w-full">
+                            <Box className="block md:hidden w-full">
+                              <AdsterraNativeBanner />
+                            </Box>
+                            <Box className="hidden md:block">
+                              <AdsterraBanner728x90 />
+                            </Box>
+                          </Box>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+
+                {hasMore && (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 5, md: 7 }, mb: 4 }}>
+                    <Button
+                      variant="contained"
+                      onClick={handleLoadMore}
+                      disabled={searchLoading}
+                      sx={{
+                        px: { xs: 3, md: 5 },
+                        py: { xs: 0.8, md: 1.1 },
+                        bgcolor: isDarkMode ? 'rgba(202,96,20,0.15)' : '#FEE7D6',
+                        color: isDarkMode ? '#FFEFD9' : '#CA6014',
+                        border: `1.5px solid ${isDarkMode ? 'rgba(202,96,20,0.4)' : '#CA6014'}`,
+                        borderRadius: '8px',
+                        fontFamily: "'Basic', sans-serif",
+                        fontSize: { xs: '0.9rem', md: '1rem' },
+                        fontWeight: 600,
+                        letterSpacing: '0.05em',
+                        textTransform: 'none',
+                        cursor: searchLoading ? 'not-allowed' : 'pointer',
+                        opacity: searchLoading ? 0.7 : 1,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: isDarkMode ? 'none' : '0 4px 14px rgba(202, 96, 20, 0.15)',
+                        '&:hover': {
+                          bgcolor: searchLoading ? undefined : '#CA6014',
+                          color: searchLoading ? undefined : '#fff',
+                          transform: searchLoading ? 'none' : 'translateY(-2px)',
+                          boxShadow: searchLoading ? 'none' : '0 6px 20px rgba(202, 96, 20, 0.25)',
+                        },
+                        '&:active': {
+                          transform: 'translateY(0)',
+                        }
+                      }}
+                    >
+                      {searchLoading ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <CircularProgress size={20} sx={{ color: 'inherit' }} />
+                          <span>Loading...</span>
+                        </Box>
+                      ) : (
+                        <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+                          <span>Load More</span>
+                          <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↓</span>
+                        </Box>
+                      )}
+                    </Button>
+                  </Box>
+                )}
+              </>
+            );
+          })()
         ) : null}
         {searchData && searchData.recipes.length === 0 && !searchLoading && (
           <div className="flex flex-col items-center justify-center py-16 sm:py-24 animate-fade-in">

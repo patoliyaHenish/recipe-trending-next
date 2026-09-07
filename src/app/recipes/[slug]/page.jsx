@@ -2,7 +2,7 @@ import React from 'react';
 import RecipeDetail from '../../../pages_old/users/RecipeDetail';
 import { notFound } from 'next/navigation';
 
-export const revalidate = 3600; // ISR: Revalidate every hour
+export const dynamic = 'force-dynamic';
 
 // Fetch recipe details directly on the server for SEO
 async function getRecipeDetails(slug) {

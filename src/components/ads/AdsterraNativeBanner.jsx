@@ -38,7 +38,7 @@ const AdsterraNativeBanner = () => {
   }, []);
 
   return (
-    <div className="adsterra-native-banner flex justify-center items-center w-full min-h-[120px] my-3">
+    <div className="adsterra-native-banner flex justify-center items-center w-full min-h-[120px] my-0">
       <iframe
         ref={iframeRef}
         title="Adsterra Native Banner Ad"

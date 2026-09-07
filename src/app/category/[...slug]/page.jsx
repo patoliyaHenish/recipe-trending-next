@@ -1,9 +1,9 @@
 import React from 'react';
 import CategoryPage from '../../../pages_old/users/CategoryPage';
 import { notFound } from 'next/navigation';
-
-
 import { cookies } from 'next/headers';
+
+export const dynamic = 'force-dynamic';
 
 // Fetch category/subcategory details directly on the server for SEO
 async function getCategoryDetails(slugArray) {

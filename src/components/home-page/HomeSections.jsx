@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import RecipeCard from '../common/RecipeCard';
 import RecipeGridSkeleton from '../common/RecipeGridSkeleton';
@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { getImage } from '../../utils/helper';
 import noImageFound from '../../assets/no-image-found.png';
 import Cookies from 'js-cookie';
-import { useEffect, useState } from 'react';
+import { AdsterraBanner728x90, AdsterraNativeBanner } from '../ads';
 
 const SECTIONS_PER_PAGE = 2;
 
@@ -121,7 +121,6 @@ const HomeSections = () => {
     </Box>
   );
 
-
   const CategoryCard = ({ item, type }) => {
     const imgVal = (typeof item.image === 'string' ? item.image.trim() : '') || '';
     const imgUrl = imgVal && imgVal.toLowerCase() !== 'null' ? getImage(imgVal) : '';
@@ -210,19 +209,17 @@ const HomeSections = () => {
           String(section.section_type || '').toLowerCase() === 'feature' ||
           String(section.type || '').toLowerCase() === 'collection';
 
-        if (isCollectionSection) {
-          return (
-            <React.Fragment key={section.home_section_id}>
-              {sectionIndex > 0 && (
-                <Divider sx={{ my: { xs: 4, md: 6 }, borderColor: isDarkMode ? '#2d3748' : '#e5e7eb' }} />
-              )}
+        return (
+          <React.Fragment key={section.home_section_id}>
+
+            {isCollectionSection ? (
               <Box sx={{ mb: { xs: 4, md: 6 } }}>
                 <CollectionCard
                   image={section.image || section.background_image}
                   title={section.name}
                   description={section.description}
                   isDarkMode={isDarkMode}
-                   onClick={() => {
+                  onClick={() => {
                     const slug = slugify(section.name || 'collection');
                     const searchParams = new URLSearchParams({
                       image: section.image || section.background_image || '',
@@ -231,57 +228,91 @@ const HomeSections = () => {
                   }}
                 />
               </Box>
-            </React.Fragment>
-          );
-        }
+            ) : (
+              section.items && section.items.length > 0 && (() => {
+                const isRecipeType = isRecipeSectionType(section.type);
 
-        if (!section.items || section.items.length === 0) return null;
+                // Compute ad insertion indices after every 8 or 12 recipes randomly
+                const getAdIndices = (items, seed) => {
+                  const indices = new Set();
+                  if (!items || items.length === 0) return indices;
+                  let curr = 0;
+                  let s = (seed || 1) * 16807;
+                  while (curr < items.length) {
+                    s = (s * 9301 + 49297) % 233280;
+                    const step = (s / 233280) > 0.5 ? 8 : 12;
+                    curr += step;
+                    if (curr <= items.length) {
+                      indices.add(curr - 1);
+                    }
+                  }
+                  return indices;
+                };
 
-        const isRecipeType = isRecipeSectionType(section.type);
+                const adIndices = isRecipeType
+                  ? getAdIndices(section.items, (section.home_section_id || 1) + sectionIndex * 37)
+                  : new Set();
 
-        return (
-          <React.Fragment key={section.home_section_id}>
-            {sectionIndex > 0 && (
-              <Divider sx={{ my: { xs: 4, md: 6 }, borderColor: isDarkMode ? '#2d3748' : '#e5e7eb' }} />
+                return (
+                  <Box sx={{ mb: { xs: 4, md: 6 } }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Typography
+                        component="h2"
+                        variant="h3"
+                        sx={{
+                          fontFamily: "'Basic', sans-serif !important",
+                          fontWeight: 500,
+                          fontSize: { xs: '2rem', md: '3.2rem' },
+                          color: isDarkMode ? '#FFF7EC' : '#2B2828',
+                        }}
+                      >
+                        {section.name}
+                      </Typography>
+                    </Box>
+
+                    <Grid container spacing={3}>
+                      {section.items.map((item, index) => {
+                        const showAd = isRecipeType && adIndices.has(index);
+
+                        return (
+                          <React.Fragment key={index}>
+                            <Grid size={{ 
+                              xs: 12 / (isRecipeType ? 1 : 2),
+                              sm: isRecipeType ? 6 : 4,
+                              md: isRecipeType ? 4 : 3,
+                              lg: isRecipeType ? 3 : 2
+                            }}>
+                              {isRecipeType ? (
+                                <RecipeCard recipe={item} mobileLayout="vertical" />
+                              ) : (
+                                <CategoryCard item={item} type={section.type} />
+                              )}
+                            </Grid>
+
+                            {/* Render ad after every 8 or 12 recipe cards randomly */}
+                            {showAd && (
+                              <Grid size={{ xs: 12 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'center', my: { xs: 2, md: 3 }, width: '100%' }}>
+                                  <Box sx={{ display: { xs: 'block', md: 'none' }, width: '100%' }}>
+                                    <AdsterraNativeBanner />
+                                  </Box>
+                                  <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                                    <AdsterraBanner728x90 />
+                                  </Box>
+                                </Box>
+                              </Grid>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </Grid>
+                  </Box>
+                );
+              })()
             )}
-            <Box sx={{ mb: { xs: 4, md: 6 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Typography
-                  component="h2"
-                  variant="h3"
-                  sx={{
-                    fontFamily: "'Basic', sans-serif !important",
-                    fontWeight: 500,
-                    fontSize: { xs: '2rem', md: '3.2rem' },
-                    color: isDarkMode ? '#FFF7EC' : '#2B2828',
-                  }}
-                >
-                  {section.name}
-                </Typography>
-              </Box>
-
-              <Grid container spacing={3}>
-                {section.items.map((item, index) => (
-                  <Grid size={{ 
-                    xs: 12 / (isRecipeType ? 1 : 2),
-                    sm: isRecipeType ? 6 : 4,
-                    md: isRecipeType ? 4 : 3,
-                    lg: isRecipeType ? 3 : 2
-                  }} key={index}>
-                    {isRecipeType ? (
-                      <RecipeCard recipe={item} mobileLayout="vertical" />
-                    ) : (
-                      <CategoryCard item={item} type={section.type} />
-                    )}
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
           </React.Fragment>
         );
       })}
-
-
 
       {hasMore && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 4, md: 6 }, mb: 4 }}>
@@ -334,5 +365,3 @@ const HomeSections = () => {
 };
 
 export default HomeSections;
-
-

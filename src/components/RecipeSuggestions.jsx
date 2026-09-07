@@ -5,7 +5,23 @@ import { useGetRecipeSuggestionsQuery } from "../features/api/recipeDetailsApi";
 import { useSearchRecipesQuery } from "../features/api/searchApi";
 import RecipeCard from "./common/RecipeCard";
 import RecipeGridSkeleton from "./common/RecipeGridSkeleton";
-import { AdsterraNativeBanner } from "./ads";
+import { AdsterraNativeBanner, AdsterraBanner728x90 } from "./ads";
+
+const getAdIndices = (items, seed = 1) => {
+  const indices = new Set();
+  if (!items || items.length === 0) return indices;
+  let curr = 0;
+  let s = seed * 16807;
+  while (curr < items.length) {
+    s = (s * 9301 + 49297) % 233280;
+    const step = (s / 233280) > 0.5 ? 8 : 12;
+    curr += step;
+    if (curr <= items.length) {
+      indices.add(curr - 1);
+    }
+  }
+  return indices;
+};
 
 const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions, initialFallback }) => {
   const [limit, setLimit] = useState(16);
@@ -26,6 +42,8 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
   const fallbackRecipes = fallbackData?.recipes || fallbackData?.data?.recipes || (Array.isArray(fallbackData?.data) ? fallbackData.data : []);
   const displayRecipes = suggestions.length > 0 ? suggestions : fallbackRecipes;
   
+  const adIndices = getAdIndices(displayRecipes, Number(recipeId) || 42);
+
   // isLoading is for the initial load
   const isLoading = ((!initialSuggestions && limit === 16) && isLoadingSuggestions) || (!initialFallback && needFallback && isLoadingFallback);
 
@@ -60,20 +78,29 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
         {suggestions.length > 0 ? "You’ll Also Love" : "Recommended"}
       </Typography>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-        {displayRecipes.map((recipe, index) => (
-          <React.Fragment key={recipe.recipe_id || recipe.id || index}>
-            <RecipeCard
-              recipe={recipe}
-              mobileLayout="vertical"
-              isRelated={true}
-            />
-            {(index + 1) % 8 === 0 && (
-              <Box className="col-span-full flex md:hidden justify-center items-center my-4 w-full">
-                <AdsterraNativeBanner />
-              </Box>
-            )}
-          </React.Fragment>
-        ))}
+        {displayRecipes.map((recipe, index) => {
+          const showAd = adIndices.has(index);
+
+          return (
+            <React.Fragment key={recipe.recipe_id || recipe.id || index}>
+              <RecipeCard
+                recipe={recipe}
+                mobileLayout="vertical"
+                isRelated={true}
+              />
+              {showAd && (
+                <Box className="col-span-full flex justify-center items-center my-4 w-full">
+                  <Box className="block md:hidden w-full">
+                    <AdsterraNativeBanner />
+                  </Box>
+                  <Box className="hidden md:block">
+                    <AdsterraBanner728x90 />
+                  </Box>
+                </Box>
+              )}
+            </React.Fragment>
+          );
+        })}
       </div>
       
       {suggestions.length > 0 && suggestions.length >= limit && (

@@ -1,5 +1,7 @@
 import BannerRecipes from '../../../pages_old/users/BannerRecipes';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }) {
   const { collectionName } = params;
   const name = collectionName?.split('-').join(' ') || 'Collection';

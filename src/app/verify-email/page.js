@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Verify Email | Recipe Trending',
   description: 'Verify your email address to complete your Recipe Trending account setup.',
@@ -8,7 +10,7 @@ import VerifyEmailClient from './VerifyEmailClient';
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={  <div>Loading...</div>}>
       <VerifyEmailClient />
     </Suspense>
   );
