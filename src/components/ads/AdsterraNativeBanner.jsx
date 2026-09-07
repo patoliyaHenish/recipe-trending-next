@@ -8,7 +8,7 @@ const AdsterraNativeBanner = () => {
     const currentContainer = containerRef.current;
     if (!currentContainer) return;
 
-    // Clear previous elements
+    // Clear previous script elements
     currentContainer.innerHTML = '';
 
     const adDiv = document.createElement('div');

@@ -63,9 +63,11 @@ import Image from "next/image";
 
 import RecipeSuggestions from "../../components/RecipeSuggestions";
 import RecipeGridSkeleton from "../../components/common/RecipeGridSkeleton";
-import AdsterraNativeBanner from "../../components/AdsterraNativeBanner";
-import AdsterraBanner300x250 from "../../components/AdsterraBanner300x250";
-import AdsterraBanner320x50 from "../../components/AdsterraBanner320x50";
+import {
+  AdsterraNativeBanner,
+  AdsterraBanner300x250,
+  AdsterraBanner320x50,
+} from "../../components/ads";
 import { useCallback, useMemo } from "react";
 import useTrackEngagement from "../../hooks/useTrackEngagement";
 
@@ -547,6 +549,19 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
     }}>
       <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
 
+          {/* Mobile Adsterra 320x50 Banner Ad above breadcrumbs */}
+          <Box
+            sx={{
+              display: { xs: "flex", md: "none" },
+              justifyContent: "center",
+              alignItems: "center",
+              my: 1.5,
+              width: "100%",
+            }}
+          >
+            <AdsterraBanner320x50 />
+          </Box>
+
           <Box>
             <Box
               sx={{
@@ -865,6 +880,45 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                         )}
                       </Box>
                     )}
+
+                    {/* Recipe Image Card */}
+                    <Card
+                      sx={{
+                        width: "100%",
+                        backgroundColor: isDarkMode ? "grey.800" : "white",
+                        background: isDarkMode
+                          ? "linear-gradient(145deg, #1e293b 0%, #334155 100%)"
+                          : "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
+                        border: "none",
+                        borderRadius: 0,
+                        boxShadow: "none",
+                        overflow: "hidden",
+                        mt: 1.5,
+                        mb: 3,
+                        transition: "all 0.3s ease",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: "relative",
+                          width: "100%",
+                          paddingTop: { xs: "54%", sm: "58%", md: "58%" },
+                        }}
+                      >
+                        <Image
+                          src={recipeImageUrl || "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1200&h=600&fit=crop"}
+                          alt={recipe.title || "Recipe Image"}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          style={{
+                            objectFit: "cover",
+                            objectPosition: "center",
+                            transition: "transform 0.5s ease-in-out",
+                          }}
+                          priority
+                        />
+                      </Box>
+                    </Card>
                   </Box>
                   
                   {/* Right Column: Desktop/Laptop Adsterra 300x250 Banner Ad */}
@@ -879,71 +933,8 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                     <AdsterraBanner300x250 />
                   </Box>
 
-                  {/* Mobile Adsterra 320x50 Banner Ad */}
-                  <Box
-                    sx={{
-                      display: { xs: "flex", md: "none" },
-                      justifyContent: "center",
-                      alignItems: "center",
-                      my: { xs: 2, md: 0 },
-                      width: "100%",
-                    }}
-                  >
-                    <AdsterraBanner320x50 />
-                  </Box>
                 </Box>
               </Box>
-
-              <Box
-                sx={{
-                  mb: 2,
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
-                  gap: 3,
-                  alignItems: "stretch",
-                }}
-              >
-                <Box>
-
-                        <Card
-                          sx={{
-                            backgroundColor: isDarkMode ? "grey.800" : "white",
-                            background: isDarkMode
-                              ? "linear-gradient(145deg, #1e293b 0%, #334155 100%)"
-                              : "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
-                            border: "none",
-                            borderRadius: 0,
-                            boxShadow: "none",
-                            overflow: "hidden",
-                            height: "100%",
-                            minHeight: { xs: "auto", lg: "400px" },
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          <Box
-                              sx={{
-                                position: "relative",
-                                width: "100%",
-                                paddingTop: { xs: "54%", sm: "58%", md: "58%" },
-                              }}
-                            >
-                              <Image
-                                src={recipeImageUrl || "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1200&h=600&fit=crop"}
-                                alt={recipe.title || "Recipe Image"}
-                                fill
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                style={{
-                                  objectFit: "cover",
-                                  objectPosition: "center",
-                                  transition: "transform 0.5s ease-in-out",
-                                }}
-                                priority
-                              />
-                            </Box>
-                        </Card>
-
-                    </Box>
-                  </Box>
 
                   <Box
                     sx={{

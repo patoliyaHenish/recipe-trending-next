@@ -8,26 +8,21 @@ const AdsterraBanner300x250 = () => {
     const currentContainer = containerRef.current;
     if (!currentContainer) return;
 
-    // Clear previous script elements
     currentContainer.innerHTML = '';
 
-    const confScript = document.createElement('script');
-    confScript.type = 'text/javascript';
-    confScript.text = `
-      atOptions = {
-        'key' : 'dc666cababfc93ae2eb60772898f823f',
-        'format' : 'iframe',
-        'height' : 250,
-        'width' : 300,
-        'params' : {}
-      };
-    `;
+    // Assign atOptions to global window object before invoking script
+    window.atOptions = {
+      'key': 'dc666cababfc93ae2eb60772898f823f',
+      'format': 'iframe',
+      'height': 250,
+      'width': 300,
+      'params': {}
+    };
 
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = 'https://www.highrevenueformat.com/dc666cababfc93ae2eb60772898f823f/invoke.js';
 
-    currentContainer.appendChild(confScript);
     currentContainer.appendChild(script);
 
     return () => {
