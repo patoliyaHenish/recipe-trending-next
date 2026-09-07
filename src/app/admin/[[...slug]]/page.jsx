@@ -1,11 +1,9 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
+import dynamicComponent from 'next/dynamic';
 
-const AdminRouter = dynamic(() => import('../../../components/admin/AdminRouter'), {
+const AdminRouter = dynamicComponent(() => import('../../../components/admin/AdminRouter'), {
   ssr: false,
   loading: () => <div className="p-8">Loading Admin Panel...</div>
 });
