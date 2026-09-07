@@ -10,7 +10,7 @@ export const metadata = {
   },
 };
 
-export const revalidate = 3600; // ISR for the home page
+export const dynamic = 'force-dynamic';
 
 export default function Page() {
   return <Home />;

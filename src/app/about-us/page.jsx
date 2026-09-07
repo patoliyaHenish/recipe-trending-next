@@ -1,5 +1,7 @@
 import AboutUs from '../../pages_old/users/AboutUs';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'About Us | Recipe Trending',
   description: 'Discover the story behind Recipe Trending. We\'re on a mission to make cooking approachable, clutter-free, and delicious for everyone.',
