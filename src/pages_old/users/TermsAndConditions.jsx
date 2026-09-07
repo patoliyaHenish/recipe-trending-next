@@ -529,7 +529,6 @@ const TermsAndConditions = () => {
                         <Section title="6. Third-Party Services" icon={<InfoIcon />} isDarkMode={isDarkMode}>
                             <p>This website may use third-party services such as:</p>
                             <ul>
-                                <li>Google AdSense (for ads)</li>
                                 <li>Google Analytics (for analytics)</li>
                             </ul>
                             <p>These services may collect data as per their own policies. We are not responsible for their practices.</p>

@@ -476,8 +476,7 @@ const PrivacyPolicy = () => {
                         <Divider sx={{ my: 4, opacity: 0.1 }} />
 
                         <Section title="Third-Party Services" icon={<InfoIcon />} isDarkMode={isDarkMode}>
-                            We integrate trusted third-party services like Google Analytics, Google AdSense, and YouTube to provide rich features. 
-                            These partners may collect data according to their own privacy standards which we encourage you to review.
+                            We integrate trusted third-party services like Google Analytics and YouTube to provide rich features. 
                         </Section>
 
                         <Divider sx={{ my: 4, opacity: 0.1 }} />

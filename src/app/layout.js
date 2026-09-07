@@ -51,9 +51,6 @@ export default async function RootLayout({ children }) {
         {process.env.NEXT_GOOGLE_ANALYTICS_ID && process.env.NODE_ENV === 'production' && (
            <Analytics gaId={process.env.NEXT_GOOGLE_ANALYTICS_ID} />
         )}
-        {process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT_ID && process.env.NODE_ENV === 'production' && (
-          <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT_ID}`} crossOrigin="anonymous"></script>
-        )}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
