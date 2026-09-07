@@ -46,8 +46,6 @@ const Footer = ({ initialFooterItems = [] }) => {
     >
       <Container maxWidth="lg" sx={{ py: 6 }}>
         <Grid container spacing={4} sx={{ justifyContent: 'space-between' }}>
-
-
           <Grid size={{ xs: 12 }}>
             <Box sx={{ 
               display: 'flex', 
@@ -71,7 +69,7 @@ const Footer = ({ initialFooterItems = [] }) => {
                         component={link.path ? NextLink : 'button'}
                         href={link.path ? (link.path.startsWith('/') ? link.path : `/${link.path}`) : undefined}
                         target={link.open_in_new_tab ? '_blank' : undefined}
-                        rel={link.open_in_new_tab ? 'noopener noreferrer' : undefined}
+                        rel={link.open_in_new_tab ? '_blank' : undefined}
                         underline="none"
                         sx={{
                           color: '#ffffff',
