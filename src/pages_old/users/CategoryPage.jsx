@@ -15,6 +15,7 @@ import noImageFound from '../../assets/no-image-found.png';
 import Cookies from 'js-cookie';
 import useTrackEngagement from '../../hooks/useTrackEngagement';
 import { trackEvent } from '../../utils/analytics';
+import { AdsterraBanner728x90, AdsterraBanner320x50, AdsterraNativeBanner } from '../../components/ads';
 
 const RECIPES_PER_PAGE = 12;
 
@@ -740,12 +741,18 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
                     gap: { xs: 2, sm: 2.5, md: 3 },
                   }}
                 >
-                  {allRecipes.map((recipe) => (
-                    <RecipeCard
-                      key={recipe.id}
-                      recipe={recipe}
-                      mobileLayout="vertical"
-                    />
+                  {allRecipes.map((recipe, index) => (
+                    <React.Fragment key={recipe.id || recipe.recipe_id || index}>
+                      <RecipeCard
+                        recipe={recipe}
+                        mobileLayout="vertical"
+                      />
+                      {(index + 1) % 8 === 0 && (
+                        <Box sx={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', my: 2 }}>
+                          <AdsterraNativeBanner />
+                        </Box>
+                      )}
+                    </React.Fragment>
                   ))}
                 </Box>
 
@@ -804,42 +811,19 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
                   </Box>
                 )}
               </>
-            ) : !isFetching && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  py: 8,
-                  gap: 2,
-                }}
-              >
-                <Typography
-                  sx={{
-                    fontFamily: "'Basic', sans-serif !important",
-                    fontSize: { xs: '1.3rem', md: '1.6rem' },
-                    fontWeight: 500,
-                    color: isDarkMode ? '#FFF7EC' : '#2B2828',
-                    textAlign: 'center',
-                  }}
-                >
-                  No recipes found
-                </Typography>
-                <Typography
-                  sx={{
-                    fontFamily: "'Basic', sans-serif !important",
-                    fontSize: '1rem',
-                    color: isDarkMode ? '#aaa' : '#666',
-                    textAlign: 'center',
-                  }}
-                >
-                  There are no recipes in this {isSubCategoryView ? 'sub-category' : 'category'} yet.
-                </Typography>
-              </Box>
-            )}
+            ) : null}
           </Box>
         )}
+
+        {/* Bottom Banner Ad above Footer */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5, mb: 1 }}>
+          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+            <AdsterraBanner320x50 />
+          </Box>
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <AdsterraBanner728x90 />
+          </Box>
+        </Box>
       </div>
     </Box>
   );
