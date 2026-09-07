@@ -63,6 +63,9 @@ import Image from "next/image";
 
 import RecipeSuggestions from "../../components/RecipeSuggestions";
 import RecipeGridSkeleton from "../../components/common/RecipeGridSkeleton";
+import AdsterraNativeBanner from "../../components/AdsterraNativeBanner";
+import AdsterraBanner300x250 from "../../components/AdsterraBanner300x250";
+import AdsterraBanner320x50 from "../../components/AdsterraBanner320x50";
 import { useCallback, useMemo } from "react";
 import useTrackEngagement from "../../hooks/useTrackEngagement";
 
@@ -607,7 +610,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
               }}>
                 <Box
                   sx={{
-                    mb: 3,
+                    mb: 0,
                     p: 0,
                     position: "relative",
                     overflow: "hidden",
@@ -862,6 +865,31 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                         )}
                       </Box>
                     )}
+                  </Box>
+                  
+                  {/* Right Column: Desktop/Laptop Adsterra 300x250 Banner Ad */}
+                  <Box
+                    sx={{
+                      display: { xs: "none", md: "flex" },
+                      justifyContent: "center",
+                      alignItems: "flex-start",
+                      pt: 0,
+                    }}
+                  >
+                    <AdsterraBanner300x250 />
+                  </Box>
+
+                  {/* Mobile Adsterra 320x50 Banner Ad */}
+                  <Box
+                    sx={{
+                      display: { xs: "flex", md: "none" },
+                      justifyContent: "center",
+                      alignItems: "center",
+                      my: { xs: 2, md: 0 },
+                      width: "100%",
+                    }}
+                  >
+                    <AdsterraBanner320x50 />
                   </Box>
                 </Box>
               </Box>
@@ -1922,6 +1950,8 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
             </Zoom>
           )}
 
+
+          <AdsterraNativeBanner />
 
           {recipe?.recipe_id && (
             <React.Suspense fallback={<RecipeGridSkeleton count={4} mobileLayout="vertical" />}> 
