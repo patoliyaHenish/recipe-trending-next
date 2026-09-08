@@ -12,7 +12,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Add, Cancel, Edit, Remove, Save, ArrowBack, Delete } from "@mui/icons-material";
 import IngredientInput from "../../../components/IngredientInput";
-import KeywordInput from "../../../components/KeywordInput";
 import {
   getImage,
   getYouTubeThumbnail,
@@ -20,7 +19,7 @@ import {
   isValidYouTubeVideo,
 } from "../../../utils/helper";
 import { useTheme } from "../../../context/ThemeContext";
-import { useGetAllKeywordsQuery } from "../../../features/api/keywordApi";
+
 
 import { useGetRecipeCategoryDropdownQuery } from "../../../features/api/categoryApi";
 import { useGetRecipeByIdForAdminQuery, useCreateRecipeByAdminMutation, useUpdateRecipeByAdminMutation, useLazyCheckRecipeSlugQuery, useGetRecipeDraftQuery, useSaveRecipeDraftMutation, useDeleteRecipeDraftMutation } from '../../../features/api/recipeApi';
@@ -217,10 +216,6 @@ const getValidationSchema = (mode) => Yup.object().shape({
   recipe_instructions: Yup.array()
     .min(1, "At least one instruction")
     .required(),
-  keywords: Yup.array()
-    .of(Yup.string().trim().min(1, "Keyword cannot be empty"))
-    .min(1, "At least one keyword is required")
-    .required(),
   ingredients: Yup.array()
     .min(1, "At least one ingredient is required")
     .required()
@@ -332,7 +327,6 @@ const AddEditRecipePage = () => {
         instructions: Array.isArray(r.instructions)
           ? r.instructions.map(i => i.instruction_text || '')
           : [],
-        keywords: Array.isArray(r.keywords) ? r.keywords : [],
         video_url: r.video_url || '',
         image_url: r.image_url || '',
         image: r.image || '',
@@ -405,7 +399,6 @@ const AddEditRecipePage = () => {
       serving_size: recipeData?.serving_size || '',
       category_id: recipeData?.category_id || '',
       sub_category_id: recipeData?.sub_category_id || null,
-      keywords: Array.isArray(recipeData?.keywords) ? recipeData.keywords : (recipeData?.keywords ? [recipeData.keywords] : []),
       ingredients: recipeData?.ingredients || [],
       recipe_instructions: recipeData?.recipe_instructions || recipeData?.instructions || [],
       video_url: recipeData?.video_url || '',
@@ -439,7 +432,7 @@ const AddEditRecipePage = () => {
             return structured;
           });
           formData.append(key, JSON.stringify(minimalIngredients));
-        } else if (key === 'recipe_instructions' || key === 'keywords') {
+        } else if (key === 'recipe_instructions') {
           formData.append(key, JSON.stringify(finalValues[key]));
         } else if (finalValues[key] !== null && finalValues[key] !== undefined) {
           formData.append(key, finalValues[key]);
@@ -1208,15 +1201,6 @@ const AddEditRecipePage = () => {
                   dialogOpen={open}
                   error={formik.touched.ingredients && Boolean(formik.errors.ingredients)}
                   errorText={formik.touched.ingredients && formik.errors.ingredients}
-                />
-
-                <KeywordInput
-                  value={formik.values.keywords || []}
-                  onChange={(keywords) => formik.setFieldValue("keywords", keywords)}
-                  disabled={isLoading}
-                  dialogOpen={open}
-                  error={formik.touched.keywords && Boolean(formik.errors.keywords)}
-                  errorText={formik.touched.keywords && formik.errors.keywords}
                 />
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>

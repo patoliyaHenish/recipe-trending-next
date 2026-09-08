@@ -90,17 +90,7 @@ const ViewRecipeDialog = ({
     fetchVideoTitle();
   }, [data?.video_url]);
 
-  const parseKeywords = (keywords) => {
-    if (!keywords) return [];
-    if (Array.isArray(keywords)) return keywords;
-    try {
-      return JSON.parse(keywords);
-    } catch {
-      return [];
-    }
-  };
 
-  const keywords = parseKeywords(data?.keywords);
 
   const formatDateTime = (dateString) => {
     if (!dateString) return 'N/A';
@@ -324,20 +314,6 @@ const ViewRecipeDialog = ({
               <DetailRow label="Cook Time" value={`${data.cook_time} min`} />
               {data.rest_time > 0 && <DetailRow label="Rest Time" value={`${data.rest_time} min`} />}
               <DetailRow label="Serving Size" value={data.serving_size} />
-
-              <Box sx={{ gridColumn: '1 / -1' }}>
-                <Typography variant="caption" sx={{ fontWeight: 600, color: isDarkMode ? '#9ca3af' : '#6b7280', letterSpacing: 0.5, textTransform: 'uppercase', display: 'block', mb: 0.5 }}>Keywords</Typography>
-                {keywords && keywords.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {keywords.map((keyword, index) => (
-                      <Chip key={index} label={keyword} size="small" sx={{ backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.15)' : '#d1fae5', color: isDarkMode ? '#34d399' : '#059669', fontWeight: 600, borderRadius: '4px' }} />
-                    ))}
-                  </div>
-                ) : (
-                  <Typography variant="body2" color="text.secondary" fontStyle="italic">No keywords</Typography>
-                )}
-              </Box>
-
 
             </Box>
 

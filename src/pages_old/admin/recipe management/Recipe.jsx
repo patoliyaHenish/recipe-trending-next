@@ -1,5 +1,5 @@
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 "use client";
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -78,10 +78,12 @@ import {
   useUpdateRecipeAdminApprovedStatusMutation,
   useUpdateRecipeBadgeMutation,
 } from '../../../features/api/recipeApi';
-import { useGetAllKeywordsQuery } from '../../../features/api/keywordApi';
+
 import { useGetRecipeCategoryDropdownQuery } from '../../../features/api/categoryApi';
 import ViewRecipeDialog from './ViewRecipeDialog';
 import RecipeNotesDialog from './RecipeNotesDialog';
+import PinterestIcon from '@mui/icons-material/Pinterest';
+import PinterestShareDialog from './PinterestShareDialog';
 
 
 
@@ -198,11 +200,13 @@ const Recipe = () => {
   const [adminToggleItem, setAdminToggleItem] = useState(null);
   const [editId, setEditId] = useState(null);
   const [viewId, setViewId] = useState(null);
+  const [pinterestRecipe, setPinterestRecipe] = useState(null);
+  const [pinterestDialogOpen, setPinterestDialogOpen] = useState(false);
   const [noteRecipeId, setNoteRecipeId] = useState(null);
   const [badgeDialogOpen, setBadgeDialogOpen] = useState(false);
   const [badgeDialogRecipeId, setBadgeDialogRecipeId] = useState(null);
   const [badgeDialogRecipeData, setBadgeDialogRecipeData] = useState(null);
-  const [editForm, setEditForm] = useState({ title: '', description: '', note: '', prep_time: '', cook_time: '', serving_size: '', ingredients_id: [], instructions: [], keywords: [] });
+  const [editForm, setEditForm] = useState({ title: '', description: '', note: '', prep_time: '', cook_time: '', serving_size: '', ingredients_id: [], instructions: [] });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [publicApproved, setPublicApproved] = useState(() => searchParams.get('public_approved') || '');
@@ -237,9 +241,7 @@ const Recipe = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [lastUpdatedRecipeId, setLastUpdatedRecipeId] = useState(null);
   const [createdBy, setCreatedBy] = useState(() => searchParams.get('created_by') || '');
-  const [keyword, setKeyword] = useState(() => { const kw = searchParams.get('keyword'); return kw ? kw.split(',') : []; });
   const [creatorSearchInput, setCreatorSearchInput] = useState('');
-  const [keywordSearchInput, setKeywordSearchInput] = useState('');
   const [sortBy, setSortBy] = useState(() => searchParams.get('sort_by') || 'created_at');
   const filterRef = useRef();
 
@@ -351,7 +353,6 @@ const Recipe = () => {
     updatedTo: searchParams.get('updated_to') || '',
     badge: searchParams.get('badge') || '',
     createdBy: searchParams.get('created_by') || '',
-    keyword: searchParams.get('keyword') || '',
     pendingNotesOnly: searchParams.get('pending_notes') === 'true',
     hasUpdatesAfterNotes: searchParams.get('has_updates') === 'true',
     showAnalyticsColumns: searchParams.get('show_analytics') === 'true',
@@ -359,7 +360,7 @@ const Recipe = () => {
   });
 
   const { data: categoryDropdownData } = useGetRecipeCategoryDropdownQuery();
-  const { data: keywordsData } = useGetAllKeywordsQuery({ limit: 1000 });
+
 
   let defaultForm = {
     title: '',
@@ -371,7 +372,6 @@ const Recipe = () => {
     sub_category_id: null,
     ingredients: [],
     recipe_instructions: [],
-    keywords: [],
     video_url: '',
     image_url: '',
     slug: '',
@@ -412,7 +412,6 @@ const Recipe = () => {
     ...(apiFilters.updatedTo ? { updated_at_to: apiFilters.updatedTo } : {}),
     ...(apiFilters.badge ? { badge: apiFilters.badge } : {}),
     ...(apiFilters.createdBy ? { created_by: apiFilters.createdBy } : {}),
-    ...(apiFilters.keyword ? { keyword: apiFilters.keyword } : {}),
     ...(apiFilters.pendingNotesOnly ? { pending_notes: true } : {}),
     ...(apiFilters.hasUpdatesAfterNotes ? { has_updates: true } : {}),
     sort_by: apiFilters.sortBy
@@ -472,7 +471,6 @@ const Recipe = () => {
         setOrDelete('updated_to', filters.updatedTo);
         setOrDelete('pending_notes', filters.pendingNotesOnly ? 'true' : '');
         setOrDelete('has_updates', filters.hasUpdatesAfterNotes ? 'true' : '');
-        setOrDelete('keyword', filters.keyword);
         setOrDelete('show_analytics', filters.showAnalyticsColumns ? 'true' : '');
         setOrDelete('sort_by', filters.sortBy);
       }
@@ -484,7 +482,7 @@ const Recipe = () => {
     if (!execute) return;
     const current = {
       search, category, subCategory, publicApproved, adminApproved, foodType, approvedFrom, approvedTo, adminApprovedFrom, adminApprovedTo, createdFrom, createdTo, updatedFrom, updatedTo, badge, createdBy, sortBy,
-      pendingNotesOnly, keyword, hasUpdatesAfterNotes,
+      pendingNotesOnly, hasUpdatesAfterNotes,
       showAnalyticsColumns,
       ...overrides
     };
@@ -514,8 +512,6 @@ const Recipe = () => {
     setFoodType('');
     setBadge('');
     setCreatedBy('');
-    setKeyword([]);
-    setKeywordSearchInput('');
     setCreatorSearchInput('');
     setApprovedFrom('');
     setApprovedTo('');
@@ -537,7 +533,7 @@ const Recipe = () => {
     setHasUpdatesAfterNotes(false);
     setShowAnalyticsColumns(false);
     setPage(1);
-    setApiFilters({ search: '', category: '', subCategory: '', publicApproved: '', adminApproved: '', foodType: '', approvedFrom: '', approvedTo: '', adminApprovedFrom: '', adminApprovedTo: '', createdFrom: '', createdTo: '', updatedFrom: '', updatedTo: '', badge: '', createdBy: '', keyword: '', pendingNotesOnly: false, hasUpdatesAfterNotes: false, showAnalyticsColumns: false, sortBy: 'created_at' });
+    setApiFilters({ search: '', category: '', subCategory: '', publicApproved: '', adminApproved: '', foodType: '', approvedFrom: '', approvedTo: '', adminApprovedFrom: '', adminApprovedTo: '', createdFrom: '', createdTo: '', updatedFrom: '', updatedTo: '', badge: '', createdBy: '', pendingNotesOnly: false, hasUpdatesAfterNotes: false, showAnalyticsColumns: false, sortBy: 'created_at' });
     setSearchParams({});
   };
 
@@ -654,7 +650,6 @@ const Recipe = () => {
         instructions: Array.isArray(r.instructions)
           ? r.instructions.map(i => i.instruction_text || '')
           : [],
-        keywords: Array.isArray(r.keywords) ? r.keywords : [],
         video_url: r.video_url || '',
         image_url: r.image_url || '',
         image: r.image || '',
@@ -694,7 +689,7 @@ const Recipe = () => {
       }
 
 
-      formData.append('keywords', JSON.stringify(values.keywords || []));
+
       formData.append('ingredients', JSON.stringify(values.ingredients || []));
       formData.append('recipe_instructions', JSON.stringify(values.recipe_instructions || []));
 
@@ -764,7 +759,7 @@ const Recipe = () => {
       }
 
 
-      formData.append('keywords', JSON.stringify(values.keywords || []));
+
       formData.append('ingredients', JSON.stringify(values.ingredients || []));
       formData.append('recipe_instructions', JSON.stringify(values.recipe_instructions || []));
 
@@ -1385,7 +1380,7 @@ const Recipe = () => {
                             type="text"
                             value={search}
                             onChange={handleSearchChange}
-                            placeholder="Search by title or keyword..."
+                            placeholder="Search by title..."
                             className="px-3 py-2 border rounded outline-none transition-colors"
                             style={{
                                 height: '38px',
@@ -1914,93 +1909,6 @@ const Recipe = () => {
               />
             </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 150, flex: { xs: 1, sm: '0 1 auto' } }}>
-              <Autocomplete
-                multiple
-                size="small"
-                limitTags={1}
-                options={(keywordsData?.data || keywordsData || []).map(item => item.keyword || item.name)}
-                value={keyword}
-                onChange={(_, newValue) => {
-                  setKeyword(newValue);
-                  applyFilters({ keyword: newValue.join(',') });
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder="All Keywords"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        padding: '0 39px 0 0 !important',
-                        minHeight: 38,
-                        ...dropdownSx,
-                      },
-                      '& .MuiInputBase-input': {
-                        padding: '8px 14px !important',
-                        height: 'auto',
-                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                        '&::placeholder': {
-                          color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                          opacity: 1,
-                        }
-                      }
-                    }}
-                  />
-                )}
-                disablePortal={true}
-                slotProps={{
-                  paper: {
-                    sx: {
-                      bgcolor: isDarkMode ? '#283046' : '#ffffff',
-                      color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                      borderRadius: '6px',
-                      border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
-                      boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
-                      '& .MuiAutocomplete-listbox': {
-                        padding: '0',
-                        '& .MuiAutocomplete-option': {
-                          fontSize: '0.9rem',
-                          color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                          '&[aria-selected="true"]': {
-                            bgcolor: 'rgba(115, 103, 240, 0.12) !important',
-                            color: '#7367f0 !important',
-                            fontWeight: 500,
-                            '&.Mui-focused': {
-                              bgcolor: 'rgba(115, 103, 240, 0.16) !important'
-                            }
-                          },
-                          '&:hover': {
-                            bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
-                            color: '#7367f0 !important'
-                          },
-                          '&.Mui-focused': {
-                            bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
-                            color: '#7367f0 !important'
-                          }
-                        }
-                      }
-                    }
-                  }
-                }}
-                sx={{
-                  width: '100%',
-                  '& .MuiAutocomplete-popupIndicator': { color: isDarkMode ? '#d0d2d6' : '#6e6b7b' },
-                  '& .MuiAutocomplete-clearIndicator': { color: isDarkMode ? '#d0d2d6' : '#6e6b7b' },
-                  '& .MuiChip-root': {
-                    height: '24px',
-                    margin: '2px',
-                    bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.08)',
-                    color: '#7367f0',
-                    '& .MuiChip-deleteIcon': {
-                        color: '#7367f0',
-                        '&:hover': {
-                            color: '#5e50ee'
-                        }
-                    }
-                  }
-                }}
-              />
-            </FormControl>
 
             <Box
               sx={{
@@ -2474,7 +2382,7 @@ const Recipe = () => {
               >
                 Search
               </Button>
-              {(category || subCategory || publicApproved || adminApproved || foodType || badge || approvedFrom || approvedTo || adminApprovedFrom || adminApprovedTo || createdFrom || createdTo || updatedFrom || updatedTo || search || createdBy || keyword?.length > 0 || pendingNotesOnly || hasUpdatesAfterNotes || showAnalyticsColumns || (sortBy && sortBy !== 'created_at')) && (
+              {(category || subCategory || publicApproved || adminApproved || foodType || badge || approvedFrom || approvedTo || adminApprovedFrom || adminApprovedTo || createdFrom || createdTo || updatedFrom || updatedTo || search || createdBy || pendingNotesOnly || hasUpdatesAfterNotes || showAnalyticsColumns || (sortBy && sortBy !== 'created_at')) && (
                 <Button
                   aria-label="clear all filters"
                   onClick={handleClearFilters}
@@ -2822,6 +2730,24 @@ const Recipe = () => {
                                         showEdit={canUpdate && canModifyEdit}
                                         showDelete={canDelete && canModifyDelete}
                                     />
+                                    <IconButton
+                                        onClick={() => {
+                                            setPinterestRecipe(recipe);
+                                            setPinterestDialogOpen(true);
+                                        }}
+                                        size="small"
+                                        title="Share to Pinterest"
+                                        sx={{
+                                            color: '#E60023',
+                                            backgroundColor: 'transparent',
+                                            borderRadius: 0,
+                                            border: 'none',
+                                            '&:hover': { color: '#ad001a', backgroundColor: 'rgba(230, 0, 35, 0.08)' },
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                    >
+                                        <PinterestIcon fontSize="small" />
+                                    </IconButton>
                                     {canNotesList && !recipe.is_admin_approved && (
                                         <IconButton
                                             onClick={() => setNoteRecipeId(recipe.recipe_id)}
@@ -3308,6 +3234,15 @@ const Recipe = () => {
         isLoading={isUpdatingAdminStatus}
         loadingText="Updating..."
         severity="primary"
+      />
+
+      <PinterestShareDialog
+        open={pinterestDialogOpen}
+        onClose={() => {
+          setPinterestDialogOpen(false);
+          setPinterestRecipe(null);
+        }}
+        recipe={pinterestRecipe}
       />
 
 

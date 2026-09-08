@@ -8,7 +8,6 @@ import { ingredientApi } from "../features/api/ingredientApi";
 import { bannerApi } from '../features/api/bannerApi';
 import { searchApi } from '../features/api/searchApi';
 import { recipeDetailsApi } from '../features/api/recipeDetailsApi';
-import { keywordApi } from '../features/api/keywordApi';
 import { cronLogApi } from '../features/api/cronLogApi';
 import { activityLogApi } from '../features/api/activityLogApi';
 import { homeSectionApi } from '../features/api/homeSectionApi';
@@ -28,6 +27,7 @@ import { notificationApi } from "../features/api/notificationApi";
 import { dashboardApi } from "../features/api/dashboardApi";
 import { analyticsApi } from "../features/api/analyticsApi";
 import { myWorkApi } from "../features/api/myWorkApi";
+import { pinterestApi } from "../features/api/pinterestApi";
 
 import { rtkQueryErrorMiddleware } from "./middleware";
 
@@ -45,7 +45,6 @@ export const appStore = configureStore({
             bannerApi.middleware,
             searchApi.middleware,
             recipeDetailsApi.middleware,
-            keywordApi.middleware,
             cronLogApi.middleware,
             activityLogApi.middleware,
             homeSectionApi.middleware,
@@ -64,6 +63,7 @@ export const appStore = configureStore({
             dashboardApi.middleware,
             analyticsApi.middleware,
             myWorkApi.middleware,
+            pinterestApi.middleware,
         )
 
 });

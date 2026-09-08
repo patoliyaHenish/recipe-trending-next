@@ -96,12 +96,11 @@ const adminLinks = [
   {
     label: 'Recipes',
     icon: <FoodBank />,
-    permission: ['recipe.list_all', 'recipe.list', 'keyword.list', 'assigned_recipe.list', 'assigned_recipe.list_all', 'recipe.note_list_all', 'recipe.note_list'],
+    permission: ['recipe.list_all', 'recipe.list', 'assigned_recipe.list', 'assigned_recipe.list_all', 'recipe.note_list_all', 'recipe.note_list'],
     subLinks: [
       { label: 'Manage Recipes', icon: <FoodBank />, to: '/admin/manage-recipes', permission: ['recipe.list_all', 'recipe.list'] },
       { label: 'Assigned Recipes', icon: <ReceiptLong />, to: '/admin/manage-assigned-recipes', permission: ['assigned_recipe.list', 'assigned_recipe.list_all'] },
       { label: 'Recipe Notes', icon: <ReceiptLong />, to: '/admin/manage-recipe-notes', permission: ['recipe.note_list_all', 'recipe.note_list'] },
-      { label: 'Manage Keywords', icon: <Category />, to: '/admin/manage-keywords', permission: 'keyword.list' },
     ],
   },
   {

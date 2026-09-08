@@ -19,7 +19,6 @@ import RecipeCategory from '../../pages_old/admin/category management/RecipeCate
 import FooterManagement from '../../pages_old/admin/footer management/FooterManagement';
 import HomeSectionManagement from '../../pages_old/admin/home management/HomeSectionManagement';
 import HomeSectionItemsManagement from '../../pages_old/admin/home management/HomeSectionItemsManagement';
-import Keywords from '../../pages_old/admin/keyword management/Keywords';
 import NavbarManagement from '../../pages_old/admin/navbar management/NavbarManagement';
 import PayrollManagement from '../../pages_old/admin/payroll management/PayrollManagement';
 
@@ -50,7 +49,6 @@ export default function AdminRouter() {
         <Route path="manage-users" element={<UserManagement />} />
         <Route path="manage-ingredients" element={<IngredientManagement />} />
         <Route path="manage-ingredient-units" element={<IngredientUnitManagement />} />
-        <Route path="manage-keywords" element={<Keywords />} />
         
         {/* Categories */}
         <Route path="manage-recipe-category" element={<RecipeCategory />} />

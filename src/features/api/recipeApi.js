@@ -36,8 +36,6 @@ export const recipeApi = createApi({
                         formData.append('ingredients', JSON.stringify(inputData[key]));
                     } else if (key === 'recipe_instructions' && Array.isArray(inputData[key])) {
                         formData.append('recipe_instructions', JSON.stringify(inputData[key]));
-                    } else if (key === 'keywords' && Array.isArray(inputData[key])) {
-                        formData.append('keywords', JSON.stringify(inputData[key]));
                     } else if (key !== 'image' && key !== 'imageData' && key !== 'keepExistingImage' && key !== 'imageRemoved') {
                         formData.append(key, inputData[key]);
                     }
@@ -52,7 +50,7 @@ export const recipeApi = createApi({
             invalidatesTags: ["Refetch_Recipe"],
         }),
         getAllRecipesForAdmin: builder.query({
-            query: ({ search = '', page = 1, limit = 10, category_name = '', sub_category_name = '', public_approved = '', admin_approved = '', food_type = '', public_approved_from = '', public_approved_to = '', admin_approved_from = '', admin_approved_to = '', created_at_from = '', created_at_to = '', updated_at_from = '', updated_at_to = '', badge = '', created_by = '', pending_notes = '', has_updates = '', keyword = '', sort_by = 'created_at' }) => {
+            query: ({ search = '', page = 1, limit = 10, category_name = '', sub_category_name = '', public_approved = '', admin_approved = '', food_type = '', public_approved_from = '', public_approved_to = '', admin_approved_from = '', admin_approved_to = '', created_at_from = '', created_at_to = '', updated_at_from = '', updated_at_to = '', badge = '', created_by = '', pending_notes = '', has_updates = '', sort_by = 'created_at' }) => {
                 const params = new URLSearchParams();
                 if (search) params.append('search', search);
                 if (page) params.append('page', page);
@@ -74,7 +72,6 @@ export const recipeApi = createApi({
                 if (created_by) params.append('created_by', created_by);
                 if (pending_notes) params.append('pending_notes', pending_notes);
                 if (has_updates) params.append('has_updates', has_updates);
-                if (keyword) params.append('keyword', keyword);
                 if (sort_by) params.append('sort_by', sort_by);
                 return {
                     url: `/get-all-recipes-for-admin?${params.toString()}`,
@@ -115,8 +112,6 @@ export const recipeApi = createApi({
                         formData.append('ingredients', JSON.stringify(inputData[key]));
                     } else if (key === 'recipe_instructions' && Array.isArray(inputData[key])) {
                         formData.append('recipe_instructions', JSON.stringify(inputData[key]));
-                    } else if (key === 'keywords' && Array.isArray(inputData[key])) {
-                        formData.append('keywords', JSON.stringify(inputData[key]));
                     } else if (key !== 'imageData') {
                         formData.append(key, inputData[key]);
                     }
@@ -154,12 +149,7 @@ export const recipeApi = createApi({
             }),
             invalidatesTags: ["Refetch_Recipe"],
         }),
-        getMostUsedKeywords: builder.query({
-            query: () => ({
-                url: "/get-most-used-keywords",
-                method: "GET",
-            }),
-        }),
+
         getAllRecipesSimple: builder.query({
             query: () => ({
                 url: "/get-all-recipes-simple",
@@ -220,7 +210,6 @@ export const {
     useUpdateRecipePublicApprovedStatusMutation,
     useUpdateRecipeAdminApprovedStatusMutation,
     useUpdateRecipeBadgeMutation,
-    useGetMostUsedKeywordsQuery,
     useGetAllRecipesSimpleQuery,
     useSearchPublicApprovedRecipesSimpleQuery,
     useCheckRecipeSlugQuery,

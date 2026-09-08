@@ -9,7 +9,6 @@ import { ingredientApi } from "../features/api/ingredientApi";
 import { bannerApi } from '../features/api/bannerApi';
 import { searchApi } from '../features/api/searchApi';
 import { recipeDetailsApi } from '../features/api/recipeDetailsApi';
-import { keywordApi } from '../features/api/keywordApi';
 import { cronLogApi } from '../features/api/cronLogApi';
 import { activityLogApi } from '../features/api/activityLogApi';
 import { homeSectionApi } from '../features/api/homeSectionApi';
@@ -29,6 +28,7 @@ import { notificationApi } from "../features/api/notificationApi";
 import { dashboardApi } from "../features/api/dashboardApi";
 import { analyticsApi } from "../features/api/analyticsApi";
 import { myWorkApi } from "../features/api/myWorkApi";
+import { pinterestApi } from "../features/api/pinterestApi";
 
 const rootReducer = combineReducers({
     [authApi.reducerPath]: authApi.reducer,
@@ -40,7 +40,6 @@ const rootReducer = combineReducers({
     [bannerApi.reducerPath]: bannerApi.reducer,
     [searchApi.reducerPath]: searchApi.reducer,
     [recipeDetailsApi.reducerPath]: recipeDetailsApi.reducer,
-    [keywordApi.reducerPath]: keywordApi.reducer,
     [cronLogApi.reducerPath]: cronLogApi.reducer,
     [activityLogApi.reducerPath]: activityLogApi.reducer,
     [homeSectionApi.reducerPath]: homeSectionApi.reducer,
@@ -59,6 +58,7 @@ const rootReducer = combineReducers({
     [dashboardApi.reducerPath]: dashboardApi.reducer,
     [analyticsApi.reducerPath]: analyticsApi.reducer,
     [myWorkApi.reducerPath]: myWorkApi.reducer,
+    [pinterestApi.reducerPath]: pinterestApi.reducer,
     auth: authReducer,
     global: globalReducer,
 })
