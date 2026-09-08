@@ -489,7 +489,7 @@ const AdminVerticalNavbar = ({ open, setOpen, mobileOpen, setMobileOpen }) => {
                             exit={{ opacity: 0, width: 0 }}
                             transition={{ duration: 0.18 }}
                             style={{
-                              fontSize: '1.05rem', fontWeight: 600,
+                              fontSize: '1.05rem', fontWeight: 500,
                               color: isActive ? '#ffffff' : TEXT_PRI,
                               whiteSpace: 'nowrap', overflow: 'hidden',
                               textOverflow: 'ellipsis', letterSpacing: '0.01em',
