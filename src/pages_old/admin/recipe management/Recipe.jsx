@@ -172,6 +172,7 @@ const Recipe = () => {
   const canNotesAdd = isAdmin || userPermissions.includes('recipe.notes_add');
   const canNotesDelete = isAdmin || userPermissions.includes('recipe.notes_delete');
   const canNotesUpdateStatus = isAdmin || userPermissions.includes('recipe.notes_update_status');
+  const canAdminApprovedEdit = isAdmin || userPermissions.includes('recipe.admin_approved_edit');
 
   useEffect(() => {
     document.title = 'Recipes Management'
@@ -2550,9 +2551,11 @@ const Recipe = () => {
                 displayedRecipes.map((recipe, index) => {
                     const rowBgColor = recipe.has_pending_notes ? (isDarkMode ? 'rgba(253, 224, 71, 0.15)' : '#fef9c3') : 'transparent';
                     
-                    const canModifyEdit = isAdmin || canUpdateAll || Number(recipe.created_by) === Number(user?.user_id);
-                    const canModifyDelete = isAdmin || canDeleteAll || Number(recipe.created_by) === Number(user?.user_id);
-                    const canModifyPublic = isAdmin || canPublishAll || Number(recipe.created_by) === Number(user?.user_id);
+                    const currentUserId = user?.user_id || user?.userId;
+                    const isApprovedBlocked = recipe.is_admin_approved && !canAdminApprovedEdit;
+                    const canModifyEdit = (isAdmin || canUpdateAll || Number(recipe.created_by) === Number(currentUserId)) && !isApprovedBlocked;
+                    const canModifyDelete = isAdmin || canDeleteAll || Number(recipe.created_by) === Number(currentUserId);
+                    const canModifyPublic = isAdmin || canPublishAll || Number(recipe.created_by) === Number(currentUserId);
 
                     const foodTypeColor = recipe.food_type === 'veg' ? '#10b981' : recipe.food_type === 'egg' ? '#f59e0b' : '#ef4444';
                     
@@ -2933,8 +2936,10 @@ const Recipe = () => {
 
       {viewId && (() => {
         const viewData = viewRecipeData?.data;
-        const canModifyEdit = isAdmin || canUpdateAll || Number(viewData?.created_by) === Number(user?.user_id);
-        const canModifyDelete = isAdmin || canDeleteAll || Number(viewData?.created_by) === Number(user?.user_id);
+        const currentUserId = user?.user_id || user?.userId;
+        const isApprovedBlocked = viewData?.is_admin_approved && !canAdminApprovedEdit;
+        const canModifyEdit = (isAdmin || canUpdateAll || Number(viewData?.created_by) === Number(currentUserId)) && !isApprovedBlocked;
+        const canModifyDelete = isAdmin || canDeleteAll || Number(viewData?.created_by) === Number(currentUserId);
       
 
 

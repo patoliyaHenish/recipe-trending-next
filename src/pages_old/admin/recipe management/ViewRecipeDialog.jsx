@@ -188,7 +188,7 @@ const ViewRecipeDialog = ({
           )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {canViewNotes && onViewNotes && (
+          {canViewNotes && onViewNotes && !data?.is_admin_approved && (
             <IconButton onClick={() => { onViewNotes(data?.recipe_id); }} size="small" sx={{ color: isDarkMode ? '#10b981' : '#059669', '&:hover': { color: isDarkMode ? '#34d399' : '#047857', backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } }} title="View Notes">
               <NoteAltOutlinedIcon fontSize="small" />
             </IconButton>
