@@ -19,8 +19,37 @@ import { AdsterraBanner728x90, AdsterraBanner320x50, AdsterraNativeBanner } from
 
 const RECIPES_PER_PAGE = 12;
 
- 
+const getDesktopAdIndices = (items, seed = 1) => {
+  const indices = new Set();
+  if (!items || items.length === 0) return indices;
+  let curr = 0;
+  let s = seed * 16807;
+  while (curr < items.length) {
+    s = (s * 9301 + 49297) % 233280;
+    const step = (s / 233280) > 0.5 ? 8 : 12;
+    curr += step;
+    if (curr <= items.length && curr - 1 !== items.length - 1) {
+      indices.add(curr - 1);
+    }
+  }
+  return indices;
+};
 
+const getMobileAdIndices = (items, seed = 1) => {
+  const indices = new Set();
+  if (!items || items.length === 0) return indices;
+  let curr = 0;
+  let s = seed * 48271;
+  while (curr < items.length) {
+    s = (s * 9301 + 49297) % 233280;
+    const step = (s / 233280) > 0.5 ? 4 : 6;
+    curr += step;
+    if (curr <= items.length && curr - 1 !== items.length - 1) {
+      indices.add(curr - 1);
+    }
+  }
+  return indices;
+};
 
 const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSubCategorySlug, initialData, initialPreference = '' }) => {
   const categorySlug = propCategorySlug;
@@ -200,6 +229,9 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
       setPage(prev => prev + 1);
     }
   }, [isFetching, hasMore]);
+
+  const desktopAdIndices = useMemo(() => getDesktopAdIndices(allRecipes, 42), [allRecipes]);
+  const mobileAdIndices  = useMemo(() => getMobileAdIndices(allRecipes, 42), [allRecipes]);
 
   const category = headerData?.category;
   const subCategory = headerData?.subCategory;
@@ -741,19 +773,41 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
                     gap: { xs: 2, sm: 2.5, md: 3 },
                   }}
                 >
-                  {allRecipes.map((recipe, index) => (
-                    <React.Fragment key={recipe.id || recipe.recipe_id || index}>
-                      <RecipeCard
-                        recipe={recipe}
-                        mobileLayout="vertical"
-                      />
-                      {(index + 1) % 8 === 0 && (
-                        <Box sx={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', my: 2 }}>
-                          <AdsterraNativeBanner />
-                        </Box>
-                      )}
-                    </React.Fragment>
-                  ))}
+                  {allRecipes.map((recipe, index) => {
+                    const isLastItem = index === allRecipes.length - 1;
+                    const showMobileAd = mobileAdIndices.has(index) && !isLastItem;
+                    const showDesktopAd = desktopAdIndices.has(index) && !isLastItem;
+
+                    return (
+                      <React.Fragment key={recipe.id || recipe.recipe_id || index}>
+                        <RecipeCard
+                          recipe={recipe}
+                          mobileLayout="vertical"
+                        />
+                        {(showMobileAd || showDesktopAd) && (
+                          <Box
+                            sx={{
+                              gridColumn: '1 / -1',
+                              display: {
+                                xs: showMobileAd ? 'flex' : 'none',
+                                sm: showMobileAd ? 'flex' : 'none',
+                                md: showDesktopAd ? 'flex' : 'none'
+                              },
+                              justifyContent: 'center',
+                              my: 3
+                            }}
+                          >
+                            <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                              <AdsterraBanner320x50 />
+                            </Box>
+                            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                              <AdsterraBanner728x90 />
+                            </Box>
+                          </Box>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </Box>
 
                 {hasMore && (
