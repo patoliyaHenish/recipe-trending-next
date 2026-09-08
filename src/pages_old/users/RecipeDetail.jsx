@@ -161,9 +161,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
     setShowVideo(false);
   }, [recipe?.recipe_id, recipe?.video_url]);
 
-  const handleKeywordClick = (keyword) => {
-    router.push(`/result?q=${encodeURIComponent(keyword)}`);
-  };
+
 
   useEffect(() => {
     if (recipeData?.data?.is_saved !== undefined) {
@@ -197,17 +195,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
     const metaDesc = (recipe?.meta_description || recipe?.description || 'Delicious recipe from Recipe Trending').replace(/^"|"$/g, '').trim();
     metaDescriptionTag.setAttribute('content', metaDesc);
 
-    let metaKeywordsTag = document.querySelector('meta[name="keywords"]');
-    if (!metaKeywordsTag) {
-      metaKeywordsTag = document.createElement('meta');
-      metaKeywordsTag.name = "keywords";
-      document.head.appendChild(metaKeywordsTag);
-    }
 
-    const metaKeywords = (Array.isArray(recipe?.keywords) && recipe?.keywords.length > 0)
-      ? recipe.keywords.join(', ')
-      : 'recipe, recipe trending, food, cooking';
-    metaKeywordsTag.setAttribute('content', metaKeywords);
 
     // Meta Tags Management
     const updateTag = (attr, value, content) => {
@@ -1778,72 +1766,6 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                     )}
                 </Card>
 
-              </Box>
-              <Box sx={{ mt: 3, width: '100%' }}>
-                {recipe?.keywords && recipe.keywords.length > 0 && (
-                  <Box sx={{ mt: 0, mb: 1.5 }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        letterSpacing: '0.5px',
-                        color: isDarkMode ? '#EAEAEA' : '#374151',
-                        fontFamily: "'Basic', sans-serif !important",
-                        mb: 2,
-                        fontSize: '1.1rem'
-                      }}
-                    >
-                      Keywords for this recipe:
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-                      {recipe.keywords.map((kw, i) => (
-                        <Box
-                          key={i}
-                          component="span"
-                          onClick={() => handleKeywordClick(kw)}
-                          sx={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            px: 2,
-                            py: 0.8,
-                            fontSize: '0.9rem',
-                            fontWeight: 600,
-                            borderRadius: '12px',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            userSelect: 'none',
-                            color: isDarkMode ? '#FFB870' : '#CA6014',
-                            backgroundColor: isDarkMode ? 'rgba(202, 96, 20, 0.1)' : '#FFF7EC',
-                            border: `1.5px solid ${isDarkMode ? 'rgba(202, 96, 20, 0.2)' : '#FFEFD9'}`,
-                            '&:hover': {
-                              color: '#fff',
-                              backgroundColor: '#CA6014',
-                              borderColor: '#CA6014',
-                              boxShadow: isDarkMode
-                                ? '0 8px 16px -4px rgba(0, 0, 0, 0.5), 0 0 12px rgba(202, 96, 20, 0.3)'
-                                : '0 8px 16px -4px rgba(202, 96, 20, 0.2)',
-                              '& .hash': {
-                                color: '#fff',
-                                opacity: 1,
-                              }
-                            },
-                            '& .hash': {
-                              color: isDarkMode ? '#FFB870' : '#CA6014',
-                              opacity: 0.6,
-                              mr: 0.5,
-                              fontSize: '1.1rem',
-                              fontWeight: 800,
-                              transition: 'all 0.3s ease',
-                            }
-                          }}
-                        >
-                          <span className="hash">#</span>
-                          {kw}
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                )}
               </Box>
 
 

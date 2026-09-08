@@ -86,7 +86,7 @@ const HomeSections = () => {
   const isMin768 = useMediaQuery('(min-width:768px)');
   const isMin1024 = useMediaQuery('(min-width:1024px)');
   const isMin1280 = useMediaQuery('(min-width:1280px)');
-  const isRecipeSectionType = (type) => type === 'recipe' || type === 'keyword';
+  const isRecipeSectionType = (type) => type === 'recipe';
 
   const renderLoadingSectionSkeleton = (isRecipeType, key) => (
     <Box key={key} sx={{ mb: { xs: 4, md: 6 } }}>

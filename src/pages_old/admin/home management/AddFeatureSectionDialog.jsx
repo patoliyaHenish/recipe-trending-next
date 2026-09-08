@@ -45,7 +45,7 @@ const AddFeatureSectionDialog = ({ open, onClose, nextPosition = 0, mode = 'add'
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
-    type: Yup.string().oneOf(['recipe', 'keyword']).required('Type is required'),
+    type: Yup.string().oneOf(['recipe']).required('Type is required'),
     description: Yup.string().required('Description is required'),
     background_image: Yup.mixed()
       .test(
@@ -300,9 +300,9 @@ const AddFeatureSectionDialog = ({ open, onClose, nextPosition = 0, mode = 'add'
           />
 
           <Autocomplete
-            options={[{label: 'Recipe', value: 'recipe'}, {label: 'Keywords', value: 'keyword'}]}
+            options={[{label: 'Recipe', value: 'recipe'}]}
             getOptionLabel={(option) => option.label}
-            value={[{label: 'Recipe', value: 'recipe'}, {label: 'Keywords', value: 'keyword'}].find(opt => opt.value === formik.values.type) || null}
+            value={[{label: 'Recipe', value: 'recipe'}].find(opt => opt.value === formik.values.type) || null}
             onChange={(_, newValue) => {
                 formik.setFieldValue('type', newValue ? newValue.value : '');
             }}

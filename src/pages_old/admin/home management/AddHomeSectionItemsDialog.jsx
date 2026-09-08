@@ -1,12 +1,11 @@
 "use client";
 import React, { useState, useMemo, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, Button, IconButton, Autocomplete, TextField, Box, DialogActions, Typography, Chip } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Button, IconButton, Autocomplete, TextField, Box, DialogActions, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useAddHomeSectionItemsMutation } from '../../../features/api/homeSectionItemApi';
 import { useGetRecipeCategoriesQuery } from '../../../features/api/categoryApi';
 import { useGetAllRecipeSubCategorieDetailsQuery } from '../../../features/api/subCategoryApi';
 import { useSearchPublicApprovedRecipesSimpleQuery } from '../../../features/api/recipeApi';
-import { useGetAllKeywordsQuery } from '../../../features/api/keywordApi';
 import { toast } from '../../../utils/toast';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -19,10 +18,8 @@ const getItemId = (item, type) => {
             return item.sub_category_id || item.item_id;
         case 'recipe':
             return item.recipe_id || item.item_id;
-        case 'keyword':
-            return item.keyword_id || item.item_id || item.id;
         default:
-            return item.recipe_id || item.sub_category_id || item.category_id || item.keyword_id || item.id || item.item_id;
+            return item.recipe_id || item.sub_category_id || item.category_id || item.id || item.item_id;
     }
 };
 
@@ -181,18 +178,6 @@ const AddHomeSectionItemsDialog = ({ open, onClose, section, existingItems }) =>
                 isDarkMode={isDarkMode}
                 section={section}
             />
-        } else if (section.type === 'keyword') {
-            return <AddItemAutocomplete
-                useQuery={useGetAllKeywordsQuery}
-                label="Search Keywords"
-                onSelect={handleSelect}
-                value={selectedItems}
-                existingIds={existingIds}
-                customInputSx={customInputSx}
-                autocompletePaperSx={autocompletePaperSx}
-                isDarkMode={isDarkMode}
-                section={section}
-            />
         }
         return null;
     };
@@ -304,7 +289,7 @@ const AddHomeSectionItemsDialog = ({ open, onClose, section, existingItems }) =>
     );
 };
 
-const AddItemAutocomplete = ({ useQuery, label, onSelect, value, existingIds, isRecipe, categoryId, customInputSx, autocompletePaperSx, isDarkMode, section }) => {
+const AddItemAutocomplete = ({ useQuery, label, onSelect, value, existingIds, categoryId, customInputSx, autocompletePaperSx, isDarkMode, section }) => {
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [options, setOptions] = useState([]);
@@ -369,165 +354,34 @@ const AddItemAutocomplete = ({ useQuery, label, onSelect, value, existingIds, is
                     const id = getItemId(option, section?.type);
                     return !existingIds.includes(String(id));
                 }) : []}
-                noOptionsText={search.trim() ? "No options found" : "Type to search..."}
-                getOptionLabel={(option) => option.name || option.title || ''}
-                loading={isLoading}
-                filterSelectedOptions
-                onInputChange={(event, newInputValue) => {
-                    if (event && event.type !== 'click') {
-                        setSearch(newInputValue);
-                    }
+                getOptionLabel={(option) => {
+                    if (typeof option === 'string') return option;
+                    return option.category_name || option.sub_category_name || option.title || option.name || '';
                 }}
-                onChange={(event, newValue) => {
-                    onSelect(newValue);
+                isOptionEqualToValue={(option, val) => {
+                    const id1 = getItemId(option, section?.type);
+                    const id2 = getItemId(val, section?.type);
+                    return String(id1) === String(id2);
                 }}
-                slotProps={{
-                    paper: autocompletePaperSx,
-                    listbox: {
-                        onScroll: handleScroll,
-                        sx: {
-                            backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-                            color: isDarkMode ? '#e5e7eb' : '#374151',
-                            '& .MuiAutocomplete-option': {
-                                '&[aria-selected="true"]': {
-                                    backgroundColor: isDarkMode ? '#374151' : '#e5e7eb',
-                                },
-                                '&:hover': {
-                                    backgroundColor: isDarkMode ? '#374151' : '#f3f4f6',
-                                }
-                            }
-                        }
-                    }
-                }}
-
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        label={label}
-                        variant="outlined"
-                        sx={customInputSx}
-                        InputProps={{
-                            ...params?.InputProps,
-                            endAdornment: (
-                                <React.Fragment>
-                                    {isLoading || isFetching ? <Box sx={{ display: 'flex', color: isDarkMode ? '#e5e7eb' : 'inherit' }} mr={1}>Loading...</Box> : null}
-                                    {params?.InputProps?.endAdornment}
-                                </React.Fragment>
-                            ),
-                        }}
-                    />
-                )}
-                renderTags={() => []}
-                isOptionEqualToValue={(option, value) => {
-                    const idOption = getItemId(option, section?.type);
-                    const idValue = getItemId(value, section?.type);
-                    return String(idOption) === String(idValue);
-                }}
-            />
-            {value.length > 0 && (
-                <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {value.map((option, index) => (
-                        <Chip
-                            key={index}
-                            label={option.name || option.title || ''}
-                            onDelete={() => {
-                                const newValue = value.filter((_, i) => i !== index);
-                                onSelect(newValue);
-                            }}
-                            sx={{
-                                backgroundColor: isDarkMode ? '#334155' : '#e2e8f0',
-                                color: isDarkMode ? '#f8fafc' : '#1e293b',
-                                '& .MuiChip-deleteIcon': {
-                                    color: isDarkMode ? '#94a3b8' : '#64748b',
-                                    '&:hover': {
-                                        color: isDarkMode ? '#e2e8f0' : '#475569',
-                                    }
-                                }
-                            }}
-                        />
-                    ))}
-                </Box>
-            )}
-        </Box>
-    )
-}
-
-const SimpleAddItemAutocomplete = ({ useQuery, label, onSelect, value, existingIds, customInputSx, autocompletePaperSx, isDarkMode, section }) => {
-    const { data, isLoading } = useQuery();
-
-    const options = useMemo(() => {
-        const items = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-        return items.filter(option => {
-            const getId = (item) => getItemId(item, section?.type);
-            return !existingIds.includes(String(getId(option)));
-        });
-    }, [data, existingIds]);
-
-    return (
-        <Box sx={{ width: '100%' }}>
-            <Autocomplete
-                multiple
-                value={value}
-                options={options}
-                getOptionLabel={(option) => option.name || option.title || ''}
-                loading={isLoading}
-                filterSelectedOptions
-                onChange={(event, newValue) => {
-                    onSelect(newValue);
-                }}
+                onChange={(_, newValue) => onSelect(newValue)}
+                onInputChange={(_, newInputValue) => setSearch(newInputValue)}
+                loading={isLoading || isFetching}
                 slotProps={{ paper: autocompletePaperSx }}
-
+                ListboxProps={{
+                    onScroll: handleScroll,
+                    style: { maxHeight: '200px' }
+                }}
                 renderInput={(params) => (
                     <TextField
                         {...params}
                         label={label}
-                        variant="outlined"
+                        placeholder={search.trim() ? "Search more..." : "Type to search..."}
                         sx={customInputSx}
-                        InputProps={{
-                            ...params?.InputProps,
-                            endAdornment: (
-                                <React.Fragment>
-                                    {isLoading ? <Box sx={{ display: 'flex', color: isDarkMode ? '#e5e7eb' : 'inherit' }} mr={1}>Loading...</Box> : null}
-                                    {params?.InputProps?.endAdornment}
-                                </React.Fragment>
-                            ),
-                        }}
                     />
                 )}
-                renderTags={() => []}
-                isOptionEqualToValue={(option, value) => {
-                    const idOption = getItemId(option, section?.type);
-                    const idValue = getItemId(value, section?.type);
-                    return String(idOption) === String(idValue);
-                }}
             />
-            {value.length > 0 && (
-                <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {value.map((option, index) => (
-                        <Chip
-                            key={index}
-                            label={option.name || option.title || ''}
-                            onDelete={() => {
-                                const newValue = value.filter((_, i) => i !== index);
-                                onSelect(newValue);
-                            }}
-                            sx={{
-                                backgroundColor: isDarkMode ? '#334155' : '#e2e8f0',
-                                color: isDarkMode ? '#f8fafc' : '#1e293b',
-                                '& .MuiChip-deleteIcon': {
-                                    color: isDarkMode ? '#94a3b8' : '#64748b',
-                                    '&:hover': {
-                                        color: isDarkMode ? '#e2e8f0' : '#475569',
-                                    }
-                                }
-                            }}
-                        />
-                    ))}
-                </Box>
-            )}
         </Box>
-    )
-}
+    );
+};
 
 export default AddHomeSectionItemsDialog;
-

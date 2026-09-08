@@ -116,27 +116,7 @@ const ViewBannerDialog = ({
                 
                 <DetailRow label="Button Text" value={banner.button_text || '—'} />
 
-                <DetailRow label="Keywords">
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {(banner.keywords || []).length > 0 ? (
-                      banner.keywords.map((kw, idx) => (
-                        <Chip
-                          key={`${kw}-${idx}`}
-                          label={kw}
-                          size="small"
-                          sx={{ 
-                              backgroundColor: isDarkMode ? 'rgba(5, 150, 105, 0.15)' : 'rgba(16, 185, 129, 0.15)', 
-                              color: isDarkMode ? '#10b981' : '#059669', 
-                              fontWeight: 600,
-                              borderRadius: '4px' 
-                          }} 
-                        />
-                      ))
-                    ) : (
-                      <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280', fontStyle: 'italic' }}>None</Typography>
-                    )}
-                  </Box>
-                </DetailRow>
+
 
                 <DetailRow label="Is Hero Banner">
                     <Chip

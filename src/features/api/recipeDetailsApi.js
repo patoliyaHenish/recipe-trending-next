@@ -81,25 +81,6 @@ export const recipeDetailsApi = createApi({
             },
             providesTags: ['SavedRecipes'],
         }),
-        getPublicRecipesByKeywords: builder.query({
-            query: ({ keywords, page = 1, limit = 20, preference = '' }) => {
-                let queryParam = keywords;
-                if (Array.isArray(keywords)) {
-                    queryParam = JSON.stringify(keywords);
-                }
-                const params = new URLSearchParams();
-                params.append('keywords', queryParam);
-                params.append('page', page);
-                params.append('limit', limit);
-                if (preference) params.append('preference', preference);
-
-                return {
-                    url: `/get-public-recipes-by-keywords?${params.toString()}`,
-                    method: "GET",
-                };
-            },
-            providesTags: ['SavedRecipes'],
-        }),
         getRecipeSuggestions: builder.query({
             query: ({ recipeId, limit = 16 }) => ({
                 url: `/get-recipe-suggestions?recipeId=${recipeId}&limit=${limit}`,
@@ -119,6 +100,5 @@ export const {
     useUnsaveRecipeMutation,
     useGetCategoryPageQuery,
     useGetSubCategoryPageQuery,
-    useGetPublicRecipesByKeywordsQuery,
     useGetRecipeSuggestionsQuery,
 } = recipeDetailsApi;

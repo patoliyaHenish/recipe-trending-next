@@ -313,15 +313,10 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
         .split(',')
         .map(item => item.trim())
         .filter(Boolean);
-      const keywordIds = (searchParams.get('keywordId') || '')
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
       let categoryIndex = 0;
       let subCategoryIndex = 0;
       let recipeIndex = 0;
       let ingredientIndex = 0;
-      let keywordIndex = 0;
       const parsedTags = q
         .split(',')
         .map(item => item.trim())
@@ -339,9 +334,7 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                 ? recipeIds[recipeIndex++]
                 : (types[index] === 'ingredient' && ingredientIds[ingredientIndex])
                   ? ingredientIds[ingredientIndex++]
-                  : (types[index] === 'keyword' && keywordIds[keywordIndex])
-                    ? keywordIds[keywordIndex++]
-                    : undefined
+                  : undefined
         }));
 
       setSearchTags(parsedTags);
@@ -447,9 +440,6 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
     const ingredientIds = searchTags
       .filter(tag => tag.type === 'ingredient' && tag.id)
       .map(tag => tag.id);
-    const keywordIds = searchTags
-      .filter(tag => tag.type === 'keyword' && tag.id)
-      .map(tag => tag.id);
     closeSearchDrawer();
     if (q) {
       const params = new URLSearchParams();
@@ -459,10 +449,10 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
       if (subCategoryIds.length > 0) params.set('subCategoryId', subCategoryIds.join(','));
       if (recipeIds.length > 0) params.set('recipeId', recipeIds.join(','));
       if (ingredientIds.length > 0) params.set('ingredientId', ingredientIds.join(','));
-      if (keywordIds.length > 0) params.set('keywordId', keywordIds.join(','));
       router.push(`/result?${params.toString()}`);
+    } else {
+      router.push('/result');
     }
-    else router.push('/result');
   };
 
 
@@ -1730,18 +1720,14 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                             ? (isDarkMode ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)')
                             : tagType === 'subCategory'
                               ? (isDarkMode ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.1)')
-                              : tagType === 'keyword'
-                                ? (isDarkMode ? 'rgba(236, 72, 153, 0.15)' : 'rgba(236, 72, 153, 0.1)')
-                                : (isDarkMode ? 'rgba(202, 96, 20, 0.15)' : 'rgba(202, 96, 20, 0.1)'),
+                              : (isDarkMode ? 'rgba(202, 96, 20, 0.15)' : 'rgba(202, 96, 20, 0.1)'),
                         border: tagType === 'ingredient'
                           ? (isDarkMode ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(16, 185, 129, 0.3)')
                           : tagType === 'category'
                             ? (isDarkMode ? '1px solid rgba(139, 92, 246, 0.4)' : '1px solid rgba(139, 92, 246, 0.3)')
                             : tagType === 'subCategory'
                               ? (isDarkMode ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(245, 158, 11, 0.3)')
-                              : tagType === 'keyword'
-                                ? (isDarkMode ? '1px solid rgba(236, 72, 153, 0.4)' : '1px solid rgba(236, 72, 153, 0.3)')
-                                : (isDarkMode ? '1px solid rgba(202, 96, 20, 0.4)' : '1px solid rgba(202, 96, 20, 0.3)'),
+                              : (isDarkMode ? '1px solid rgba(202, 96, 20, 0.4)' : '1px solid rgba(202, 96, 20, 0.3)'),
                         fontSize: '0.9rem',
                         fontWeight: 500,
                         fontFamily: "'Basic', sans-serif !important",
@@ -1754,9 +1740,7 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                             ? (isDarkMode ? '#a78bfa' : '#8b5cf6')
                             : tagType === 'subCategory'
                               ? (isDarkMode ? '#fbbf24' : '#f59e0b')
-                              : tagType === 'keyword'
-                                ? (isDarkMode ? '#f472b6' : '#db2777')
-                                : (isDarkMode ? '#fb923c' : '#ca6014')
+                              : (isDarkMode ? '#fb923c' : '#ca6014')
                       }}>{tagText}</span>
                       <IconButton
                         size="small"
@@ -1769,9 +1753,7 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                               ? (isDarkMode ? '#a78bfa' : '#8b5cf6')
                               : tagType === 'subCategory'
                                 ? (isDarkMode ? '#fbbf24' : '#f59e0b')
-                                : tagType === 'keyword'
-                                  ? (isDarkMode ? '#f472b6' : '#db2777')
-                                  : (isDarkMode ? '#fb923c' : '#ca6014'),
+                                : (isDarkMode ? '#fb923c' : '#ca6014'),
                           '&:hover': {
                             bgcolor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
                           },
@@ -1895,13 +1877,11 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                         color: suggestion.type === 'ingredient' ? '#10b981' :
                           suggestion.type === 'category' ? '#8b5cf6' :
                             suggestion.type === 'subCategory' ? '#f59e0b' :
-                              suggestion.type === 'keyword' ? '#db2777' :
-                                '#ca6014',
+                              '#ca6014',
                         backgroundColor: suggestion.type === 'ingredient' ? 'rgba(16, 185, 129, 0.1)' :
                           suggestion.type === 'category' ? 'rgba(139, 92, 246, 0.1)' :
                             suggestion.type === 'subCategory' ? 'rgba(245, 158, 11, 0.1)' :
-                              suggestion.type === 'keyword' ? 'rgba(236, 72, 153, 0.1)' :
-                                'rgba(202, 96, 20, 0.1)',
+                              'rgba(202, 96, 20, 0.1)',
                         px: 1.2,
                         py: 0.4,
                         borderRadius: 1,
@@ -1911,8 +1891,7 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                       {suggestion.type === 'ingredient' ? 'Ingredient' :
                         suggestion.type === 'category' ? 'Category' :
                           suggestion.type === 'subCategory' ? 'Sub-Cat' :
-                            suggestion.type === 'keyword' ? 'Keyword' :
-                              'Recipe'}
+                            'Recipe'}
                     </Box>
                   </Box>
                 ))}

@@ -271,15 +271,13 @@ const AddHomeSectionDialog = ({
               options={[
                 {label: 'Category', value: 'category'},
                 {label: 'Sub Category', value: 'sub-category'},
-                {label: 'Recipe', value: 'recipe'},
-                {label: 'Keyword', value: 'keyword'}
+                {label: 'Recipe', value: 'recipe'}
               ]}
               getOptionLabel={(option) => option.label}
               value={[
                 {label: 'Category', value: 'category'},
                 {label: 'Sub Category', value: 'sub-category'},
-                {label: 'Recipe', value: 'recipe'},
-                {label: 'Keyword', value: 'keyword'}
+                {label: 'Recipe', value: 'recipe'}
               ].find(opt => opt.value === formik.values.type) || null}
               onChange={(_, newValue) => {
                   handleFieldChange({ target: { name: 'type', value: newValue ? newValue.value : '' } });

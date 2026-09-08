@@ -130,7 +130,6 @@ const  Banner = () => {
                 }}
                 onClick={() => {
                   const searchParams = new URLSearchParams({
-                    keywords: banner.keywords || banner.title,
                     title: banner.title,
                     image: banner.image || '',
                   });
@@ -229,7 +228,6 @@ const  Banner = () => {
                 }}
                 onClick={() => {
                   const searchParams = new URLSearchParams({
-                    keywords: banner.keywords || banner.title,
                     title: banner.title,
                     image: banner.image || '',
                   });

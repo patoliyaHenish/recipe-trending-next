@@ -7,7 +7,7 @@ import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { toast } from '../../../utils/toast';
 import { useCreateBannerMutation, useUpdateBannerMutation } from '../../../features/api/bannerApi'
-import { useGetAllKeywordsQuery } from '../../../features/api/keywordApi'
+
 import { useTheme } from '../../../context/ThemeContext'
 import { getImage } from '../../../utils/helper'
 import { useUser } from '../../../context/useUser'
@@ -24,12 +24,7 @@ const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerD
   const [createBanner, { isLoading: isAdding }] = useCreateBannerMutation()
 
   const [updateBanner, { isLoading: isUpdating }] = useUpdateBannerMutation()
-  const [keywordSearch, setKeywordSearch] = useState('')
-  const [debouncedKeywordSearch, setDebouncedKeywordSearch] = useState('')
-  const { data: keywordSuggestionsRaw } = useGetAllKeywordsQuery(
-    { search: debouncedKeywordSearch, page: 1, limit: 15 },
-    { skip: !open }
-  )
+
 
   const [imagePreview, setImagePreview] = useState(null)
   const [dragActive, setDragActive] = useState(false)
@@ -43,27 +38,20 @@ const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerD
       } else {
         setImagePreview(null)
       }
-      setKeywordSearch('')
-      setDebouncedKeywordSearch('')
+
     }
     return () => {
       if (imageUrlRef.current) URL.revokeObjectURL(imageUrlRef.current)
     }
   }, [open, mode, bannerData])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedKeywordSearch(keywordSearch.trim())
-    }, 300)
 
-    return () => clearTimeout(timer)
-  }, [keywordSearch])
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     const formData = new FormData()
     formData.append('title', values.title)
     formData.append('button_text', values.button_text)
-    formData.append('keywords', JSON.stringify(values.keywords))
+
     formData.append('is_hero', values.is_hero ? 'true' : 'false')
     
     if (values.is_hero && values.order) {
@@ -98,14 +86,12 @@ const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerD
   const initialValues = mode === 'edit' && bannerData ? {
     title: bannerData.title || '',
     button_text: bannerData.button_text || '',
-    keywords: bannerData.keywords || [],
     image: null,
     is_hero: bannerData.is_hero || false,
     order: bannerData.order || ''
   } : {
     title: '',
     button_text: '',
-    keywords: [],
     image: null,
     is_hero: false,
     order: ''
@@ -115,7 +101,6 @@ const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerD
     const baseSchema = {
       title: Yup.string().required('Title is required'),
       button_text: Yup.string().required('Button text is required'),
-      keywords: Yup.array().of(Yup.string().trim().required()).min(1, 'At least one keyword is required'),
       is_hero: Yup.boolean(),
       order: Yup.number().when('is_hero', {
         is: true,
@@ -242,16 +227,6 @@ const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerD
         validateOnChange={true}
       >
         {({ values, errors, touched, handleChange, handleBlur, setFieldValue, isSubmitting }) => {
-          const keywordOptions = Array.isArray(keywordSuggestionsRaw?.data)
-            ? keywordSuggestionsRaw.data
-                .filter(k => !values.keywords.includes(k.name))
-                .map(k => ({
-                  label: `${k.name} (${Number(k.usage_count || 0)})`,
-                  value: k.name,
-                  usageCount: Number(k.usage_count || 0),
-                }))
-            : []
-
           const handleFileChange = (e) => {
             const file = e.target.files[0]
             if (file) {
@@ -309,102 +284,6 @@ const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerD
                     helperText={touched.button_text && errors.button_text} 
                     sx={customInputSx}
                   />
-                  <Autocomplete
-                    multiple
-                    sx={{
-                      '& .MuiAutocomplete-tag': {
-                        backgroundColor: '#6366f1 !important',
-                        color: '#ffffff !important',
-                        fontWeight: 600,
-                        borderRadius: '6px',
-                        '& .MuiChip-label': {
-                          color: '#ffffff !important',
-                        },
-                        '& .MuiChip-deleteIcon': {
-                          color: 'rgba(255, 255, 255, 0.7) !important',
-                          '&:hover': {
-                            color: '#ffffff !important',
-                          }
-                        }
-                      }
-                    }}
-                    options={keywordOptions}
-                    inputValue={keywordSearch}
-                    onInputChange={(_, value, reason) => {
-                      if (reason === 'input') {
-                        setKeywordSearch(value)
-                      }
-                    }}
-                    getOptionLabel={option => typeof option === 'string' ? option : option.label}
-                    value={values.keywords.map(val => {
-                      const found = keywordOptions.find(opt => opt.value === val)
-                      return found ? found : { label: val, value: val }
-                    })}
-                    onChange={(_, newValue) => setFieldValue('keywords', newValue.map(v => (typeof v === 'string' ? v : v.value)))}
-                    renderTags={(value, getTagProps) =>
-                      value.map((option, index) => (
-                        <Chip 
-                          variant="filled" 
-                          color="primary"
-                          label={option.label} 
-                          {...getTagProps({ index })} 
-                          key={option.value || option.label}
-                          sx={{
-                            color: '#ffffff !important',
-                            backgroundColor: '#6366f1 !important',
-                            fontWeight: 600,
-                            borderRadius: '6px',
-                            '& .MuiChip-label': {
-                              color: '#ffffff !important',
-                            },
-                            '& .MuiChip-deleteIcon': {
-                              color: 'rgba(255, 255, 255, 0.7) !important',
-                              '&:hover': { color: '#ffffff !important' },
-                            },
-                          }}
-                        />
-                      ))
-                    }
-                    slotProps={{
-                        paper: {
-                            sx: {
-                                backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
-                                color: isDarkMode ? '#e2e8f0' : '#1e293b',
-                                borderRadius: '8px',
-                                border: `1px solid ${isDarkMode ? '#334155' : '#e2e8f0'}`,
-                                boxShadow: isDarkMode ? '0 10px 15px -3px rgba(0, 0, 0, 0.5)' : '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                                mt: 1,
-                                '& .MuiAutocomplete-option': {
-                                    padding: '10px 16px',
-                                    color: isDarkMode ? '#e2e8f0' : '#1e293b',
-                                    '&:hover': {
-                                        backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.15)' : '#f1f5f9',
-                                    },
-                                    '&[aria-selected="true"]': {
-                                        backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.2)' : '#e0e7ff',
-                                        color: '#6366f1',
-                                        fontWeight: 600,
-                                        '&:hover': {
-                                            backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.3)' : '#c7d2fe',
-                                        }
-                                    }
-                                },
-                                '& .MuiAutocomplete-noOptions': { color: isDarkMode ? '#9ca3af' : '#6b7280' },
-                            }
-                        }
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Keywords"
-                        fullWidth
-                        error={touched.keywords && Boolean(errors.keywords)}
-                        helperText={touched.keywords && errors.keywords}
-                        sx={customInputSx}
-                      />
-                    )}
-                  />
-
                   <Box
                     onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                     onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}

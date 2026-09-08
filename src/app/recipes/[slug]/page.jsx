@@ -62,7 +62,6 @@ export async function generateMetadata({ params }) {
   return {
     title: recipe.meta_title || recipe.title || 'Recipe Trending',
     description: recipe.meta_description || recipe.description || 'Delicious recipe from Recipe Trending',
-    keywords: recipe.keywords?.join(', ') || 'recipe, food',
     openGraph: {
       title: recipe.meta_title || recipe.title,
       description: recipe.meta_description || recipe.description,

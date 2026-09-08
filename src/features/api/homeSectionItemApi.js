@@ -38,7 +38,7 @@ export const homeSectionItemApi = createApi({
                     homeSectionItemApi.util.updateQueryData('getHomeSectionItems', String(inputData.home_section_id), (draft) => {
                         if (draft.data && Array.isArray(draft.data)) {
                             draft.data = draft.data.filter(item => {
-                                const itemId = String(item.recipe_id || item.category_id || item.sub_category_id || item.keyword_id || item.id);
+                                const itemId = String(item.recipe_id || item.category_id || item.sub_category_id || item.id);
                                 return !inputData.item_ids.map(id => String(id)).includes(itemId);
                             });
                         }

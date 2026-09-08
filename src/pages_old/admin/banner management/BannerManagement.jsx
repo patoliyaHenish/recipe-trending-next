@@ -96,8 +96,7 @@ const BannerManagement = () => {
         let result = bannersRaw;
         if (debouncedSearch) {
             result = result.filter(b => 
-                b.title.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
-                (b.keywords || []).some(k => k.toLowerCase().includes(debouncedSearch.toLowerCase()))
+                b.title.toLowerCase().includes(debouncedSearch.toLowerCase())
             );
         }
         if (debouncedStatus !== 'all') {

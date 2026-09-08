@@ -2,20 +2,17 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Box, Typography, Button, IconButton, Select, MenuItem, FormControl, InputLabel, Paper, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { Box, Typography, Button, IconButton, Paper, Tabs, Tab, Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material'
 
 import { useTheme } from '../../../context/ThemeContext'
 import { toast } from '../../../utils/toast';
-import { PageHeader, ConfirmDialog } from '../../../components/common'
+import { ConfirmDialog } from '../../../components/common'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useGetHomeSectionsQuery } from '../../../features/api/homeSectionApi'
 
 import { useGetHomeSectionItemsQuery, useRemoveHomeSectionItemsMutation } from '../../../features/api/homeSectionItemApi'
 import AddHomeSectionItemsDialog from './AddHomeSectionItemsDialog'
 import { getImage } from '../../../utils/helper'
-
-
 
 import { useUser } from '../../../context/useUser';
 import { AccessDenied } from '../../../components/common';
@@ -27,23 +24,18 @@ const HomeSectionItemsManagement = () => {
     const isAdmin = user?.role === 'admin';
     
     const canList = isAdmin || userPermissions.includes('home_section_items.list');
-    const canViewItems = isAdmin || userPermissions.includes('home_section_items.list');
     const canAddItems = isAdmin || userPermissions.includes('home_section_items.add');
     const canDeleteItems = isAdmin || userPermissions.includes('home_section_items.delete');
 
-    
-
-
     useEffect(() => {
         document.title = 'Home Section Items'
-    })
+    }, [])
 
     const [searchParams, setSearchParams] = useSearchParams()
     const { data: homeSections, isLoading: isLoadingSections } = useGetHomeSectionsQuery()
     
     const selectedSectionId = searchParams.get('sectionId') || ''
     
-
     const { data: sectionItems, isLoading: isLoadingItems, isFetching: isFetchingItems } = useGetHomeSectionItemsQuery(selectedSectionId, {
         skip: !selectedSectionId
     })
@@ -54,14 +46,11 @@ const HomeSectionItemsManagement = () => {
     const [deleteId, setDeleteId] = useState(null)
     const [search, setSearch] = useState('')
 
-
     useEffect(() => {
         if (homeSections?.data && homeSections.data.length > 0 && !selectedSectionId) {
             setSearchParams({ sectionId: homeSections.data[0].home_section_id })
         }
     }, [homeSections, selectedSectionId, setSearchParams])
-
-    
 
     const selectedSection = useMemo(() => {
         return homeSections?.data?.find(s => String(s.home_section_id) === String(selectedSectionId))
@@ -85,63 +74,25 @@ const HomeSectionItemsManagement = () => {
         }
     }
 
-
-
     const rowData = useMemo(() => {
         let finalData = Array.isArray(sectionItems?.data) ? sectionItems.data : [];
-        
-        if (selectedSection?.type === 'keyword' && finalData.length > 0) {
-            const groups = {};
-            const seenRecipeIds = new Set();
-            
-            finalData.forEach(item => {
-                const kId = item.keyword_id;
-                if (!groups[kId]) {
-                    groups[kId] = {
-                        isHeader: true,
-                        keyword_id: kId,
-                        keyword_name: item.keyword_name,
-                        recipes: []
-                    };
-                }
-                
-                const rId = item.recipe_id || item.id;
-                if (!seenRecipeIds.has(rId)) {
-                    groups[kId].recipes.push(item);
-                    seenRecipeIds.add(rId);
-                }
-            });
-
-            const transformed = [];
-            Object.values(groups).forEach(group => {
-                transformed.push(group);
-                group.recipes.forEach(recipe => {
-                    transformed.push({ ...recipe, isChild: true });
-                });
-            });
-            finalData = transformed;
-        }
         
         if (search) {
             const lowerSearch = search.toLowerCase();
             return finalData.filter(item => {
-                if (item.isHeader) {
-                    return item.keyword_name?.toLowerCase().includes(lowerSearch);
-                }
-                return (item.name || item.title || '').toLowerCase().includes(lowerSearch) ||
-                       (item.keyword_name || '').toLowerCase().includes(lowerSearch);
+                return (item.name || item.title || '').toLowerCase().includes(lowerSearch);
             });
         }
         
         return finalData;
-    }, [sectionItems, selectedSection, search])
+    }, [sectionItems, search])
 
     if (!canList) {
         return <AccessDenied message="You do not have permission to view Home Section Items Management." />;
     }
 
-  return (
-    <Box className="transition-all duration-200 flex flex-col pt-0 md:pt-4 pb-4 px-3 mt-[64px] md:mt-[74px] min-h-[calc(100vh-74px)] h-auto w-full">
+    return (
+        <Box className="transition-all duration-200 flex flex-col pt-0 md:pt-4 pb-4 px-3 mt-[64px] md:mt-[74px] min-h-[calc(100vh-74px)] h-auto w-full">
             <Box 
                 className="flex flex-col bg-white rounded-lg shadow-sm border overflow-hidden transition-all duration-200"
                 sx={{ 
@@ -263,9 +214,9 @@ const HomeSectionItemsManagement = () => {
                                     );
                                 })}
                             </Tabs>
+                        </Box>
                     </Box>
                 </Box>
-            </Box>
 
                 {/* ── Table ───────────────────────────────────────────────── */}
                 <TableContainer 
@@ -300,9 +251,6 @@ const HomeSectionItemsManagement = () => {
                                 <TableCell align="center" width={60}>#</TableCell>
                                 <TableCell align="center" width={80}>IMAGE</TableCell>
                                 <TableCell>NAME</TableCell>
-                                {selectedSection?.type === 'keyword' && (
-                                    <TableCell>KEYWORD</TableCell>
-                                )}
                                 {selectedSection?.type === 'recipe' && (
                                     <TableCell align="center">FOOD TYPE</TableCell>
                                 )}
@@ -315,141 +263,94 @@ const HomeSectionItemsManagement = () => {
                         <TableBody>
                             {isLoadingItems || isFetchingItems ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} align="center" sx={{ py: 8, borderBottom: 'none' }}>
+                                    <TableCell colSpan={6} align="center" sx={{ py: 8, borderBottom: 'none' }}>
                                         <CircularProgress size={40} sx={{ color: '#7367f0' }} />
                                     </TableCell>
                                 </TableRow>
                             ) : (!rowData || rowData.length === 0) ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} align="center" sx={{ py: 8, borderBottom: 'none' }}>
+                                    <TableCell colSpan={6} align="center" sx={{ py: 8, borderBottom: 'none' }}>
                                         <Typography variant="body1" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
                                             No items found
                                         </Typography>
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                (() => {
-                                    const filteredItems = search ? 
-                                        rowData.filter(item => {
-                                            const searchStr = search.toLowerCase();
-                                            const nameMatch = (item.name || item.title || '').toLowerCase().includes(searchStr);
-                                            const keywordMatch = (item.keyword_name || '').toLowerCase().includes(searchStr);
-                                            return nameMatch || keywordMatch;
-                                        }) : rowData;
+                                rowData.map((rowItem, index) => {
+                                    const imgVal = (typeof rowItem.image === 'string' ? rowItem.image.trim() : '') || '';
+                                    const imgUrl = imgVal && imgVal.toLowerCase() !== 'null' ? getImage(imgVal) : '';
+                                    const isSquare = selectedSection?.type === 'category' || selectedSection?.type === 'sub-category';
+                                    const isRecipe = selectedSection?.type === 'recipe';
+                                    let width = 60; let height = 40;
+                                    if (isSquare) { width = 40; height = 40; } else if (isRecipe) { width = 50; height = 35; }
 
-                                    if (filteredItems.length === 0) {
-                                        return (
-                                            <TableRow>
-                                                <TableCell colSpan={7} align="center" sx={{ py: 8, borderBottom: 'none' }}>
-                                                    <Typography variant="body1" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                                                        No matching items
-                                                    </Typography>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    }
-
-                                    return filteredItems.map((rowItem, index) => {
-                                        const isKeywordType = selectedSection?.type === 'keyword';
-                                        const isRecipeType = selectedSection?.type === 'recipe';
-
-                                        if (rowItem.isHeader) {
-                                            let colSpan = 2;
-                                            if (isKeywordType) colSpan += 1;
-                                            if (isRecipeType) colSpan += 1;
+                                    return (
+                                        <TableRow 
+                                            key={rowItem.id || `item-${index}`}
+                                            sx={{ 
+                                                'height': '60px',
+                                                '&:hover': {
+                                                    backgroundColor: isDarkMode ? '#2f3851' : '#f8f8f8',
+                                                },
+                                                '& td': {
+                                                    borderColor: isDarkMode ? '#3b4253' : '#ebe9f1',
+                                                    color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                                }
+                                            }}
+                                        >
+                                            <TableCell align="center">{index + 1}</TableCell>
+                                            <TableCell align="center">
+                                                {imgUrl ? (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                                        <img src={imgUrl} alt={rowItem.name || rowItem.title} style={{ width, height, objectFit: 'cover', borderRadius: isSquare ? '50%' : 4 }} />
+                                                    </Box>
+                                                ) : (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                                        <span style={{ color: '#9ca3af' }}>-</span>
+                                                    </Box>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>{rowItem.name || rowItem.title}</TableCell>
                                             
-                                            return (
-                                                <TableRow key={'header-'+index} sx={{ backgroundColor: isDarkMode ? '#111827' : '#f9fafb', height: '60px' }}>
-                                                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>•</TableCell>
-                                                    <TableCell></TableCell>
-                                                    <TableCell colSpan={colSpan} sx={{ fontWeight: 'bold', color: '#CA6014', pl: '20px' }}>
-                                                        Recipes for: {rowItem.keyword_name}
-                                                    </TableCell>
-                                                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}></TableCell>
-                                                    {canDeleteItems && <TableCell></TableCell>}
-                                                </TableRow>
-                                            );
-                                        }
-
-                                        const imgVal = (typeof rowItem.image === 'string' ? rowItem.image.trim() : '') || '';
-                                        const imgUrl = imgVal && imgVal.toLowerCase() !== 'null' ? getImage(imgVal) : '';
-                                        const isSquare = selectedSection?.type === 'category' || selectedSection?.type === 'sub-category';
-                                        const isRecipe = selectedSection?.type === 'recipe' || selectedSection?.type === 'keyword';
-                                        let width = 60; let height = 40;
-                                        if (isSquare) { width = 40; height = 40; } else if (isRecipe) { width = 50; height = 35; }
-
-                                        return (
-                                            <TableRow 
-                                                key={rowItem.id || `item-${index}`}
-                                                sx={{ 
-                                                    'height': '60px',
-                                                    '&:hover': {
-                                                        backgroundColor: isDarkMode ? '#2f3851' : '#f8f8f8',
-                                                    },
-                                                    '& td': {
-                                                        borderColor: isDarkMode ? '#3b4253' : '#ebe9f1',
-                                                        color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                                                    }
-                                                }}
-                                            >
-                                                <TableCell align="center">{index + 1}</TableCell>
+                                            {isRecipe && (
                                                 <TableCell align="center">
-                                                    {imgUrl ? (
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                                                            <img src={imgUrl} alt={rowItem.name || rowItem.title} style={{ width, height, objectFit: 'cover', borderRadius: isSquare ? '50%' : 4 }} />
-                                                        </Box>
-                                                    ) : (
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                                                            <span style={{ color: '#9ca3af' }}>-</span>
-                                                        </Box>
-                                                    )}
+                                                    {(() => {
+                                                        const val = String(rowItem.food_type || '').trim().toLowerCase();
+                                                        if (!val) return '-';
+                                                        if (val === 'veg') return 'Veg';
+                                                        if (val === 'egg') return 'Egg';
+                                                        if (val === 'non_veg' || val === 'non-veg' || val === 'non veg') return 'Non-Veg';
+                                                        return val.charAt(0).toUpperCase() + val.slice(1);
+                                                    })()}
                                                 </TableCell>
-                                                <TableCell>{rowItem.name || rowItem.title}</TableCell>
-                                                
-                                                {isKeywordType && (
-                                                    <TableCell>{rowItem.keyword_name || '-'}</TableCell>
-                                                )}
-                                                
-                                                {isRecipeType && (
-                                                    <TableCell align="center">
-                                                        {(() => {
-                                                            const val = String(rowItem.food_type || '').trim().toLowerCase();
-                                                            if (!val) return '-';
-                                                            if (val === 'veg') return 'Veg';
-                                                            if (val === 'egg') return 'Egg';
-                                                            if (val === 'non_veg' || val === 'non-veg' || val === 'non veg') return 'Non-Veg';
-                                                            return val.charAt(0).toUpperCase() + val.slice(1);
-                                                        })()}
-                                                    </TableCell>
-                                                )}
+                                            )}
 
-                                                <TableCell align="center" sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                                                    {selectedSection?.type ? selectedSection.type.charAt(0).toUpperCase() + selectedSection.type.slice(1) : '-'}
+                                            <TableCell align="center" sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                                                {selectedSection?.type ? selectedSection.type.charAt(0).toUpperCase() + selectedSection.type.slice(1) : '-'}
+                                            </TableCell>
+                                            
+                                            {canDeleteItems && (
+                                                <TableCell align="center">
+                                                    <Tooltip title="Delete" arrow>
+                                                        <IconButton 
+                                                            size="small" 
+                                                            onClick={() => handleDelete(rowItem.recipe_id || rowItem.category_id || rowItem.sub_category_id || rowItem.id)}
+                                                            disabled={isRemoving}
+                                                            sx={{
+                                                                color: isDarkMode ? '#ef4444' : '#dc2626',
+                                                                '&:hover': {
+                                                                    backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2',
+                                                                },
+                                                            }}
+                                                        >
+                                                            <DeleteIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                 </TableCell>
-                                                
-                                                {canDeleteItems && (
-                                                    <TableCell align="center">
-                                                        <Tooltip title="Delete" arrow>
-                                                            <IconButton 
-                                                                size="small" 
-                                                                onClick={() => handleDelete(rowItem.keyword_id || rowItem.recipe_id || rowItem.category_id || rowItem.sub_category_id || rowItem.id)}
-                                                                disabled={isRemoving}
-                                                                sx={{
-                                                                    color: isDarkMode ? '#ef4444' : '#dc2626',
-                                                                    '&:hover': {
-                                                                        backgroundColor: isDarkMode ? '#7f1d1d' : '#fee2e2',
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <DeleteIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </TableCell>
-                                                )}
-                                            </TableRow>
-                                        );
-                                    })
-                                })()
+                                            )}
+                                        </TableRow>
+                                    );
+                                })
                             )}
                         </TableBody>
                     </Table>
@@ -482,4 +383,3 @@ const HomeSectionItemsManagement = () => {
 }
 
 export default HomeSectionItemsManagement
-

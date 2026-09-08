@@ -20,7 +20,6 @@ export const searchApi = createApi({
                 if (params.subCategoryId) searchParams.append('subCategoryId', params.subCategoryId);
                 if (params.recipeId) searchParams.append('recipeId', params.recipeId);
                 if (params.ingredientId) searchParams.append('ingredientId', params.ingredientId);
-                if (params.keywordId) searchParams.append('keywordId', params.keywordId);
                 if (params.preference) searchParams.append('preference', params.preference);
                 if (params.badge) searchParams.append('badge', params.badge);
                 if (params.timeRange) searchParams.append('timeRange', params.timeRange);
@@ -78,15 +77,12 @@ export const searchApi = createApi({
                     if (data.categories) combined.push(...data.categories);
                     if (data.subCategories) combined.push(...data.subCategories);
                     if (data.ingredients) combined.push(...data.ingredients);
-                    if (data.keywords) combined.push(...data.keywords);
 
                     return combined;
                 }
                 throw new Error(response.message || 'Failed to get combined suggestions');
             },
         }),
-
-
     }),
 });
 
@@ -94,5 +90,4 @@ export const {
     useSearchRecipesQuery,
     useGetSearchSuggestionsQuery,
     useGetCombinedSuggestionsQuery,
-} = searchApi; 
-
+} = searchApi;

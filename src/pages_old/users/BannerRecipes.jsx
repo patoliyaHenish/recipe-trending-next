@@ -5,7 +5,7 @@ import { usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { useGetPublicRecipesByKeywordsQuery } from '../../features/api/recipeDetailsApi';
+import { useSearchRecipesQuery } from '../../features/api/searchApi';
 import { useGetPublicCollectionDetailsQuery } from '../../features/api/homeSectionApi';
 import RecipeCard from '../../components/common/RecipeCard';
 import { useTheme } from '../../context/ThemeContext';
@@ -52,7 +52,7 @@ const getMobileAdIndices = (items, seed = 1) => {
   return indices;
 };
 
-const BannerRecipes = ({ bannerTitle, bannerImage, bannerKeywords }) => {
+const BannerRecipes = ({ bannerTitle, bannerImage }) => {
   const { isDarkMode } = useTheme();
   const pathname = usePathname();
 
@@ -72,8 +72,8 @@ const BannerRecipes = ({ bannerTitle, bannerImage, bannerKeywords }) => {
   const collectionDescription = section?.description || '';
   const collectionItems       = section?.items       || [];
 
-  const keywords  = bannerKeywords || navState?.keywords || '';
-  const pageTitle = isCollection ? collectionTitle : (bannerTitle || navState?.title || 'Recipe Spotlight');
+  const searchQuery = bannerTitle || navState?.title || '';
+  const pageTitle   = isCollection ? collectionTitle : (bannerTitle || navState?.title || 'Recipe Spotlight');
 
   const [userPreference, setUserPreference] = useState(Cookies.get('userPreference') || '');
   const [page, setPage]               = useState(1);
@@ -137,14 +137,15 @@ const BannerRecipes = ({ bannerTitle, bannerImage, bannerKeywords }) => {
     return () => window.removeEventListener('userPreferenceChanged', handler);
   }, []);
 
+
   useEffect(() => {
     setPage(1);
     setAllRecipes([]);
     setHasMore(true);
-  }, [keywords, userPreference]);
+  }, [searchQuery, userPreference]);
 
-  const { data, isLoading, isFetching, error } = useGetPublicRecipesByKeywordsQuery(
-    { keywords, page, limit: RECIPES_PER_PAGE, preference: userPreference },
+  const { data, isLoading, isFetching, error } = useSearchRecipesQuery(
+    { q: searchQuery, page, limit: RECIPES_PER_PAGE, preference: userPreference },
     { skip: isCollection }        
   );
 

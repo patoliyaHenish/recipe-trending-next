@@ -121,7 +121,7 @@ const Result = () => {
     searchParams.get("q") || "",
   );
   const initialPreference = searchParams.get("preference") || Cookies.get('userPreference') || "";
-  const [shouldSearch, setShouldSearch] = useState(!!(searchParams.get("q") || initialPreference || searchParams.get("categoryId") || searchParams.get("subCategoryId") || searchParams.get("recipeId") || searchParams.get("ingredientId") || searchParams.get("keywordId")));
+  const [shouldSearch, setShouldSearch] = useState(!!(searchParams.get("q") || initialPreference || searchParams.get("categoryId") || searchParams.get("subCategoryId") || searchParams.get("recipeId") || searchParams.get("ingredientId")));
   const [filters, setFilters] = useState({
     preference: initialPreference,
     badge: searchParams.get("badge") || "",
@@ -232,7 +232,7 @@ const Result = () => {
       processedDataRef.current.clear();
       
       const hasAnyFilter = Object.values(nextFilters).some(v => v);
-      const hasAnySelection = !!searchParams.get("categoryId") || !!searchParams.get("subCategoryId") || !!searchParams.get("recipeId") || !!searchParams.get("ingredientId") || !!searchParams.get("keywordId");
+      const hasAnySelection = !!searchParams.get("categoryId") || !!searchParams.get("subCategoryId") || !!searchParams.get("recipeId") || !!searchParams.get("ingredientId");
       setShouldSearch(!!(executedSearchQuery || hasAnyFilter || hasAnySelection));
       
       return nextFilters;
@@ -283,7 +283,6 @@ const Result = () => {
       subCategory: parseIds(searchParams.get("subCategoryId")),
       recipe: parseIds(searchParams.get("recipeId")),
       ingredient: parseIds(searchParams.get("ingredientId")),
-      keyword: parseIds(searchParams.get("keywordId")),
     };
   }, [searchParams]);
 
@@ -297,8 +296,7 @@ const Result = () => {
         recipe: [...(ids.recipe || [])],
         ingredient: [...(ids.ingredient || [])],
         category: [...(ids.category || [])],
-        subCategory: [...(ids.subCategory || [])],
-        keyword: [...(ids.keyword || [])]
+        subCategory: [...(ids.subCategory || [])]
       };
 
       const textParts = [];
@@ -316,9 +314,6 @@ const Result = () => {
         } else if (type === 'subCategory' && mutableIds.subCategory.length > 0) {
           mutableIds.subCategory.shift();
           isIdBased = true;
-        } else if (type === 'keyword' && mutableIds.keyword.length > 0) {
-          mutableIds.keyword.shift();
-          isIdBased = true;
         } else if (type === 'recipe' && mutableIds.recipe.length > 0) {
           mutableIds.recipe.shift();
           isIdBased = true;
@@ -335,7 +330,6 @@ const Result = () => {
     subCategoryId: searchParams.get("subCategoryId") || "",
     recipeId: searchParams.get("recipeId") || "",
     ingredientId: searchParams.get("ingredientId") || "",
-    keywordId: searchParams.get("keywordId") || "",
     ...filters,
     page,
     limit: 12,
@@ -411,7 +405,6 @@ const Result = () => {
     const nextSubCategoryIds = [...selectionIds.subCategory];
     const nextRecipeIds = [...selectionIds.recipe];
     const nextIngredientIds = [...selectionIds.ingredient];
-    const nextKeywordIds = [...selectionIds.keyword];
 
     if (typeToRemove === "category" && nextCategoryIds.length > 0) {
       const removeIndex = getTypeIndex(
@@ -445,14 +438,7 @@ const Result = () => {
       );
       nextIngredientIds.splice(removeIndex, 1);
     }
-    if (typeToRemove === "keyword" && nextKeywordIds.length > 0) {
-        const removeIndex = getTypeIndex(
-          searchItemTypes,
-          indexToRemove,
-          "keyword",
-        );
-        nextKeywordIds.splice(removeIndex, 1);
-      }
+
 
     if (remainingItems.length > 0) {
       const newQuery = remainingItems.join(", ");
@@ -468,8 +454,6 @@ const Result = () => {
         params.set("recipeId", nextRecipeIds.join(","));
       if (nextIngredientIds.length > 0)
         params.set("ingredientId", nextIngredientIds.join(","));
-      if (nextKeywordIds.length > 0)
-        params.set("keywordId", nextKeywordIds.join(","));
       router.push(`/result?${params.toString()}`);
     } else {
       router.push("/");
@@ -544,10 +528,6 @@ const Result = () => {
              const currentIds = (searchParams.get("recipeId") || '').split(',').filter(Boolean);
              if (!currentIds.includes(String(id))) currentIds.push(String(id));
              newParams.recipeId = currentIds.join(',');
-        } else if (type === 'keyword') {
-             const currentIds = (searchParams.get("keywordId") || '').split(',').filter(Boolean);
-             if (!currentIds.includes(String(id))) currentIds.push(String(id));
-             newParams.keywordId = currentIds.join(',');
         }
       }
 
@@ -593,9 +573,7 @@ const Result = () => {
     const subCategoryId = searchParams.get("subCategoryId");
     const recipeId = searchParams.get("recipeId");
     const ingredientId = searchParams.get("ingredientId");
-    const keywordId = searchParams.get("keywordId");
-    const pageParam = searchParams.get("page");
-    const hasAnySelection = !!categoryId || !!subCategoryId || !!recipeId || !!ingredientId || !!keywordId;
+    const hasAnySelection = !!categoryId || !!subCategoryId || !!recipeId || !!ingredientId;
     const hasAnyFilterParam = !!(preference || badge || timeRange || filters.preference);
 
     const currentParamsObj = {
@@ -606,8 +584,7 @@ const Result = () => {
       categoryId: categoryId || "",
       subCategoryId: subCategoryId || "",
       recipeId: recipeId || "",
-      ingredientId: ingredientId || "",
-      keywordId: keywordId || ""
+      ingredientId: ingredientId || ""
     };
     const currentParamsStr = JSON.stringify(currentParamsObj);
 
@@ -850,7 +827,6 @@ const Result = () => {
                           case 'ingredient': return 'Ingredient';
                           case 'category': return 'Category';
                           case 'subCategory': return 'Sub-Cat';
-                          case 'keyword': return 'Keyword';
                           default: 
                             return `Recipe`; 
                         }
@@ -875,12 +851,6 @@ const Result = () => {
                               bg: isDark ? "rgba(245, 158, 11, 0.2)" : "rgba(245, 158, 11, 0.1)",
                               color: isDark ? "#fbbf24" : "#f59e0b",
                               border: isDark ? "1px solid rgba(245, 158, 11, 0.3)" : "1px solid rgba(245, 158, 11, 0.2)"
-                            };
-                          case 'keyword':
-                            return {
-                              bg: isDark ? "rgba(236, 72, 153, 0.2)" : "rgba(236, 72, 153, 0.1)",
-                              color: isDark ? "#f472b6" : "#db2777",
-                              border: isDark ? "1px solid rgba(236, 72, 153, 0.3)" : "1px solid rgba(236, 72, 153, 0.2)"
                             };
                           default:
                             return {
@@ -1051,92 +1021,13 @@ const Result = () => {
                         px: 2,
                         py: 1,
                         borderRadius: 2,
-                        bgcolor:
-                          itemType === "ingredient"
-                            ? isDarkMode
-                              ? "rgba(16, 185, 129, 0.15)"
-                              : "rgba(16, 185, 129, 0.1)"
-                            : itemType === "category"
-                              ? isDarkMode
-                                ? "rgba(139, 92, 246, 0.15)"
-                                : "rgba(139, 92, 246, 0.1)"
-                              : itemType === "subCategory"
-                                ? isDarkMode
-                                  ? "rgba(245, 158, 11, 0.15)"
-                                  : "rgba(245, 158, 11, 0.1)"
-                                : itemType === "keyword"
-                                  ? isDarkMode
-                                    ? "rgba(236, 72, 153, 0.15)"
-                                    : "rgba(236, 72, 153, 0.1)"
-                                  : isDarkMode
-                                    ? "rgba(202, 96, 20, 0.15)"
-                                    : "rgba(202, 96, 20, 0.1)",
-                        border:
-                          itemType === "ingredient"
-                            ? isDarkMode
-                              ? "1px solid rgba(16, 185, 129, 0.4)"
-                              : "1px solid rgba(16, 185, 129, 0.3)"
-                            : itemType === "category"
-                              ? isDarkMode
-                                ? "1px solid rgba(139, 92, 246, 0.4)"
-                                : "1px solid rgba(139, 92, 246, 0.3)"
-                              : itemType === "subCategory"
-                                ? isDarkMode
-                                  ? "1px solid rgba(245, 158, 11, 0.4)"
-                                  : "1px solid rgba(245, 158, 11, 0.3)"
-                                : itemType === "keyword"
-                                  ? isDarkMode
-                                    ? "1px solid rgba(236, 72, 153, 0.4)"
-                                    : "1px solid rgba(236, 72, 153, 0.3)"
-                                  : isDarkMode
-                                    ? "1px solid rgba(202, 96, 20, 0.4)"
-                                    : "1px solid rgba(202, 96, 20, 0.3)",
-                        color:
-                          itemType === "ingredient"
-                            ? isDarkMode
-                              ? "#6ee7b7"
-                              : "#10b981"
-                            : itemType === "category"
-                              ? isDarkMode
-                                ? "#a78bfa"
-                                : "#8b5cf6"
-                              : itemType === "subCategory"
-                                ? isDarkMode
-                                  ? "#fbbf24"
-                                  : "#f59e0b"
-                                : itemType === "keyword"
-                                  ? isDarkMode
-                                    ? "#f472b6"
-                                    : "#db2777"
-                                : isDarkMode
-                                  ? "#fb923c"
-                                  : "#ca6014",
+                        bgcolor: isDarkMode ? "rgba(75, 85, 99, 0.2)" : "rgba(229, 231, 235, 0.5)",
+                        border: isDarkMode ? "1px solid rgba(75, 85, 99, 0.4)" : "1px solid rgba(209, 213, 219, 0.5)",
+                        color: isDarkMode ? "#e5e7eb" : "#374151",
                         fontSize: { xs: "0.9rem", sm: "1rem" },
                         fontWeight: 500,
                         fontFamily: "'Basic', sans-serif !important",
                         transition: "all 0.2s ease",
-                        "&:hover": {
-                          bgcolor:
-                            itemType === "ingredient"
-                              ? isDarkMode
-                                ? "rgba(16, 185, 129, 0.25)"
-                                : "rgba(16, 185, 129, 0.15)"
-                              : itemType === "category"
-                                ? isDarkMode
-                                  ? "rgba(139, 92, 246, 0.25)"
-                                  : "rgba(139, 92, 246, 0.15)"
-                                : itemType === "subCategory"
-                                  ? isDarkMode
-                                    ? "rgba(245, 158, 11, 0.25)"
-                                    : "rgba(245, 158, 11, 0.15)"
-                                  : itemType === "keyword"
-                                    ? isDarkMode
-                                      ? "rgba(236, 72, 153, 0.25)"
-                                      : "rgba(236, 72, 153, 0.15)"
-                                    : isDarkMode
-                                      ? "rgba(202, 96, 20, 0.25)"
-                                      : "rgba(202, 96, 20, 0.15)",
-                        },
                       }}
                     >
                       <span>{item}</span>
