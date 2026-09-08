@@ -46,9 +46,9 @@ import RecipeGridSkeleton from "../../components/common/RecipeGridSkeleton";
 import RecipeCard from "../../components/common/RecipeCard";
 import { useTheme } from "../../context/ThemeContext";
 import { trackEvent } from "../../utils/analytics";
-import { AdsterraBanner728x90, AdsterraNativeBanner } from "../../components/ads";
+import { AdsterraBanner728x90, AdsterraBanner320x50, AdsterraNativeBanner } from "../../components/ads";
 
-const getAdIndices = (items, seed = 1) => {
+const getDesktopAdIndices = (items, seed = 1) => {
   const indices = new Set();
   if (!items || items.length === 0) return indices;
   let curr = 0;
@@ -57,7 +57,23 @@ const getAdIndices = (items, seed = 1) => {
     s = (s * 9301 + 49297) % 233280;
     const step = (s / 233280) > 0.5 ? 8 : 12;
     curr += step;
-    if (curr <= items.length) {
+    if (curr <= items.length && curr - 1 !== items.length - 1) {
+      indices.add(curr - 1);
+    }
+  }
+  return indices;
+};
+
+const getMobileAdIndices = (items, seed = 1) => {
+  const indices = new Set();
+  if (!items || items.length === 0) return indices;
+  let curr = 0;
+  let s = (seed || 1) * 48271;
+  while (curr < items.length) {
+    s = (s * 9301 + 49297) % 233280;
+    const step = (s / 233280) > 0.5 ? 4 : 6;
+    curr += step;
+    if (curr <= items.length && curr - 1 !== items.length - 1) {
       indices.add(curr - 1);
     }
   }
@@ -1530,7 +1546,10 @@ const Result = () => {
         )}
         {(searchData && searchData.recipes && searchData.recipes.length > 0) || (allRecipes && allRecipes.length > 0) ? (
           (() => {
-            const adIndices = getAdIndices(allRecipes, (executedSearchQuery ? executedSearchQuery.length : 1) + 17);
+            const seed = (executedSearchQuery ? executedSearchQuery.length : 1) + 17;
+            const desktopAdIndices = getDesktopAdIndices(allRecipes, seed);
+            const mobileAdIndices = getMobileAdIndices(allRecipes, seed);
+
             return (
               <>
                 <div
@@ -1543,17 +1562,28 @@ const Result = () => {
                       recipe_id: recipe.recipe_id || recipe.id,
                       title: recipe.title || recipe.name,
                     };
-                    const showAd = adIndices.has(index);
+                    const isLastItem = index === allRecipes.length - 1;
+                    const showMobileAd = mobileAdIndices.has(index) && !isLastItem;
+                    const showDesktopAd = desktopAdIndices.has(index) && !isLastItem;
 
                     return (
                       <React.Fragment key={normalizedRecipe.recipe_id || index}>
                         <div className="h-full">
                           <RecipeCard recipe={normalizedRecipe} mobileLayout="vertical" hideVideoIcon />
                         </div>
-                        {showAd && (
-                          <Box className="col-span-full flex justify-center items-center my-4 w-full">
+                        {(showMobileAd || showDesktopAd) && (
+                          <Box
+                            className="col-span-full justify-center items-center my-4 w-full"
+                            sx={{
+                              display: {
+                                xs: showMobileAd ? 'flex' : 'none',
+                                sm: showMobileAd ? 'flex' : 'none',
+                                md: showDesktopAd ? 'flex' : 'none'
+                              }
+                            }}
+                          >
                             <Box className="block md:hidden w-full">
-                              <AdsterraNativeBanner />
+                              <AdsterraBanner320x50 />
                             </Box>
                             <Box className="hidden md:block">
                               <AdsterraBanner728x90 />
