@@ -2730,24 +2730,26 @@ const Recipe = () => {
                                         showEdit={canUpdate && canModifyEdit}
                                         showDelete={canDelete && canModifyDelete}
                                     />
-                                    <IconButton
-                                        onClick={() => {
-                                            setPinterestRecipe(recipe);
-                                            setPinterestDialogOpen(true);
-                                        }}
-                                        size="small"
-                                        title="Share to Pinterest"
-                                        sx={{
-                                            color: '#E60023',
-                                            backgroundColor: 'transparent',
-                                            borderRadius: 0,
-                                            border: 'none',
-                                            '&:hover': { color: '#ad001a', backgroundColor: 'rgba(230, 0, 35, 0.08)' },
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                    >
-                                        <PinterestIcon fontSize="small" />
-                                    </IconButton>
+                                    {isAdmin && (
+                                        <IconButton
+                                            onClick={() => {
+                                                setPinterestRecipe(recipe);
+                                                setPinterestDialogOpen(true);
+                                            }}
+                                            size="small"
+                                            title="Share to Pinterest"
+                                            sx={{
+                                                color: '#E60023',
+                                                backgroundColor: 'transparent',
+                                                borderRadius: 0,
+                                                border: 'none',
+                                                '&:hover': { color: '#ad001a', backgroundColor: 'rgba(230, 0, 35, 0.08)' },
+                                                transition: 'all 0.3s ease'
+                                            }}
+                                        >
+                                            <PinterestIcon fontSize="small" />
+                                        </IconButton>
+                                    )}
                                     {canNotesList && !recipe.is_admin_approved && (
                                         <IconButton
                                             onClick={() => setNoteRecipeId(recipe.recipe_id)}
