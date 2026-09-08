@@ -5,9 +5,9 @@ import { useGetRecipeSuggestionsQuery } from "../features/api/recipeDetailsApi";
 import { useSearchRecipesQuery } from "../features/api/searchApi";
 import RecipeCard from "./common/RecipeCard";
 import RecipeGridSkeleton from "./common/RecipeGridSkeleton";
-import { AdsterraNativeBanner, AdsterraBanner728x90 } from "./ads";
+import { AdsterraNativeBanner, AdsterraBanner728x90, AdsterraBanner320x50 } from "./ads";
 
-const getAdIndices = (items, seed = 1) => {
+const getDesktopAdIndices = (items, seed = 1) => {
   const indices = new Set();
   if (!items || items.length === 0) return indices;
   let curr = 0;
@@ -16,7 +16,23 @@ const getAdIndices = (items, seed = 1) => {
     s = (s * 9301 + 49297) % 233280;
     const step = (s / 233280) > 0.5 ? 8 : 12;
     curr += step;
-    if (curr <= items.length) {
+    if (curr <= items.length && curr - 1 !== items.length - 1) {
+      indices.add(curr - 1);
+    }
+  }
+  return indices;
+};
+
+const getMobileAdIndices = (items, seed = 1) => {
+  const indices = new Set();
+  if (!items || items.length === 0) return indices;
+  let curr = 0;
+  let s = seed * 48271;
+  while (curr < items.length) {
+    s = (s * 9301 + 49297) % 233280;
+    const step = (s / 233280) > 0.5 ? 4 : 6;
+    curr += step;
+    if (curr <= items.length && curr - 1 !== items.length - 1) {
       indices.add(curr - 1);
     }
   }
@@ -42,7 +58,8 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
   const fallbackRecipes = fallbackData?.recipes || fallbackData?.data?.recipes || (Array.isArray(fallbackData?.data) ? fallbackData.data : []);
   const displayRecipes = suggestions.length > 0 ? suggestions : fallbackRecipes;
   
-  const adIndices = getAdIndices(displayRecipes, Number(recipeId) || 42);
+  const desktopAdIndices = getDesktopAdIndices(displayRecipes, Number(recipeId) || 42);
+  const mobileAdIndices = getMobileAdIndices(displayRecipes, Number(recipeId) || 42);
 
   // isLoading is for the initial load
   const isLoading = ((!initialSuggestions && limit === 16) && isLoadingSuggestions) || (!initialFallback && needFallback && isLoadingFallback);
@@ -79,7 +96,8 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
       </Typography>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {displayRecipes.map((recipe, index) => {
-          const showAd = adIndices.has(index);
+          const showMobileAd = mobileAdIndices.has(index);
+          const showDesktopAd = desktopAdIndices.has(index);
 
           return (
             <React.Fragment key={recipe.recipe_id || recipe.id || index}>
@@ -88,10 +106,18 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
                 mobileLayout="vertical"
                 isRelated={true}
               />
-              {showAd && (
-                <Box className="col-span-full flex justify-center items-center my-4 w-full">
+              {(showMobileAd || showDesktopAd) && (
+                <Box
+                  className="col-span-full justify-center items-center my-4 w-full"
+                  sx={{
+                    display: {
+                      xs: showMobileAd ? 'flex' : 'none',
+                      md: showDesktopAd ? 'flex' : 'none'
+                    }
+                  }}
+                >
                   <Box className="block md:hidden w-full">
-                    <AdsterraNativeBanner />
+                    <AdsterraBanner320x50 />
                   </Box>
                   <Box className="hidden md:block">
                     <AdsterraBanner728x90 />

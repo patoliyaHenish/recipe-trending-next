@@ -995,8 +995,8 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                           />
                           <span
                             className={`text-[0.82rem] sm:text-base font-medium ${isDarkMode
-                                ? "text-gray-300"
-                                : "text-gray-600"
+                              ? "text-gray-300"
+                              : "text-gray-600"
                               }`}
                           >
                             Prep:
@@ -1026,8 +1026,8 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                           </Box>
                           <span
                             className={`text-[0.82rem] sm:text-base font-medium ${isDarkMode
-                                ? "text-gray-300"
-                                : "text-gray-600"
+                              ? "text-gray-300"
+                              : "text-gray-600"
                               }`}
                           >
                             Cook:
@@ -1055,8 +1055,8 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                             />
                             <span
                               className={`text-[0.82rem] sm:text-base font-medium ${isDarkMode
-                                  ? "text-gray-300"
-                                  : "text-gray-600"
+                                ? "text-gray-300"
+                                : "text-gray-600"
                                 }`}
                             >
                               Rest:
@@ -1084,8 +1084,8 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                           />
                           <span
                             className={`text-[0.82rem] sm:text-base font-medium ${isDarkMode
-                                ? "text-gray-300"
-                                : "text-gray-600"
+                              ? "text-gray-300"
+                              : "text-gray-600"
                               }`}
                           >
                             Total:
@@ -1116,8 +1116,8 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                           />
                           <span
                             className={`text-[0.82rem] sm:text-base font-medium ${isDarkMode
-                                ? "text-gray-300"
-                                : "text-gray-600"
+                              ? "text-gray-300"
+                              : "text-gray-600"
                               }`}
                           >
                             Serves:
@@ -1148,14 +1148,14 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                       <div className="flex items-center mb-2">
                         <LightbulbOutlinedIcon
                           className={`mr-2 text-[1.4rem] ${isDarkMode
-                              ? "text-amber-400"
-                              : "text-amber-600"
+                            ? "text-amber-400"
+                            : "text-amber-600"
                             }`}
                         />
                         <span
                           className={`font-bold tracking-wide text-base ${isDarkMode
-                              ? "text-white"
-                              : "text-slate-900"
+                            ? "text-white"
+                            : "text-slate-900"
                             }`}
                           style={{
                             fontFamily: "'Basic', sans-serif !important",

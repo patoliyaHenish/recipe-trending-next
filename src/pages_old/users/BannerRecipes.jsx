@@ -15,9 +15,42 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { toast } from '../../utils/toast';
 import { trackEvent } from '../../utils/analytics';
+import { AdsterraBanner728x90, AdsterraBanner320x50, AdsterraNativeBanner } from '../../components/ads';
 
 const RECIPES_PER_PAGE    = 12;
 const COLLECTION_PER_PAGE = 12;
+
+const getDesktopAdIndices = (items, seed = 1) => {
+  const indices = new Set();
+  if (!items || items.length === 0) return indices;
+  let curr = 0;
+  let s = seed * 16807;
+  while (curr < items.length) {
+    s = (s * 9301 + 49297) % 233280;
+    const step = (s / 233280) > 0.5 ? 8 : 12;
+    curr += step;
+    if (curr <= items.length && curr - 1 !== items.length - 1) {
+      indices.add(curr - 1);
+    }
+  }
+  return indices;
+};
+
+const getMobileAdIndices = (items, seed = 1) => {
+  const indices = new Set();
+  if (!items || items.length === 0) return indices;
+  let curr = 0;
+  let s = seed * 48271;
+  while (curr < items.length) {
+    s = (s * 9301 + 49297) % 233280;
+    const step = (s / 233280) > 0.5 ? 4 : 6;
+    curr += step;
+    if (curr <= items.length && curr - 1 !== items.length - 1) {
+      indices.add(curr - 1);
+    }
+  }
+  return indices;
+};
 
 const BannerRecipes = ({ bannerTitle, bannerImage, bannerKeywords }) => {
   const { isDarkMode } = useTheme();
@@ -52,6 +85,9 @@ const BannerRecipes = ({ bannerTitle, bannerImage, bannerKeywords }) => {
   const visibleCollectionItems = collectionItems.slice(0, collectionPage * COLLECTION_PER_PAGE);
   const collectionHasMore      = visibleCollectionItems.length < collectionItems.length;
   const displayRecipes         = isCollection ? visibleCollectionItems : allRecipes;
+
+  const desktopAdIndices = getDesktopAdIndices(displayRecipes, 42);
+  const mobileAdIndices  = getMobileAdIndices(displayRecipes, 42);
 
   useEffect(() => {
     document.title = `${pageTitle} | Recipe Trending`;
@@ -454,13 +490,41 @@ const BannerRecipes = ({ bannerTitle, bannerImage, bannerKeywords }) => {
               {displayRecipes.length > 0 ? (
                 <>
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: { xs: 2, sm: 2.5, md: 3 } }}>
-                    {displayRecipes.map(recipe => (
-                      <RecipeCard
-                        key={recipe.recipe_id || recipe.id}
-                        recipe={recipe}
-                        mobileLayout="vertical"
-                      />
-                    ))}
+                    {displayRecipes.map((recipe, index) => {
+                      const isLastItem = index === displayRecipes.length - 1;
+                      const showMobileAd = mobileAdIndices.has(index) && !isLastItem;
+                      const showDesktopAd = desktopAdIndices.has(index) && !isLastItem;
+
+                      return (
+                        <React.Fragment key={recipe.recipe_id || recipe.id || index}>
+                          <RecipeCard
+                            recipe={recipe}
+                            mobileLayout="vertical"
+                          />
+                          {(showMobileAd || showDesktopAd) && (
+                            <Box
+                              sx={{
+                                gridColumn: '1 / -1',
+                                display: {
+                                  xs: showMobileAd ? 'flex' : 'none',
+                                  sm: showMobileAd ? 'flex' : 'none',
+                                  md: showDesktopAd ? 'flex' : 'none'
+                                },
+                                justifyContent: 'center',
+                                my: 3
+                              }}
+                            >
+                              <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                                <AdsterraBanner320x50 />
+                              </Box>
+                              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                                <AdsterraBanner728x90 />
+                              </Box>
+                            </Box>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
                   </Box>
 
                   {isCollection ? (
@@ -565,10 +629,19 @@ const BannerRecipes = ({ bannerTitle, bannerImage, bannerKeywords }) => {
             </>
           )}
         </Box>
+
+        {/* Bottom Banner Ad above Footer */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5, mb: 1 }}>
+          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+            <AdsterraBanner320x50 />
+          </Box>
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <AdsterraBanner728x90 />
+          </Box>
+        </Box>
       </div>
     </Box>
   );
 };
 
 export default BannerRecipes;
-
