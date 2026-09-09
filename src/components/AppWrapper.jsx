@@ -34,15 +34,19 @@ const AppWrapper = () => {
   useEffect(() => {
     const loginStatus = searchParams.get('login');
     const message = searchParams.get('message');
+    const cleanSearchParams = new URLSearchParams(searchParams.toString());
+    cleanSearchParams.delete('login');
+    cleanSearchParams.delete('message');
+    const returnUrl = `${pathname}${cleanSearchParams.toString() ? `?${cleanSearchParams.toString()}` : ''}`;
 
     if (user && loginStatus === 'success') {
       toast.success('Google login successful!');
-      router.replace(pathname);
+      router.replace(returnUrl);
     }
 
     if (loginStatus === 'error') {
       toast.error(message || 'Google login failed');
-      router.replace(pathname);
+      router.replace(returnUrl);
     }
   }, [searchParams, user, pathname, router]);
 

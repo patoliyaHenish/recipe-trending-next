@@ -130,7 +130,8 @@ const AuthModal = ({ open, onClose }) => {
 
   const handleGoogleLogin = () => {
     try {
-      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
+      const returnTo = `${window.location.pathname}${window.location.search}`;
+      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`;
     } catch {
       toast.error("Failed to initiate Google login");
     }
