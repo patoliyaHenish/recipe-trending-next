@@ -1658,7 +1658,10 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
             width: { xs: '100%', sm: 400 },
             maxWidth: '100%',
             bgcolor: isDarkMode ? 'var(--bg-primary)' : '#ffffff',
-            borderLeft: isDarkMode ? '1px solid var(--border-color)' : '1px solid #e5e7eb',
+            borderLeft: {
+              xs: 'none',
+              sm: isDarkMode ? '1px solid var(--border-color)' : '1px solid #e5e7eb',
+            },
           },
         }}
       >
