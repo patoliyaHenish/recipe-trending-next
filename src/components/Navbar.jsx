@@ -1602,16 +1602,22 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                 <ListItemText
                   primary={user.name || user.username}
                   secondary="My Profile"
-                  primaryTypographyProps={{
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
-                    color: isDarkMode ? '#ffffff' : '#000000',
-                    fontFamily: "'Basic', sans-serif !important"
-                  }}
-                  secondaryTypographyProps={{
-                    fontSize: '0.85rem',
-                    color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                    fontFamily: "'Basic', sans-serif !important"
+                  slotProps={{
+                    primary: {
+                      sx: {
+                        fontSize: '1.1rem',
+                        fontWeight: 'bold',
+                        color: isDarkMode ? '#ffffff' : '#000000',
+                        fontFamily: "'Basic', sans-serif !important",
+                      },
+                    },
+                    secondary: {
+                      sx: {
+                        fontSize: '0.85rem',
+                        color: isDarkMode ? 'rgba(255,255,255,0.72)' : 'rgba(0,0,0,0.6)',
+                        fontFamily: "'Basic', sans-serif !important",
+                      },
+                    },
                   }}
                 />
               </ListItem>
@@ -1635,10 +1641,14 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                 <PersonOutlineIcon sx={{ mr: 2, fontSize: 28 }} />
                 <ListItemText
                   primary="Login / Sign Up"
-                  primaryTypographyProps={{
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
-                    fontFamily: "'Basic', sans-serif !important"
+                  slotProps={{
+                    primary: {
+                      sx: {
+                        fontSize: '1.1rem',
+                        fontWeight: 'bold',
+                        fontFamily: "'Basic', sans-serif !important",
+                      },
+                    },
                   }}
                 />
               </ListItem>
