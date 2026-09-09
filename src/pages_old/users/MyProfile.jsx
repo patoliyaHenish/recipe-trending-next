@@ -1,6 +1,6 @@
 "use client";
-import { Visibility, VisibilityOff, RestaurantMenuRounded, EditRounded, Egg as EggIcon, RadioButtonCheckedRounded } from '@mui/icons-material';
-import { Avatar, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, TextField, Typography, Box, Chip, Stack, Divider } from '@mui/material';
+import { Visibility, VisibilityOff, Egg as EggIcon, RadioButtonCheckedRounded } from '@mui/icons-material';
+import { Avatar, Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, TextField, Typography, Box, Chip, Stack } from '@mui/material';
 import { Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -10,13 +10,10 @@ import CropImage from '../../components/CropImage';
 import { useUser } from '../../context/useUser';
 import { useChangePasswordMutation, useLogoutUserMutation, useMyProfileQuery, useUpdateProfileMutation, useUpdatePreferenceMutation } from '../../features/api/authApi';
 
-import RecipeCard from '../../components/common/RecipeCard';
 import { getImage } from '../../utils/helper';
-import PreferenceDialog from '../../components/PreferenceDialog';
-import RecipeGridSkeleton from '../../components/common/RecipeGridSkeleton';
 import Cookies from 'js-cookie';
 import { useTheme } from '../../context/ThemeContext';
-import { Pagination, CircularProgress } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 
 
 const MyProfile = () => {
@@ -37,10 +34,10 @@ const MyProfile = () => {
   const [rawImage, setRawImage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [removeProfilePic, setRemoveProfilePic] = useState(false);
+  const [editPreferences, setEditPreferences] = useState(['all']);
 
   const [nameError, setNameError] = useState('');
 
-  const [isPreferenceDialogOpen, setIsPreferenceDialogOpen] = useState(false);
 
 
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
@@ -142,6 +139,11 @@ const MyProfile = () => {
     setRawImage(null);
   };
 
+  const handleEditClick = () => {
+    const currentPrefs = Array.isArray(data?.user?.preference) && data.user.preference.length > 0 ? data.user.preference : ['all'];
+    setEditPreferences(currentPrefs);
+    setIsEditing(true);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -157,6 +159,16 @@ const MyProfile = () => {
     try {
       setNameError('');
       await updateProfile(formData).unwrap();
+
+      await updatePreference(editPreferences).unwrap();
+      const prefValue = editPreferences.join(',');
+      if (prefValue === 'all') {
+        Cookies.remove('userPreference');
+      } else {
+        Cookies.set('userPreference', prefValue, { expires: 365 });
+      }
+      window.dispatchEvent(new Event('userPreferenceChanged'));
+
       toast.success('Profile updated successfully!');
       setIsEditing(false);
     } catch (err) {
@@ -185,29 +197,10 @@ const MyProfile = () => {
     }
   };
 
-  const handleSavePreference = async (selectedPreferences) => {
-    try {
-      await updatePreference(selectedPreferences).unwrap();
-
-      const prefValue = selectedPreferences.join(',');
-      if (prefValue === 'all') {
-        Cookies.remove('userPreference');
-      } else {
-        Cookies.set('userPreference', prefValue, { expires: 365 });
-      }
-      window.dispatchEvent(new Event('userPreferenceChanged'));
-
-      toast.success('Food preferences updated!');
-      setIsPreferenceDialogOpen(false);
-    } catch (err) {
-      toast.error(err?.data?.message || 'Failed to update preferences');
-    }
-  };
-
   const preferenceMap = {
-    'veg': 'Vegetarian',
-    'egg': 'Eggetarian',
-    'all': 'Everything'
+    'veg': 'Veg',
+    'egg': 'Egg',
+    'all': 'All'
   };
 
   const getPreferenceIcon = (pref) => {
@@ -297,7 +290,7 @@ const MyProfile = () => {
                   </Avatar>
                   <Typography
                     component="button"
-                    onClick={() => setIsEditing(true)}
+                    onClick={handleEditClick}
                     sx={{
                       color: isDarkMode ? '#FFEFD9' : '#000000',
                       fontSize: '0.95rem',
@@ -333,13 +326,6 @@ const MyProfile = () => {
                       >
                         Preferences
                       </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={() => setIsPreferenceDialogOpen(true)}
-                        sx={{ color: '#CA6014', padding: '2px' }}
-                      >
-                        <EditRounded sx={{ fontSize: '1.1rem' }} />
-                      </IconButton>
                     </Box>
                     <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
                       {(Array.isArray(data?.user?.preference) && data.user.preference.length > 0 ? data.user.preference : ['all']).map(pref => (
@@ -480,13 +466,6 @@ const MyProfile = () => {
                       >
                         Food Preferences
                       </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={() => setIsPreferenceDialogOpen(true)}
-                        sx={{ color: '#CA6014', padding: '4px' }}
-                      >
-                        <EditRounded fontSize="small" />
-                      </IconButton>
                     </Box>
                     <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: 'wrap', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
                       {(Array.isArray(data?.user?.preference) && data.user.preference.length > 0 ? data.user.preference : ['all']).map(pref => (
@@ -698,8 +677,48 @@ const MyProfile = () => {
                       },
                       transition: 'all 0.3s ease'
                     }}
-                  />
-                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-start' }}>
+                   />
+                   <Box sx={{ mt: 1 }}>
+                     <Typography variant="body2" sx={{ mb: 1, color: isDarkMode ? 'var(--text-primary)' : '#374151', fontFamily: "'Basic', sans-serif" }}>Food Preference</Typography>
+                     <Box sx={{ display: 'flex', gap: 2 }}>
+                       {['all', 'veg', 'egg'].map(pref => {
+                         const isChecked = editPreferences.includes(pref);
+                         return (
+                           <Box
+                             key={pref}
+                             onClick={() => {
+                               if (pref === 'all') {
+                                 setEditPreferences(['all']);
+                               } else {
+                                 let next = editPreferences.filter(v => v !== 'all');
+                                 if (isChecked) next = next.filter(v => v !== pref);
+                                 else next = [...next, pref];
+                                 if (next.length === 0) next = ['all'];
+                                 setEditPreferences(next);
+                               }
+                             }}
+                             sx={{
+                               flex: 1,
+                               py: 1,
+                               textAlign: 'center',
+                               borderRadius: '8px',
+                               cursor: 'pointer',
+                               border: '1px solid',
+                               borderColor: isChecked ? '#F97C1B' : (isDarkMode ? 'rgba(255,255,255,0.1)' : '#e5e7eb'),
+                               bgcolor: isChecked ? 'rgba(249, 124, 27, 0.1)' : (isDarkMode ? 'rgba(255,255,255,0.02)' : '#f9fafb'),
+                               color: isChecked ? '#F97C1B' : (isDarkMode ? 'var(--text-secondary)' : '#6b7280'),
+                               textTransform: 'capitalize',
+                               transition: 'all 0.2s'
+                             }}
+                           >
+                             {pref}
+                           </Box>
+                         );
+                       })}
+                     </Box>
+                   </Box>
+                   <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-start' }}>
+
                     <Button
                       type="submit"
                       variant="contained"
@@ -729,6 +748,7 @@ const MyProfile = () => {
                         setPreview(data?.user?.image ? getImage(data.user.image) : '');
                         setProfilePic(null);
                         setRemoveProfilePic(false);
+                        setEditPreferences(Array.isArray(data?.user?.preference) && data.user.preference.length > 0 ? data.user.preference : ['all']);
                       }}
                       sx={{
                         borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : '#666666',
@@ -1051,13 +1071,6 @@ const MyProfile = () => {
         </Formik>
       </Dialog>
 
-      <PreferenceDialog
-        open={isPreferenceDialogOpen}
-        onClose={() => setIsPreferenceDialogOpen(false)}
-        onSave={handleSavePreference}
-        isLoading={isUpdatingPref}
-        initialValues={Array.isArray(data?.user?.preference) && data.user.preference.length > 0 ? data.user.preference : ['all']}
-      />
     </Box>
   );
 };

@@ -68,7 +68,14 @@ const MyCravings = () => {
   );
 
   return (
-    <div className="w-full">
+    <Box
+      sx={{
+        pt: { xs: '72px', sm: '80px', md: '136px', lg: '144px' },
+        minHeight: '100vh',
+        backgroundColor: 'var(--bg-primary)',
+        transition: 'all 0.3s ease'
+      }}
+    >
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
         <Typography
           variant="h3"
@@ -157,7 +164,7 @@ const MyCravings = () => {
           </>
         )}
       </div>
-    </div>
+    </Box>
   );
 };
 

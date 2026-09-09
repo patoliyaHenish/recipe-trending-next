@@ -35,9 +35,9 @@ const getVegIcon = (color) => (
 );
 
 const preferenceOptions = [
-    { value: 'veg', label: 'Vegetarian', icon: getVegIcon('#43a047'), color: '#43a047', description: 'Fresh, plant-based recipes' },
-    { value: 'egg', label: 'Eggetarian', icon: <EggIcon sx={{ fontSize: '1.4rem' }} />, color: '#ffb300', description: 'Including eggs in your diet' },
-    { value: 'all', label: 'I Eat Everything', icon: <RadioButtonCheckedRounded sx={{ fontSize: '1.4rem' }} />, color: '#795548', description: 'No specific restrictions' }
+    { value: 'veg', label: 'Veg', icon: getVegIcon('#43a047'), color: '#43a047' },
+    { value: 'egg', label: 'Egg', icon: <EggIcon sx={{ fontSize: '1.4rem' }} />, color: '#ffb300' },
+    { value: 'all', label: 'All', icon: <RadioButtonCheckedRounded sx={{ fontSize: '1.4rem' }} />, color: '#795548' }
 ];
 
 const PreferenceDialog = ({ open, onSave, onClose, isLoading, initialValues = ['all'] }) => {
@@ -117,10 +117,7 @@ const PreferenceDialog = ({ open, onSave, onClose, isLoading, initialValues = ['
                     </Box>
                     <Box>
                         <Typography variant="h5" sx={{ fontWeight: 800, lineHeight: 1.15, color: isDarkMode ? '#f8fafc' : '#172033', fontFamily: "'Basic', sans-serif" }}>
-                            Dietary preferences
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: isDarkMode ? '#b8c1d4' : '#667085', mt: 0.45, fontFamily: "'Basic', sans-serif" }}>
-                            Personalise recipes for your table
+                            Food preferences
                         </Typography>
                     </Box>
                 </Box>
@@ -162,9 +159,6 @@ const PreferenceDialog = ({ open, onSave, onClose, isLoading, initialValues = ['
                                     <Box sx={{ minWidth: 0, pr: 2 }}>
                                         <Typography sx={{ fontWeight: 800, color: isDarkMode ? '#f8fafc' : '#1d2939', fontFamily: "'Basic', sans-serif", fontSize: '0.96rem', lineHeight: 1.2 }}>
                                             {opt.label}
-                                        </Typography>
-                                        <Typography sx={{ color: isDarkMode ? '#aeb8cc' : '#667085', fontSize: '0.74rem', mt: 0.45, lineHeight: 1.3 }}>
-                                            {opt.description}
                                         </Typography>
                                     </Box>
                                 </Box>
