@@ -436,6 +436,16 @@ const Result = () => {
     };
   }, []);
 
+  const preferenceFoodTypes = searchData?.preferenceFoodTypes || [];
+  const preferredRecipes = useMemo(
+    () => allRecipes.filter((recipe) => preferenceFoodTypes.includes(String(recipe.food_type || '').toLowerCase())),
+    [allRecipes, preferenceFoodTypes]
+  );
+  const otherRecipes = useMemo(
+    () => allRecipes.filter((recipe) => !preferenceFoodTypes.includes(String(recipe.food_type || '').toLowerCase())),
+    [allRecipes, preferenceFoodTypes]
+  );
+
   return (
     <div
       className="min-h-screen pt-[56px] sm:pt-[64px] md:pt-[96px] lg:pt-[104px]"
@@ -597,16 +607,6 @@ const Result = () => {
       </div>
       {isDarkMode && <div className="w-full h-px bg-white opacity-20"></div>}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-6 md:py-8">
-        {searchData && (
-          <div className="mb-6 sm:mb-6 md:mb-8">
-            <h3
-              className="text-xl sm:text-3xl md:text-4xl font-bold"
-              style={{ color: isDarkMode ? "var(--text-primary)" : "#1E1E1E" }}
-            >
-              {searchData.pagination.totalCount.toLocaleString()} RESULTS
-            </h3>
-          </div>
-        )}
         {(searchLoading || isResultsRefreshing) && allRecipes.length === 0 && (
           <div className="py-8 sm:py-12">
             <RecipeGridSkeleton count={8} mobileLayout="vertical" />
@@ -620,53 +620,63 @@ const Result = () => {
         {(searchData && searchData.recipes && searchData.recipes.length > 0) || (allRecipes && allRecipes.length > 0) ? (
           (() => {
             const seed = (executedSearchQuery ? executedSearchQuery.length : 1) + 17;
-            const desktopAdIndices = getDesktopAdIndices(allRecipes, seed);
-            const mobileAdIndices = getMobileAdIndices(allRecipes, seed);
+            const hasFoodPreference = preferenceFoodTypes.length > 0;
+            const renderRecipeSection = (recipes, sectionSeed, withRef = false) => {
+              if (recipes.length === 0) return null;
+
+              const desktopAdIndices = getDesktopAdIndices(recipes, sectionSeed);
+              const mobileAdIndices = getMobileAdIndices(recipes, sectionSeed);
+
+              return (
+                <Box component="section" sx={{ mb: { xs: 5, md: 7 } }}>
+                  <div
+                    ref={withRef ? scrollContainerRef : undefined}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
+                  >
+                    {recipes.map((recipe, index) => {
+                      const normalizedRecipe = {
+                        ...recipe,
+                        recipe_id: recipe.recipe_id || recipe.id,
+                        title: recipe.title || recipe.name,
+                      };
+                      const isLastItem = index === recipes.length - 1;
+                      const showMobileAd = mobileAdIndices.has(index) && !isLastItem;
+                      const showDesktopAd = desktopAdIndices.has(index) && !isLastItem;
+
+                      return (
+                        <React.Fragment key={normalizedRecipe.recipe_id || index}>
+                          <div className="h-full">
+                            <RecipeCard recipe={normalizedRecipe} mobileLayout="vertical" hideVideoIcon />
+                          </div>
+                          {(showMobileAd || showDesktopAd) && (
+                            <Box
+                              className="col-span-full justify-center items-center my-4 w-full"
+                              sx={{ display: { xs: showMobileAd ? 'flex' : 'none', sm: showMobileAd ? 'flex' : 'none', md: showDesktopAd ? 'flex' : 'none' } }}
+                            >
+                              <Box className="block md:hidden w-full"><AdsterraBanner320x50 /></Box>
+                              <Box className="hidden md:block"><AdsterraBanner728x90 /></Box>
+                            </Box>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                </Box>
+              );
+            };
 
             return (
               <>
-                <div
-                  ref={scrollContainerRef}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
-                >
-                  {allRecipes.map((recipe, index) => {
-                    const normalizedRecipe = {
-                      ...recipe,
-                      recipe_id: recipe.recipe_id || recipe.id,
-                      title: recipe.title || recipe.name,
-                    };
-                    const isLastItem = index === allRecipes.length - 1;
-                    const showMobileAd = mobileAdIndices.has(index) && !isLastItem;
-                    const showDesktopAd = desktopAdIndices.has(index) && !isLastItem;
-
-                    return (
-                      <React.Fragment key={normalizedRecipe.recipe_id || index}>
-                        <div className="h-full">
-                          <RecipeCard recipe={normalizedRecipe} mobileLayout="vertical" hideVideoIcon />
-                        </div>
-                        {(showMobileAd || showDesktopAd) && (
-                          <Box
-                            className="col-span-full justify-center items-center my-4 w-full"
-                            sx={{
-                              display: {
-                                xs: showMobileAd ? 'flex' : 'none',
-                                sm: showMobileAd ? 'flex' : 'none',
-                                md: showDesktopAd ? 'flex' : 'none'
-                              }
-                            }}
-                          >
-                            <Box className="block md:hidden w-full">
-                              <AdsterraBanner320x50 />
-                            </Box>
-                            <Box className="hidden md:block">
-                              <AdsterraBanner728x90 />
-                            </Box>
-                          </Box>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
+                {hasFoodPreference && renderRecipeSection(
+                  preferredRecipes,
+                  seed,
+                  true
+                )}
+                {renderRecipeSection(
+                  otherRecipes,
+                  seed + 101,
+                  !hasFoodPreference
+                )}
 
                 {hasMore && (
                   <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 5, md: 7 }, mb: 4 }}>
