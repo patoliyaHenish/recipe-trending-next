@@ -153,9 +153,8 @@ const getTokens = (isDarkMode) => ({
 });
 
 // ── Helper ─────────────────────────────────────────────────────────────────────
-const checkPerm = (permission, userPermissions, role) => {
+const checkPerm = (permission, userPermissions) => {
   if (!permission) return true;
-  if (role === 'admin') return true;
   if (Array.isArray(permission)) return permission.some(p => userPermissions.includes(p));
   return userPermissions.includes(permission);
 };
@@ -213,22 +212,20 @@ const AdminVerticalNavbar = ({ open, setOpen, mobileOpen, setMobileOpen }) => {
   const { BG, SURFACE, BORDER, TEXT_PRI, TEXT_SEC, HOVER_BG } = getTokens(isDarkMode);
 
   const userPermissions = useMemo(() => user?.permissions || [], [user]);
-  const userRole = user?.role;
 
   const filteredLinks = useMemo(() => {
-    if (userRole === 'admin') return adminLinks;
     return adminLinks.reduce((acc, link) => {
       const permittedSubs = link.subLinks
-        ? link.subLinks.filter(s => checkPerm(s.permission, userPermissions, userRole))
+        ? link.subLinks.filter(s => checkPerm(s.permission, userPermissions))
         : null;
       if (link.subLinks) {
         if (permittedSubs?.length) acc.push({ ...link, subLinks: permittedSubs });
-      } else if (checkPerm(link.permission, userPermissions, userRole)) {
+      } else if (checkPerm(link.permission, userPermissions)) {
         acc.push(link);
       }
       return acc;
     }, []);
-  }, [user, userPermissions, userRole]);
+  }, [userPermissions]);
 
   useEffect(() => {
     filteredLinks.forEach(link => {

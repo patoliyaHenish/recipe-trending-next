@@ -33,8 +33,7 @@ const ManageConfig = () => {
     const { isDarkMode } = useTheme();
     const user = useSelector((state) => state.auth.user);
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canManage = isAdmin || userPermissions.includes('config.manage');
+    const canManage = userPermissions.includes('config.manage');
 
     const { data: settingsData, isLoading, isError, error } = useGetAllSettingsQuery();
     const [updateSetting] = useUpdateSettingMutation();
@@ -48,7 +47,7 @@ const ManageConfig = () => {
 
     const isForbidden = error?.status === 403;
 
-    if (!canManage && !isAdmin) {
+    if (!canManage) {
         return <AccessDenied message="You don't have the required permissions to view or manage system configurations." />;
     }
 

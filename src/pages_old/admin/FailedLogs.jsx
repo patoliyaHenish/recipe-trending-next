@@ -46,12 +46,10 @@ const FailedLogs = () => {
   const { isDarkMode } = useTheme()
   const user = useSelector((state) => state.auth.user);
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-  const canList = isAdmin || userPermissions.includes('failed_logs.list');
-  const canViewDetail = isAdmin || userPermissions.includes('failed_logs.view');
-  const canDelete = isAdmin || userPermissions.includes('failed_logs.delete');
-
-  if (!canList && !isAdmin) {
+    const canList = userPermissions.includes('failed_logs.list');
+    const canViewDetail = userPermissions.includes('failed_logs.view');
+    const canDelete = userPermissions.includes('failed_logs.delete');
+  if (!canList) {
     return <AccessDenied message="You do not have permission to view System Logs." />;
   }
   const [searchParams, setSearchParams] = useSearchParams()

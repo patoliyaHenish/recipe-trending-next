@@ -1,30 +1,13 @@
 "use client";
 import {
-  Search as SearchIcon,
   Close as CloseIcon,
-  Restaurant as RestaurantIcon,
-  EmojiEvents as EmojiEventsIcon,
-  AccessTime as AccessTimeIcon,
-  Whatshot as WhatshotIcon,
-  TrendingUp as TrendingUpIcon,
-  School as SchoolIcon,
-  Speed as SpeedIcon,
-  Egg as EggIcon,
-  CheckRounded as CheckRoundedIcon,
-  Share as ShareIcon,
 } from "@mui/icons-material";
 import {
   Alert,
   Box,
   Button,
-  FormControl,
   IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
   Typography,
-  Checkbox,
-  ListItemText,
   Snackbar,
   Tooltip,
   CircularProgress,
@@ -39,14 +22,14 @@ import React, {
 } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
-  useGetCombinedSuggestionsQuery,
   useSearchRecipesQuery,
 } from "../../features/api/searchApi";
 import RecipeGridSkeleton from "../../components/common/RecipeGridSkeleton";
 import RecipeCard from "../../components/common/RecipeCard";
+import LoadMoreButton from "../../components/common/LoadMoreButton";
 import { useTheme } from "../../context/ThemeContext";
 import { trackEvent } from "../../utils/analytics";
-import { AdsterraBanner728x90, AdsterraBanner320x50, AdsterraNativeBanner } from "../../components/ads";
+import { AdsterraBanner728x90, AdsterraBanner320x50 } from "../../components/ads";
 
 const getDesktopAdIndices = (items, seed = 1) => {
   const indices = new Set();
@@ -90,115 +73,49 @@ function useIsMobile() {
   }, []);
   return isMobile;
 }
-const getPreferenceIcon = (label) => {
-  if (!label) return null;
-  const text = label.toLowerCase();
-  if (text.includes('veg') && !text.includes('non')) {
-    return (
-      <Box sx={{ width: 16, height: 16, border: '2px solid #43a047', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', mr: 1.5 }}>
-        <Box sx={{ width: 8, height: 8, bgcolor: '#43a047', borderRadius: '50%' }} />
-      </Box>
-    );
-  }
-  if (text.includes('egg')) {
-    return <EggIcon sx={{ color: '#ffb300', fontSize: '1.2rem', mr: 1.5 }} />;
-  }
-  return null;
-};
-
 const Result = () => {
   const { isDarkMode } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
-  const [showSuggestionsDropdown, setShowSuggestionsDropdown] = useState(false);
-  const [isPreferenceMenuOpen, setIsPreferenceMenuOpen] = useState(false);
-  const [isBadgeMenuOpen, setIsBadgeMenuOpen] = useState(false);
-  const [isTimeMenuOpen, setIsTimeMenuOpen] = useState(false);
   const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [executedSearchQuery, setExecutedSearchQuery] = useState(
-    searchParams.get("q") || "",
+  const searchParamsString = searchParams.toString();
+  const executedSearchQuery = searchParams.get("q") || "";
+  const filters = useMemo(
+    () => ({
+      preference: searchParams.get("preference") || "",
+      timeRange: searchParams.get("timeRange") || "",
+    }),
+    [searchParamsString]
   );
-  const initialPreference = searchParams.get("preference") || Cookies.get('userPreference') || "";
-  const [shouldSearch, setShouldSearch] = useState(!!(searchParams.get("q") || initialPreference || searchParams.get("categoryId") || searchParams.get("subCategoryId") || searchParams.get("recipeId") || searchParams.get("ingredientId")));
-  const [filters, setFilters] = useState({
-    preference: initialPreference,
-    badge: searchParams.get("badge") || "",
-    timeRange: searchParams.get("timeRange") || "",
-  });
-  const [page, setPage] = useState(parseInt(searchParams.get("page")) || 1);
+  const [page, setPage] = useState(1);
+  const hasAnySelection = useMemo(() => {
+    return !!(
+      searchParams.get("categoryId") ||
+      searchParams.get("subCategoryId") ||
+      searchParams.get("recipeId") ||
+      searchParams.get("ingredientId")
+    );
+  }, [searchParamsString]);
+  const shouldSearch = useMemo(
+    () => !!(
+      executedSearchQuery ||
+      filters.preference ||
+      filters.timeRange ||
+      hasAnySelection
+    ),
+    [executedSearchQuery, filters, hasAnySelection]
+  );
   const [allRecipes, setAllRecipes] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
+  const [isResultsRefreshing, setIsResultsRefreshing] = useState(false);
   const observer = useRef();
   const processedDataRef = useRef(new Set());
   const scrollContainerRef = useRef();
-  const closeOnScrollRafRef = useRef(null);
   const isMobile = useIsMobile();
-  const searchBoxRef = useRef(null);
-  const lastParamsRef = useRef("");
   const [showShareToast, setShowShareToast] = useState(false);
-  const selectMenuProps = useMemo(
-    () => ({
-      disableScrollLock: true,
-      transitionDuration: {
-        enter: 140,
-        exit: 220,
-      },
-      PaperProps: {
-        sx: {
-          mt: 1,
-          bgcolor: isDarkMode ? "#0f172a" : "#ffffff",
-          color: isDarkMode ? "#e5e7eb" : "#1f2937",
-          border: isDarkMode
-            ? "1px solid rgba(148, 163, 184, 0.2)"
-            : "1px solid rgba(0, 0, 0, 0.08)",
-          boxShadow: isDarkMode
-            ? "0 12px 30px rgba(0, 0, 0, 0.45)"
-            : "0 12px 30px rgba(0, 0, 0, 0.12)",
-          borderRadius: 2,
-        },
-      },
-      MenuListProps: {
-        sx: {
-          py: 0.5,
-          "& .MuiMenuItem-root": {
-            borderRadius: 1.5,
-            mx: 0.5,
-            my: 0.25,
-            fontWeight: 600,
-            "&:hover": {
-              bgcolor: isDarkMode
-                ? "rgba(148, 163, 184, 0.12)"
-                : "rgba(15, 23, 42, 0.06)",
-            },
-            "&.Mui-selected": {
-              bgcolor: isDarkMode
-                ? "rgba(56, 189, 248, 0.16)"
-                : "rgba(14, 116, 144, 0.12)",
-              "&:hover": {
-                bgcolor: isDarkMode
-                  ? "rgba(56, 189, 248, 0.22)"
-                  : "rgba(14, 116, 144, 0.18)",
-              },
-            },
-          },
-        },
-      },
-    }),
-    [isDarkMode]
-  );
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   const updateSearchParams = useCallback((newParams) => {
     const currentParams = Object.fromEntries(searchParams.entries());
+    delete currentParams.page;
     const updatedParams = { ...currentParams, ...newParams };
 
     Object.keys(updatedParams).forEach((key) => {
@@ -208,53 +125,62 @@ const Result = () => {
     });
 
     const urlParams = new URLSearchParams(updatedParams);
-    router.push(`${pathname}?${urlParams.toString()}`);
+    router.push(`${pathname}?${urlParams.toString()}`, { scroll: false });
   }, [searchParams, router, pathname]);
 
   const handleFilterChange = useCallback((key, value) => {
     if (key === "preference" && value) {
         trackEvent("food_type", { food_type_filter: value });
     }
-    setFilters((prev) => {
-      const nextFilters = { ...prev, [key]: value };
-      if (key === 'preference') {
-        if (value) {
-          Cookies.set('userPreference', value, { expires: 365 });
-        } else {
-          Cookies.remove('userPreference');
-        }
-        window.dispatchEvent(new Event('userPreferenceChanged'));
+
+    if (key === 'preference') {
+      if (value) {
+        Cookies.set('userPreference', value, { expires: 365 });
+      } else {
+        Cookies.remove('userPreference');
       }
-      updateSearchParams({ [key]: value, page: 1 });
-      setPage(1);
-      setAllRecipes([]);
-      setHasMore(true);
-      processedDataRef.current.clear();
-      
-      const hasAnyFilter = Object.values(nextFilters).some(v => v);
-      const hasAnySelection = !!searchParams.get("categoryId") || !!searchParams.get("subCategoryId") || !!searchParams.get("recipeId") || !!searchParams.get("ingredientId");
-      setShouldSearch(!!(executedSearchQuery || hasAnyFilter || hasAnySelection));
-      
-      return nextFilters;
-    });
-  }, [searchParams, executedSearchQuery, updateSearchParams]);
+      window.dispatchEvent(new Event('userPreferenceChanged'));
+    }
+
+    updateSearchParams({ [key]: value });
+    setPage(1);
+    setIsResultsRefreshing(true);
+    setAllRecipes([]);
+    processedDataRef.current.clear();
+  }, [updateSearchParams]);
 
   useEffect(() => {
+    if (searchParams.get("page")) {
+      const nextParams = new URLSearchParams(searchParams.toString());
+      nextParams.delete("page");
+
+      const nextUrl = nextParams.toString()
+        ? `${pathname}?${nextParams.toString()}`
+        : pathname;
+
+      router.replace(nextUrl, { scroll: false });
+    }
+  }, [searchParams, pathname, router]);
+
+  useEffect(() => {
+    const getUrlPreference = () => new URLSearchParams(window.location.search).get("preference") || "";
+
     const handleCookieChange = () => {
       const cookiePref = Cookies.get('userPreference') || "";
-      if (searchParams.get("preference") !== cookiePref) {
+      const urlPref = getUrlPreference();
+      if (urlPref !== cookiePref) {
         handleFilterChange("preference", cookiePref);
       }
     };
 
     const initialCookie = Cookies.get('userPreference');
-    if (initialCookie && !searchParams.get("preference")) {
+    if (initialCookie && !getUrlPreference()) {
         handleFilterChange("preference", initialCookie);
     }
 
     window.addEventListener('userPreferenceChanged', handleCookieChange);
     return () => window.removeEventListener('userPreferenceChanged', handleCookieChange);
-  }, [searchParams, handleFilterChange]);
+  }, [searchParamsString, handleFilterChange]);
 
   const searchItems = executedSearchQuery
     ? executedSearchQuery
@@ -268,7 +194,7 @@ const Result = () => {
       .split(",")
       .map((item) => item.trim())
       .filter((item) => item);
-  }, [searchParams]);
+  }, [searchParamsString]);
 
   const selectionIds = useMemo(() => {
     const parseIds = (value) =>
@@ -284,82 +210,68 @@ const Result = () => {
       recipe: parseIds(searchParams.get("recipeId")),
       ingredient: parseIds(searchParams.get("ingredientId")),
     };
-  }, [searchParams]);
+  }, [searchParamsString]);
 
-  const searchParamsForApi = {
-    q: (() => {
-      const types = searchItemTypes;
-      const items = searchItems;
-      const ids = { ...selectionIds };
-      
-      const mutableIds = {
-        recipe: [...(ids.recipe || [])],
-        ingredient: [...(ids.ingredient || [])],
-        category: [...(ids.category || [])],
-        subCategory: [...(ids.subCategory || [])]
-      };
+  const searchParamsForApi = useMemo(() => {
+    const types = searchItemTypes;
+    const items = searchItems;
+    const ids = { ...selectionIds };
 
-      const textParts = [];
+    const mutableIds = {
+      recipe: [...(ids.recipe || [])],
+      ingredient: [...(ids.ingredient || [])],
+      category: [...(ids.category || [])],
+      subCategory: [...(ids.subCategory || [])]
+    };
 
-      items.forEach((item, index) => {
-        const type = types[index] || 'recipe';
-        let isIdBased = false;
+    const textParts = [];
 
-        if (type === 'ingredient' && mutableIds.ingredient.length > 0) {
-          mutableIds.ingredient.shift();
-          isIdBased = true;
-        } else if (type === 'category' && mutableIds.category.length > 0) {
-          mutableIds.category.shift();
-          isIdBased = true;
-        } else if (type === 'subCategory' && mutableIds.subCategory.length > 0) {
-          mutableIds.subCategory.shift();
-          isIdBased = true;
-        } else if (type === 'recipe' && mutableIds.recipe.length > 0) {
-          mutableIds.recipe.shift();
-          isIdBased = true;
-        }
+    items.forEach((item, index) => {
+      const type = types[index] || 'recipe';
+      let isIdBased = false;
 
-        if (!isIdBased) {
-          textParts.push(item);
-        }
-      });
+      if (type === 'ingredient' && mutableIds.ingredient.length > 0) {
+        mutableIds.ingredient.shift();
+        isIdBased = true;
+      } else if (type === 'category' && mutableIds.category.length > 0) {
+        mutableIds.category.shift();
+        isIdBased = true;
+      } else if (type === 'subCategory' && mutableIds.subCategory.length > 0) {
+        mutableIds.subCategory.shift();
+        isIdBased = true;
+      } else if (type === 'recipe' && mutableIds.recipe.length > 0) {
+        mutableIds.recipe.shift();
+        isIdBased = true;
+      }
 
-      return textParts.join(', ');
-    })(),
-    categoryId: searchParams.get("categoryId") || "",
-    subCategoryId: searchParams.get("subCategoryId") || "",
-    recipeId: searchParams.get("recipeId") || "",
-    ingredientId: searchParams.get("ingredientId") || "",
-    ...filters,
-    page,
-    limit: 12,
-    sortBy: "created_at",
-    sortOrder: "DESC",
-  };
+      if (!isIdBased) {
+        textParts.push(item);
+      }
+    });
+
+    return {
+      q: textParts.join(', '),
+      categoryId: searchParams.get("categoryId") || "",
+      subCategoryId: searchParams.get("subCategoryId") || "",
+      recipeId: searchParams.get("recipeId") || "",
+      ingredientId: searchParams.get("ingredientId") || "",
+      ...filters,
+      page,
+      limit: 12,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+    };
+  }, [searchParamsString, executedSearchQuery, filters, page]);
 
   const {
     data: searchData,
     isLoading: searchLoading,
+    isFetching,
     error: searchError,
   } = useSearchRecipesQuery(searchParamsForApi, {
     skip: !shouldSearch,
     refetchOnMountOrArgChange: true,
   });
-
-  const { data: suggestionsDataRaw } = useGetCombinedSuggestionsQuery(
-    debouncedSearchQuery,
-    {
-      skip:
-        debouncedSearchQuery.length === 0 || debouncedSearchQuery.length < 1,
-    },
-  );
-
-  const combinedSuggestions = suggestionsDataRaw || [];
-
-  const shouldShowSuggestions =
-    searchQuery.length > 0 &&
-    combinedSuggestions &&
-    combinedSuggestions.length > 0;
 
   useEffect(() => {
     if (executedSearchQuery) {
@@ -371,24 +283,6 @@ const Result = () => {
       document.title = "Recipe Trending";
     };
   }, [executedSearchQuery]);
-
-  const searchItemTypeMap = useMemo(() => {
-    const map = new Map();
-    (combinedSuggestions || []).forEach((suggestion) => {
-      const label = (
-        suggestion.displayText ||
-        suggestion.text ||
-        suggestion.name ||
-        ""
-      )
-        .trim()
-        .toLowerCase();
-      if (label) {
-        map.set(label, suggestion.type || "recipe");
-      }
-    });
-    return map;
-  }, [combinedSuggestions]);
 
   const handleRemoveSearchItem = (indexToRemove) => {
     const remainingItems = searchItems.filter(
@@ -443,6 +337,7 @@ const Result = () => {
     if (remainingItems.length > 0) {
       const newQuery = remainingItems.join(", ");
       const newTypes = remainingTypes.join(", ");
+      setPage(1);
       const params = new URLSearchParams();
       params.set("q", newQuery);
       if (newTypes) params.set("t", newTypes);
@@ -454,15 +349,20 @@ const Result = () => {
         params.set("recipeId", nextRecipeIds.join(","));
       if (nextIngredientIds.length > 0)
         params.set("ingredientId", nextIngredientIds.join(","));
-      router.push(`/result?${params.toString()}`);
+      router.push(`/result?${params.toString()}`, { scroll: false });
     } else {
       router.push("/");
     }
   };
 
+  const hasMore = Boolean(
+    searchData?.pagination &&
+    searchData.pagination.currentPage < searchData.pagination.totalPages
+  );
+
   const handleLoadMore = () => {
-    if (!searchLoading && hasMore) {
-      setPage((prevPage) => prevPage + 1);
+    if (!isFetching && hasMore) {
+      setPage((prev) => prev + 1);
     }
   };
 
@@ -474,6 +374,7 @@ const Result = () => {
 
   useEffect(() => {
     if (searchData && searchData.pagination?.currentPage === page) {
+      setIsResultsRefreshing(false);
       if (page === 1) {
           trackEvent("search_query", { query: executedSearchQuery || "empty" });
           if (!searchData.recipes || searchData.recipes.length === 0) {
@@ -498,129 +399,8 @@ const Result = () => {
           return [...prev, ...uniqueNew];
         });
       }
-      const hasMorePages =
-        searchData.pagination?.currentPage < searchData.pagination?.totalPages;
-      setHasMore(hasMorePages);
     }
-  }, [searchData, page]);
-
-  const handleSearch = (query, type = 'recipe', id = null) => {
-    if (query.trim()) {
-      const currentQuery = executedSearchQuery ? executedSearchQuery + ', ' + query : query;
-      const currentTypes = searchParams.get("t") ? searchParams.get("t") + ',' + type : type;
-      
-      const newParams = { q: currentQuery, t: currentTypes, openSearch: "0", page: 1 };
-
-      if (id) {
-        if (type === 'ingredient') {
-            const currentIds = (searchParams.get("ingredientId") || '').split(',').filter(Boolean);
-            if (!currentIds.includes(String(id))) currentIds.push(String(id));
-            newParams.ingredientId = currentIds.join(',');
-        } else if (type === 'category') {
-            const currentIds = (searchParams.get("categoryId") || '').split(',').filter(Boolean);
-            if (!currentIds.includes(String(id))) currentIds.push(String(id));
-            newParams.categoryId = currentIds.join(',');
-        } else if (type === 'subCategory') {
-            const currentIds = (searchParams.get("subCategoryId") || '').split(',').filter(Boolean);
-            if (!currentIds.includes(String(id))) currentIds.push(String(id));
-            newParams.subCategoryId = currentIds.join(',');
-        } else if (type === 'recipe') {
-             const currentIds = (searchParams.get("recipeId") || '').split(',').filter(Boolean);
-             if (!currentIds.includes(String(id))) currentIds.push(String(id));
-             newParams.recipeId = currentIds.join(',');
-        }
-      }
-
-      setSearchQuery(query);
-      setExecutedSearchQuery(currentQuery);
-      setShouldSearch(true);
-      setPage(1);
-      setAllRecipes([]);
-      setHasMore(true);
-      updateSearchParams(newParams);
-      setShowSuggestionsDropdown(false);
-    }
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery("");
-    setExecutedSearchQuery("");
-    setShouldSearch(false);
-    setPage(1);
-    setAllRecipes([]);
-    setHasMore(true);
-    setFilters({
-      preference: "",
-      badge: "",
-      timeRange: "",
-    });
-    router.push(pathname);
-    setShowSuggestionsDropdown(false);
-  };
-
-  const handleKeyPress = (event) => {
-    if (event.key === "Enter") {
-      handleSearch(searchQuery, 'recipe');
-    }
-  };
-
-  useEffect(() => {
-    const query = searchParams.get("q");
-    const preference = searchParams.get("preference");
-    const badge = searchParams.get("badge");
-    const timeRange = searchParams.get("timeRange");
-    const categoryId = searchParams.get("categoryId");
-    const subCategoryId = searchParams.get("subCategoryId");
-    const recipeId = searchParams.get("recipeId");
-    const ingredientId = searchParams.get("ingredientId");
-    const hasAnySelection = !!categoryId || !!subCategoryId || !!recipeId || !!ingredientId;
-    const hasAnyFilterParam = !!(preference || badge || timeRange || filters.preference);
-
-    const currentParamsObj = {
-      q: query || "",
-      preference: preference || "",
-      badge: badge || "",
-      timeRange: timeRange || "",
-      categoryId: categoryId || "",
-      subCategoryId: subCategoryId || "",
-      recipeId: recipeId || "",
-      ingredientId: ingredientId || ""
-    };
-    const currentParamsStr = JSON.stringify(currentParamsObj);
-
-    
-    if (currentParamsStr !== lastParamsRef.current) {
-      lastParamsRef.current = currentParamsStr;
-      
-      setExecutedSearchQuery(query || "");
-      setShouldSearch(!!query || hasAnySelection || hasAnyFilterParam);
-      setPage(1);
-      setAllRecipes([]);
-      setHasMore(true);
-      processedDataRef.current.clear();
-    }
-
-    setFilters((prev) => {
-      const newFilters = {
-        preference: preference || "",
-        badge: badge || "",
-        timeRange: timeRange || "",
-      };
-
-      const hasAnyFilter = Object.values(newFilters).some((value) => value);
-      if (shouldSearch !== (!!query || hasAnyFilter || hasAnySelection)) {
-        setShouldSearch(!!query || hasAnyFilter || hasAnySelection);
-      }
-
-      if (JSON.stringify(prev) !== JSON.stringify(newFilters)) {
-        return newFilters;
-      }
-      return prev;
-    });
-
-    const newPage = pageParam ? parseInt(pageParam) : 1;
-    if (newPage !== page) setPage(newPage);
-  }, [searchParams, searchQuery, executedSearchQuery, shouldSearch]);
+  }, [searchData, page, executedSearchQuery]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -656,58 +436,6 @@ const Result = () => {
     };
   }, []);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        searchBoxRef.current &&
-        !searchBoxRef.current.contains(event.target)
-      ) {
-        setShowSuggestionsDropdown(false);
-      }
-    }
-    if (showSuggestionsDropdown) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showSuggestionsDropdown]);
-
-  const handleInputFocus = () => {
-    if (shouldShowSuggestions) {
-      setShowSuggestionsDropdown(true);
-    }
-  };
-
-  const closeFilterMenus = useCallback(() => {
-    setIsPreferenceMenuOpen(false);
-    setIsBadgeMenuOpen(false);
-    setIsTimeMenuOpen(false);
-  }, []);
-
-  useEffect(() => {
-    const handleScrollCloseMenus = () => {
-      if (!isPreferenceMenuOpen && !isBadgeMenuOpen && !isTimeMenuOpen) return;
-      if (closeOnScrollRafRef.current) return;
-
-      closeOnScrollRafRef.current = window.requestAnimationFrame(() => {
-        closeFilterMenus();
-        closeOnScrollRafRef.current = null;
-      });
-    };
-
-    window.addEventListener("scroll", handleScrollCloseMenus, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScrollCloseMenus);
-      if (closeOnScrollRafRef.current) {
-        window.cancelAnimationFrame(closeOnScrollRafRef.current);
-        closeOnScrollRafRef.current = null;
-      }
-    };
-  }, [closeFilterMenus, isPreferenceMenuOpen, isBadgeMenuOpen, isTimeMenuOpen]);
-
   return (
     <div
       className="min-h-screen pt-[56px] sm:pt-[64px] md:pt-[96px] lg:pt-[104px]"
@@ -724,219 +452,6 @@ const Result = () => {
         }}
       >
         <div className="w-full max-w-4xl mx-auto px-3 sm:px-4">
-          {!executedSearchQuery && (
-            <div
-              className="relative max-w-2xl mx-auto w-full"
-              ref={searchBoxRef}
-            >
-              <div
-                className={`flex items-center gap-2 ${isMobile ? "flex-col" : "flex-row"}`}
-              >
-                <div
-                  className={`flex items-center bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-full shadow-sm focus-within:ring-2 focus-within:ring-[#a21caf] transition hover:shadow-md ${
-                    isMobile ? "px-3 py-3 h-12 w-full" : "px-4 py-2 flex-1"
-                  }`}
-                  style={{ minHeight: isMobile ? "48px" : "auto" }}
-                >
-                  <SearchIcon
-                    className={`text-gray-400 dark:text-gray-300 flex-shrink-0 ${isMobile ? "mr-3" : "mr-2"}`}
-                  />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      if (
-                        e.target.value.length > 0 &&
-                        combinedSuggestions &&
-                        combinedSuggestions.length > 0
-                      ) {
-                        setShowSuggestionsDropdown(true);
-                      } else {
-                        setShowSuggestionsDropdown(false);
-                      }
-                    }}
-                    onFocus={handleInputFocus}
-                    onKeyPress={handleKeyPress}
-                    placeholder="I want to make..."
-                    className="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 text-base"
-                    style={{
-                      fontSize: "16px",
-                      height: isMobile ? "24px" : "auto",
-                      lineHeight: isMobile ? "24px" : "normal",
-                    }}
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={handleClearSearch}
-                      className={`text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 flex-shrink-0 ${
-                        isMobile ? "ml-3 p-1" : "ml-2"
-                      }`}
-                      style={{
-                        width: isMobile ? "32px" : "auto",
-                        height: isMobile ? "32px" : "auto",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <span className="text-lg">×</span>
-                    </button>
-                  )}
-                </div>
-                <button
-                  onClick={() => handleSearch(searchQuery, 'recipe')}
-                  disabled={!searchQuery.trim()}
-                  className={`flex items-center justify-center gap-2 font-semibold rounded-full transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
-                    isMobile ? "w-full px-6 py-3 h-12" : "px-6 py-2.5"
-                  }`}
-                  style={{
-                    backgroundColor: searchQuery.trim() ? "#a21caf" : "#d1d5db",
-                    color: "#ffffff",
-                    minWidth: isMobile ? "auto" : "120px",
-                  }}
-                >
-                  <span className={isMobile ? "text-base" : "text-sm"}>
-                    Search
-                  </span>
-                </button>
-              </div>
-
-              {showSuggestionsDropdown && shouldShowSuggestions && (
-                <div
-                  className={`absolute mt-2 w-full rounded-xl shadow-2xl overflow-hidden z-50 backdrop-blur-sm ${
-                    isMobile ? "max-h-80 overflow-y-auto" : ""
-                  }`}
-                  style={{
-                    backgroundColor: isDarkMode
-                      ? "rgba(17, 24, 39, 0.95)"
-                      : "rgba(255, 255, 255, 0.95)",
-                    border: isDarkMode
-                      ? "1px solid rgba(75, 85, 99, 0.3)"
-                      : "1px solid rgba(229, 231, 235, 0.5)",
-                    boxShadow: isDarkMode
-                      ? "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1)"
-                      : "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                  }}
-                >
-                  {combinedSuggestions
-                    .slice(0, isMobile ? 6 : 10)
-                    .map((s, i) => {
-                      const getBadgeLabel = (type) => {
-                        switch (type) {
-                          case 'ingredient': return 'Ingredient';
-                          case 'category': return 'Category';
-                          case 'subCategory': return 'Sub-Cat';
-                          default: 
-                            return `Recipe`; 
-                        }
-                      };
-
-                      const getBadgeStyle = (type, isDark) => {
-                        switch (type) {
-                          case 'ingredient':
-                            return {
-                              bg: isDark ? "rgba(16, 185, 129, 0.2)" : "rgba(16, 185, 129, 0.1)",
-                              color: isDark ? "#6ee7b7" : "#10b981",
-                              border: isDark ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(16, 185, 129, 0.2)"
-                            };
-                          case 'category':
-                            return {
-                              bg: isDark ? "rgba(139, 92, 246, 0.2)" : "rgba(139, 92, 246, 0.1)",
-                              color: isDark ? "#a78bfa" : "#8b5cf6",
-                              border: isDark ? "1px solid rgba(139, 92, 246, 0.3)" : "1px solid rgba(139, 92, 246, 0.2)"
-                            };
-                          case 'subCategory':
-                            return {
-                              bg: isDark ? "rgba(245, 158, 11, 0.2)" : "rgba(245, 158, 11, 0.1)",
-                              color: isDark ? "#fbbf24" : "#f59e0b",
-                              border: isDark ? "1px solid rgba(245, 158, 11, 0.3)" : "1px solid rgba(245, 158, 11, 0.2)"
-                            };
-                          default:
-                            return {
-                              bg: isDark ? "rgba(202, 96, 20, 0.2)" : "rgba(202, 96, 20, 0.1)",
-                              color: isDark ? "#fb923c" : "#ca6014",
-                              border: isDark ? "1px solid rgba(202, 96, 20, 0.3)" : "1px solid rgba(202, 96, 20, 0.2)"
-                            };
-                        }
-                      };
-
-                      const badgeStyle = getBadgeStyle(s.type, isDarkMode);
-
-                      return (
-                      <div
-                        key={`${s.type}-${i}`}
-                        onClick={() =>
-                          handleSearch(s.displayText || s.text || s.name, s.type, s.id)
-                        }
-                        className={`px-4 cursor-pointer transition-all duration-200 flex items-center gap-3 group ${
-                          isMobile ? "py-4 min-h-[48px]" : "py-3"
-                        }`}
-                        style={{
-                          backgroundColor: "transparent",
-                          borderBottom:
-                            i <
-                            combinedSuggestions.slice(0, isMobile ? 6 : 10)
-                              .length -
-                              1
-                              ? isDarkMode
-                                ? "1px solid rgba(75, 85, 99, 0.2)"
-                                : "1px solid rgba(229, 231, 235, 0.5)"
-                              : "none",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = isDarkMode
-                            ? "rgba(55, 65, 81, 0.8)"
-                            : "rgba(249, 250, 251, 0.8)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = "transparent";
-                        }}
-                      >
-                        {s.image && s.type === "recipe" && (
-                          <div
-                            className={`flex-shrink-0 rounded-lg overflow-hidden ring-2 ring-transparent group-hover:ring-purple-200 dark:group-hover:ring-purple-800 transition-all duration-200 ${
-                              isMobile ? "w-10 h-10" : "w-12 h-12"
-                            }`}
-                          >
-                            <img
-                              src={
-                                s.image ||
-                                "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop"
-                              }
-                              alt={s.displayText}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                            />
-                          </div>
-                        )}
-                        <div className="flex-1 flex justify-between items-center">
-                          <span
-                            className={`font-medium transition-colors duration-200 ${
-                              isMobile ? "text-base" : "text-sm"
-                            }`}
-                            style={{
-                              color: isDarkMode ? "#f3f4f6" : "#374151",
-                            }}
-                          >
-                            {s.displayText || s.text || s.name}
-                          </span>
-                          <span
-                            className={`px-2 py-1 rounded-full font-medium transition-all duration-200 text-xs`}
-                            style={{
-                              backgroundColor: badgeStyle.bg,
-                              color: badgeStyle.color,
-                              border: badgeStyle.border,
-                            }}
-                          >
-                            {getBadgeLabel(s.type)}
-                          </span>
-                        </div>
-                      </div>
-                    )})}
-                </div>
-              )}
-            </div>
-          )}
           {executedSearchQuery && (
             <div className="max-w-5xl mx-auto">
               <div
@@ -1011,6 +526,32 @@ const Result = () => {
                     searchItemTypes[index] ||
                     searchItemTypeMap.get(item.toLowerCase()) ||
                     "recipe";
+
+                  const typeColors = {
+                    ingredient: {
+                      bg: isDarkMode ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)",
+                      border: isDarkMode ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid rgba(16, 185, 129, 0.3)",
+                      text: isDarkMode ? "#6ee7b7" : "#10b981",
+                    },
+                    category: {
+                      bg: isDarkMode ? "rgba(139, 92, 246, 0.15)" : "rgba(139, 92, 246, 0.1)",
+                      border: isDarkMode ? "1px solid rgba(139, 92, 246, 0.4)" : "1px solid rgba(139, 92, 246, 0.3)",
+                      text: isDarkMode ? "#a78bfa" : "#8b5cf6",
+                    },
+                    subCategory: {
+                      bg: isDarkMode ? "rgba(245, 158, 11, 0.15)" : "rgba(245, 158, 11, 0.1)",
+                      border: isDarkMode ? "1px solid rgba(245, 158, 11, 0.4)" : "1px solid rgba(245, 158, 11, 0.3)",
+                      text: isDarkMode ? "#fbbf24" : "#f59e0b",
+                    },
+                    recipe: {
+                      bg: isDarkMode ? "rgba(202, 96, 20, 0.15)" : "rgba(202, 96, 20, 0.1)",
+                      border: isDarkMode ? "1px solid rgba(202, 96, 20, 0.4)" : "1px solid rgba(202, 96, 20, 0.3)",
+                      text: isDarkMode ? "#fb923c" : "#ca6014",
+                    },
+                  };
+
+                  const colors = typeColors[itemType] || typeColors.recipe;
+
                   return (
                     <Box
                       key={index}
@@ -1021,9 +562,9 @@ const Result = () => {
                         px: 2,
                         py: 1,
                         borderRadius: 2,
-                        bgcolor: isDarkMode ? "rgba(75, 85, 99, 0.2)" : "rgba(229, 231, 235, 0.5)",
-                        border: isDarkMode ? "1px solid rgba(75, 85, 99, 0.4)" : "1px solid rgba(209, 213, 219, 0.5)",
-                        color: isDarkMode ? "#e5e7eb" : "#374151",
+                        bgcolor: colors.bg,
+                        border: colors.border,
+                        color: colors.text,
                         fontSize: { xs: "0.9rem", sm: "1rem" },
                         fontWeight: 500,
                         fontFamily: "'Basic', sans-serif !important",
@@ -1036,7 +577,7 @@ const Result = () => {
                         onClick={() => handleRemoveSearchItem(index)}
                         sx={{
                           p: 0,
-                          color: "inherit",
+                          color: colors.text,
                           "&:hover": {
                             bgcolor: "transparent",
                             transform: "scale(1.1)",
@@ -1058,365 +599,6 @@ const Result = () => {
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-6 md:py-8">
         {searchData && (
           <div className="mb-6 sm:mb-6 md:mb-8">
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 2.5,
-                mb: 3,
-              }}
-            >
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: { xs: "calc(50% - 10px)", sm: 180 },
-                  flex: { xs: "1 1 calc(50% - 10px)", sm: "0 0 auto" },
-                  "& .MuiInputLabel-root": {
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.8,
-                    fontWeight: 600,
-                    letterSpacing: "0.3px",
-                  },
-                }}
-              >
-                <InputLabel
-                  id="filter-preference-label"
-                  shrink
-                  sx={{
-                    color: isDarkMode ? "#10b981" : "#059669",
-                    "&.Mui-focused": {
-                      color: isDarkMode ? "#34d399" : "#047857",
-                    },
-                  }}
-                >
-                  Preference
-                </InputLabel>
-                <Select
-                  label="Preference"
-                  open={isPreferenceMenuOpen}
-                  onOpen={() => setIsPreferenceMenuOpen(true)}
-                  onClose={() => setIsPreferenceMenuOpen(false)}
-                  sx={{
-                    borderRadius: 2.5,
-                    bgcolor: isDarkMode
-                      ? "rgba(16, 185, 129, 0.08)"
-                      : "rgba(16, 185, 129, 0.05)",
-                    color: isDarkMode ? "#e5e7eb" : "#1f2937",
-                    fontWeight: 600,
-                    transition: "all 0.3s ease",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderWidth: 2,
-                      borderColor: isDarkMode
-                        ? "rgba(16, 185, 129, 0.3)"
-                        : "rgba(16, 185, 129, 0.25)",
-                    },
-                    "&:hover": {
-                      bgcolor: isDarkMode
-                        ? "rgba(16, 185, 129, 0.12)"
-                        : "rgba(16, 185, 129, 0.08)",
-                      transform: "translateY(-1px)",
-                      boxShadow: isDarkMode
-                        ? "0 4px 12px rgba(16, 185, 129, 0.15)"
-                        : "0 4px 12px rgba(16, 185, 129, 0.12)",
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: isDarkMode
-                        ? "rgba(16, 185, 129, 0.5)"
-                        : "rgba(16, 185, 129, 0.4)",
-                    },
-                    "&.Mui-focused": {
-                      bgcolor: isDarkMode
-                        ? "rgba(16, 185, 129, 0.15)"
-                        : "rgba(16, 185, 129, 0.1)",
-                      boxShadow: isDarkMode
-                        ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
-                        : "0 0 0 3px rgba(16, 185, 129, 0.1)",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: isDarkMode ? "#10b981" : "#059669",
-                    },
-                    "& .MuiSvgIcon-root": {
-                      color: isDarkMode ? "#10b981" : "#059669",
-                    },
-                    "& .MuiSelect-select": {
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                    },
-                  }}
-                  multiple
-                  displayEmpty
-                  value={filters.preference ? filters.preference.split(",") : []}
-                  renderValue={(selected) => {
-                    if (selected.length === 0 || selected.length === 2) {
-                      return <Box sx={{ opacity: 0.9, fontWeight: 600 }}>All</Box>;
-                    }
-                    return (
-                      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-                        {selected.map((val) => (
-                          <Box key={val} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <span style={{ textTransform: 'capitalize', fontSize: '0.95rem', fontWeight: 600 }}>{val.replace('_', ' ')}</span>
-                          </Box>
-                        ))}
-                      </Box>
-                    );
-                  }}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    const newValue = typeof value === "string" ? value.split(",") : value;
-                    const hasAll = newValue.includes("");
-                    const cleanValues = newValue.filter(v => v !== "");
-                    
-                    if (hasAll || cleanValues.length === 2 || cleanValues.length === 0) {
-                      handleFilterChange("preference", "");
-                    } else {
-                      handleFilterChange("preference", cleanValues.join(","));
-                    }
-                  }}
-                  MenuProps={selectMenuProps}
-                >
-                  <MenuItem value="">
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', py: 0.5 }}>
-                      <ListItemText primary="All" sx={{ '& .MuiTypography-root': { fontWeight: 600 } }} />
-                      {!filters.preference && <CheckRoundedIcon sx={{ fontSize: '1.2rem', color: isDarkMode ? '#10b981' : '#059669' }} />}
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="veg">
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', py: 0.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {getPreferenceIcon("Veg")}
-                        <ListItemText primary="Veg" sx={{ '& .MuiTypography-root': { fontWeight: 600 } }} />
-                      </Box>
-                      {filters.preference.split(",").includes("veg") && (
-                        <CheckRoundedIcon sx={{ fontSize: '1.2rem', color: isDarkMode ? '#10b981' : '#059669' }} />
-                      )}
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="egg">
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', py: 0.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {getPreferenceIcon("Egg")}
-                        <ListItemText primary="Egg" sx={{ '& .MuiTypography-root': { fontWeight: 600 } }} />
-                      </Box>
-                      {filters.preference.split(",").includes("egg") && (
-                        <CheckRoundedIcon sx={{ fontSize: '1.2rem', color: isDarkMode ? '#10b981' : '#059669' }} />
-                      )}
-                    </Box>
-                  </MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: { xs: "calc(50% - 10px)", sm: 160 },
-                  flex: { xs: "1 1 calc(50% - 10px)", sm: "0 0 auto" },
-                  "& .MuiInputLabel-root": {
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.8,
-                    fontWeight: 600,
-                    letterSpacing: "0.3px",
-                  },
-                }}
-              >
-                <InputLabel
-                  id="filter-badge-label"
-                  shrink
-                  sx={{
-                    color: isDarkMode ? "#a78bfa" : "#8b5cf6",
-                    "&.Mui-focused": {
-                      color: isDarkMode ? "#c4b5fd" : "#7c3aed",
-                    },
-                  }}
-                >
-                  Badge
-                </InputLabel>
-                <Select
-                  labelId="filter-badge-label"
-                  displayEmpty
-                  open={isBadgeMenuOpen}
-                  onOpen={() => setIsBadgeMenuOpen(true)}
-                  onClose={() => setIsBadgeMenuOpen(false)}
-                  value={filters.badge}
-                  label="Badge"
-                  renderValue={(value) => {
-                    if (value === "") return <Box sx={{ opacity: 0.9, fontWeight: 600 }}>All</Box>;
-                    return <Box sx={{ fontWeight: 600 }}>{value}</Box>;
-                  }}
-                  onChange={(e) => handleFilterChange("badge", e.target.value)}
-                  MenuProps={selectMenuProps}
-                  sx={{
-                    borderRadius: 2.5,
-                    bgcolor: isDarkMode
-                      ? "rgba(139, 92, 246, 0.08)"
-                      : "rgba(139, 92, 246, 0.05)",
-                    color: isDarkMode ? "#e5e7eb" : "#1f2937",
-                    fontWeight: 600,
-                    transition: "all 0.3s ease",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderWidth: 2,
-                      borderColor: isDarkMode
-                        ? "rgba(139, 92, 246, 0.3)"
-                        : "rgba(139, 92, 246, 0.25)",
-                    },
-                    "&:hover": {
-                      bgcolor: isDarkMode
-                        ? "rgba(139, 92, 246, 0.12)"
-                        : "rgba(139, 92, 246, 0.08)",
-                      transform: "translateY(-1px)",
-                      boxShadow: isDarkMode
-                        ? "0 4px 12px rgba(139, 92, 246, 0.15)"
-                        : "0 4px 12px rgba(139, 92, 246, 0.12)",
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: isDarkMode
-                        ? "rgba(139, 92, 246, 0.5)"
-                        : "rgba(139, 92, 246, 0.4)",
-                    },
-                    "&.Mui-focused": {
-                      bgcolor: isDarkMode
-                        ? "rgba(139, 92, 246, 0.15)"
-                        : "rgba(139, 92, 246, 0.1)",
-                      boxShadow: isDarkMode
-                        ? "0 0 0 3px rgba(139, 92, 246, 0.15)"
-                        : "0 0 0 3px rgba(139, 92, 246, 0.1)",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: isDarkMode ? "#a78bfa" : "#8b5cf6",
-                    },
-                    "& .MuiSvgIcon-root": {
-                      color: isDarkMode ? "#a78bfa" : "#8b5cf6",
-                    },
-                  }}
-                >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="Popular">
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <WhatshotIcon sx={{ fontSize: 20, color: "#ef4444" }} />
-                      <span>Popular</span>
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="Quick">
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <SpeedIcon sx={{ fontSize: 20, color: "#f59e0b" }} />
-                      <span>Quick</span>
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="Beginner">
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <SchoolIcon sx={{ fontSize: 20, color: "#10b981" }} />
-                      <span>Beginner</span>
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="Trending">
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <TrendingUpIcon sx={{ fontSize: 20, color: "#3b82f6" }} />
-                      <span>Trending</span>
-                    </Box>
-                  </MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: { xs: "100%", sm: 170 },
-                  flex: { xs: "1 1 100%", sm: "0 0 auto" },
-                  "& .MuiInputLabel-root": {
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.8,
-                    fontWeight: 600,
-                    letterSpacing: "0.3px",
-                  },
-                }}
-              >
-                <InputLabel
-                  id="filter-time-label"
-                  shrink
-                  sx={{
-                    color: isDarkMode ? "#fbbf24" : "#f59e0b",
-                    "&.Mui-focused": {
-                      color: isDarkMode ? "#fde68a" : "#d97706",
-                    },
-                  }}
-                >
-                  Time
-                </InputLabel>
-                <Select
-                  labelId="filter-time-label"
-                  displayEmpty
-                  open={isTimeMenuOpen}
-                  onOpen={() => setIsTimeMenuOpen(true)}
-                  onClose={() => setIsTimeMenuOpen(false)}
-                  value={filters.timeRange}
-                  label="Time"
-                  renderValue={(value) => {
-                    if (value === "") return <Box sx={{ opacity: 0.9, fontWeight: 600 }}>All</Box>;
-                    const timeMap = {
-                      'under-30': 'Under 30 min',
-                      '30-60': '30-60 min',
-                      '60-plus': '60+ min',
-                    };
-                    return <Box sx={{ fontWeight: 600 }}>{timeMap[value] || value}</Box>;
-                  }}
-                  onChange={(e) =>
-                    handleFilterChange("timeRange", e.target.value)
-                  }
-                  MenuProps={selectMenuProps}
-                  sx={{
-                    borderRadius: 2.5,
-                    bgcolor: isDarkMode
-                      ? "rgba(245, 158, 11, 0.08)"
-                      : "rgba(245, 158, 11, 0.05)",
-                    color: isDarkMode ? "#e5e7eb" : "#1f2937",
-                    fontWeight: 600,
-                    transition: "all 0.3s ease",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderWidth: 2,
-                      borderColor: isDarkMode
-                        ? "rgba(245, 158, 11, 0.3)"
-                        : "rgba(245, 158, 11, 0.25)",
-                    },
-                    "&:hover": {
-                      bgcolor: isDarkMode
-                        ? "rgba(245, 158, 11, 0.12)"
-                        : "rgba(245, 158, 11, 0.08)",
-                      transform: "translateY(-1px)",
-                      boxShadow: isDarkMode
-                        ? "0 4px 12px rgba(245, 158, 11, 0.15)"
-                        : "0 4px 12px rgba(245, 158, 11, 0.12)",
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: isDarkMode
-                        ? "rgba(245, 158, 11, 0.5)"
-                        : "rgba(245, 158, 11, 0.4)",
-                    },
-                    "&.Mui-focused": {
-                      bgcolor: isDarkMode
-                        ? "rgba(245, 158, 11, 0.15)"
-                        : "rgba(245, 158, 11, 0.1)",
-                      boxShadow: isDarkMode
-                        ? "0 0 0 3px rgba(245, 158, 11, 0.15)"
-                        : "0 0 0 3px rgba(245, 158, 11, 0.1)",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: isDarkMode ? "#fbbf24" : "#f59e0b",
-                    },
-                    "& .MuiSvgIcon-root": {
-                      color: isDarkMode ? "#fbbf24" : "#f59e0b",
-                    },
-                  }}
-                >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="under-30">⏱️ Under 30 min</MenuItem>
-                  <MenuItem value="30-60">⏰ 30-60 min</MenuItem>
-                  <MenuItem value="60-plus">🕐 60+ min</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
             <h3
               className="text-xl sm:text-3xl md:text-4xl font-bold"
               style={{ color: isDarkMode ? "var(--text-primary)" : "#1E1E1E" }}
@@ -1425,9 +607,9 @@ const Result = () => {
             </h3>
           </div>
         )}
-        {searchLoading && allRecipes.length === 0 && (
+        {(searchLoading || isResultsRefreshing) && allRecipes.length === 0 && (
           <div className="py-8 sm:py-12">
-            <RecipeGridSkeleton count={8} />
+            <RecipeGridSkeleton count={8} mobileLayout="vertical" />
           </div>
         )}
         {searchError && (
@@ -1488,49 +670,11 @@ const Result = () => {
 
                 {hasMore && (
                   <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 5, md: 7 }, mb: 4 }}>
-                    <Button
-                      variant="contained"
+                    <LoadMoreButton
                       onClick={handleLoadMore}
-                      disabled={searchLoading}
-                      sx={{
-                        px: { xs: 3, md: 5 },
-                        py: { xs: 0.8, md: 1.1 },
-                        bgcolor: isDarkMode ? 'rgba(202,96,20,0.15)' : '#FEE7D6',
-                        color: isDarkMode ? '#FFEFD9' : '#CA6014',
-                        border: `1.5px solid ${isDarkMode ? 'rgba(202,96,20,0.4)' : '#CA6014'}`,
-                        borderRadius: '8px',
-                        fontFamily: "'Basic', sans-serif",
-                        fontSize: { xs: '0.9rem', md: '1rem' },
-                        fontWeight: 600,
-                        letterSpacing: '0.05em',
-                        textTransform: 'none',
-                        cursor: searchLoading ? 'not-allowed' : 'pointer',
-                        opacity: searchLoading ? 0.7 : 1,
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        boxShadow: isDarkMode ? 'none' : '0 4px 14px rgba(202, 96, 20, 0.15)',
-                        '&:hover': {
-                          bgcolor: searchLoading ? undefined : '#CA6014',
-                          color: searchLoading ? undefined : '#fff',
-                          transform: searchLoading ? 'none' : 'translateY(-2px)',
-                          boxShadow: searchLoading ? 'none' : '0 6px 20px rgba(202, 96, 20, 0.25)',
-                        },
-                        '&:active': {
-                          transform: 'translateY(0)',
-                        }
-                      }}
-                    >
-                      {searchLoading ? (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <CircularProgress size={20} sx={{ color: 'inherit' }} />
-                          <span>Loading...</span>
-                        </Box>
-                      ) : (
-                        <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                          <span>Load More</span>
-                          <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↓</span>
-                        </Box>
-                      )}
-                    </Button>
+                      isLoading={isFetching}
+                      loadingText="Loading more..."
+                    />
                   </Box>
                 )}
               </>
@@ -1593,17 +737,7 @@ const Result = () => {
             <button
               className="mt-2 px-6 py-2 rounded-full bg-[#a21caf] text-white font-semibold shadow-md hover:bg-[#86198f] transition-all duration-200 animate-fade-in-up"
               onClick={() => {
-                setSearchQuery("");
-                setPage(1);
                 setAllRecipes([]);
-                setHasMore(true);
-                setFilters({
-                  category: "",
-                  subCategory: "",
-                  prepTime: null,
-                  cookTime: null,
-                  servingSize: null,
-                });
                 router.push(pathname);
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}

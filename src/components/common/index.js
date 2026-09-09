@@ -11,3 +11,4 @@ export { default as StatusBadge } from './StatusBadge';
 export { default as AdminHeader } from './AdminHeader';
 export { default as AccessDenied } from './AccessDenied';
 export { default as NotificationsDialog } from './NotificationsDialog';
+export { default as LoadMoreButton } from './LoadMoreButton';

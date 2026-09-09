@@ -124,10 +124,32 @@ export const homeSectionApi = createApi({
             providesTags: ["Refetch_HomeSection"],
         }),
         getPublicCollectionDetails: builder.query({
-            query: (slug) => ({
-                url: `/public/collection/${slug}`,
-                method: "GET",
-            }),
+            query: (params) => {
+                let slug = '';
+                let preference = '';
+                let page = 1;
+                let limit = 20;
+
+                if (typeof params === 'object' && params !== null) {
+                    slug = params.slug || params.collectionName || '';
+                    preference = params.preference || '';
+                    page = params.page || 1;
+                    limit = params.limit || 20;
+                } else {
+                    slug = params || '';
+                }
+
+                const searchParams = new URLSearchParams();
+                if (preference) searchParams.append('preference', preference);
+                if (page) searchParams.append('page', String(page));
+                if (limit) searchParams.append('limit', String(limit));
+
+                const queryString = searchParams.toString();
+                return {
+                    url: `/public/collection/${encodeURIComponent(slug)}${queryString ? `?${queryString}` : ''}`,
+                    method: "GET",
+                };
+            },
             providesTags: ["Refetch_HomeSection"],
         }),
         updateHomeSection: builder.mutation({
@@ -138,37 +160,32 @@ export const homeSectionApi = createApi({
             }),
             async onQueryStarted({ id, inputData }, { dispatch, queryFulfilled }) {
                 try {
-                    const { data: updatedResponse } = await queryFulfilled
-                    const updatedItem = updatedResponse.data
+                    const { data: updatedResponse } = await queryFulfilled;
+                    const updatedItem = updatedResponse.data;
 
                     dispatch(
                         homeSectionApi.util.updateQueryData('getHomeSections', undefined, (draft) => {
                             const updateInArray = (arr) => {
-                                const index = arr.findIndex((item) => item.home_section_id === id)
+                                const index = arr.findIndex((item) => item.home_section_id === id);
                                 if (index !== -1) {
-                                    Object.assign(arr[index], updatedItem)
+                                    Object.assign(arr[index], updatedItem);
                                 }
-                            }
+                            };
 
-                            if (Array.isArray(draft)) {
-                                updateInArray(draft)
-                            }
-                            if (draft.data && Array.isArray(draft.data)) {
-                                updateInArray(draft.data)
-                            }
+                            if (Array.isArray(draft)) updateInArray(draft);
+                            if (draft.data && Array.isArray(draft.data)) updateInArray(draft.data);
                         })
-                    )
+                    );
 
                     dispatch(
                         homeSectionApi.util.updateQueryData('getHomeSectionById', id, (draft) => {
                             if (draft.data) {
-                                Object.assign(draft.data, updatedItem)
+                                Object.assign(draft.data, updatedItem);
                             } else {
-                                Object.assign(draft, updatedItem)
+                                Object.assign(draft, updatedItem);
                             }
                         })
-                    )
-
+                    );
                 } catch { }
             },
         }),
@@ -207,16 +224,16 @@ export const homeSectionApi = createApi({
                             }
                         }
                     })
-                )
+                );
                 try {
-                    await queryFulfilled
+                    await queryFulfilled;
                 } catch {
-                    patchResult.undo()
+                    patchResult.undo();
                 }
             },
         }),
-    })
-})
+    }),
+});
 
 export const {
     useCreateHomeSectionMutation,
@@ -230,5 +247,3 @@ export const {
     useUpdateHomeSectionMutation,
     useDeleteHomeSectionMutation,
 } = homeSectionApi;
-
-

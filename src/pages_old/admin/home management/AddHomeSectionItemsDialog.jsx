@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, Button, IconButton, Autocomplete, TextField, Box, DialogActions, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Button, IconButton, Autocomplete, TextField, Box, DialogActions, Typography, Chip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useAddHomeSectionItemsMutation } from '../../../features/api/homeSectionItemApi';
 import { useGetRecipeCategoriesQuery } from '../../../features/api/categoryApi';
@@ -238,6 +238,41 @@ const AddHomeSectionItemsDialog = ({ open, onClose, section, existingItems }) =>
                 <Box display="flex" flexDirection="column" gap={2}>
                     {renderSearch()}
                 </Box>
+
+                {selectedItems && selectedItems.length > 0 && (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
+                        {selectedItems.map((item) => {
+                            const id = getItemId(item, section?.type);
+                            const name = item.title || item.name || item.category_name || item.sub_category_name || `Item #${id}`;
+                            return (
+                                <Chip
+                                    key={id}
+                                    label={name}
+                                    onDelete={() => {
+                                        setSelectedItems(prev => prev.filter(i => String(getItemId(i, section?.type)) !== String(id)));
+                                    }}
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: isDarkMode ? '#7367f0 !important' : '#e0e7ff !important',
+                                        color: isDarkMode ? '#ffffff !important' : '#4338ca !important',
+                                        fontWeight: '600 !important',
+                                        borderRadius: '4px',
+                                        '& .MuiChip-label': {
+                                            color: isDarkMode ? '#ffffff !important' : '#4338ca !important',
+                                            fontWeight: '600 !important',
+                                        },
+                                        '& .MuiChip-deleteIcon': {
+                                            color: isDarkMode ? '#ffffff !important' : '#4338ca !important',
+                                            '&:hover': {
+                                                color: isDarkMode ? '#f1f5f9 !important' : '#3730a3 !important',
+                                            }
+                                        }
+                                    }}
+                                />
+                            );
+                        })}
+                    </Box>
+                )}
             </DialogContent>
             <DialogActions
                 sx={{
@@ -296,8 +331,7 @@ const AddItemAutocomplete = ({ useQuery, label, onSelect, value, existingIds, ca
     const [hasMore, setHasMore] = useState(true);
 
     const { data, isLoading, isFetching } = useQuery(
-        { search: search, page: page, limit: 10, categoryId },
-        { skip: !search.trim() }
+        { search: search, page: page, limit: 10, categoryId }
     );
 
     useEffect(() => {
@@ -350,10 +384,12 @@ const AddItemAutocomplete = ({ useQuery, label, onSelect, value, existingIds, ca
             <Autocomplete
                 multiple
                 value={value}
-                options={search.trim() ? options.filter(option => {
-                    const id = getItemId(option, section?.type);
-                    return !existingIds.includes(String(id));
-                }) : []}
+                options={options.filter(option => {
+                    const id = String(getItemId(option, section?.type));
+                    const isAlreadyInSection = existingIds.includes(id);
+                    const isSelectedInDialog = Array.isArray(value) && value.some(val => String(getItemId(val, section?.type)) === id);
+                    return !isAlreadyInSection && !isSelectedInDialog;
+                })}
                 getOptionLabel={(option) => {
                     if (typeof option === 'string') return option;
                     return option.category_name || option.sub_category_name || option.title || option.name || '';

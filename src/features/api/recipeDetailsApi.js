@@ -3,6 +3,22 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const RECIPE_DETAILS_API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/recipe`;
 
+const normalizePreference = (preference) => {
+    if (Array.isArray(preference)) {
+        const filtered = preference
+            .map(item => String(item).trim())
+            .filter(item => item && item.toLowerCase() !== 'all');
+
+        return filtered.join(',');
+    }
+
+    if (typeof preference === 'string') {
+        const trimmed = preference.trim();
+        return trimmed && trimmed.toLowerCase() !== 'all' ? trimmed : '';
+    }
+
+    return '';
+};
 
 export const recipeDetailsApi = createApi({
     reducerPath: "recipeDetailsApi",
@@ -58,9 +74,10 @@ export const recipeDetailsApi = createApi({
         getCategoryPage: builder.query({
             query: ({ slug, page = 1, limit = 20, preference = '' }) => {
                 const params = new URLSearchParams();
+                const normalizedPreference = normalizePreference(preference);
                 if (page) params.append('page', page);
                 if (limit) params.append('limit', limit);
-                if (preference) params.append('preference', preference);
+                if (normalizedPreference) params.append('preference', normalizedPreference);
                 return {
                     url: `/category/${slug}?${params.toString()}`,
                     method: 'GET',
@@ -71,9 +88,10 @@ export const recipeDetailsApi = createApi({
         getSubCategoryPage: builder.query({
             query: ({ slug, page = 1, limit = 20, preference = '' }) => {
                 const params = new URLSearchParams();
+                const normalizedPreference = normalizePreference(preference);
                 if (page) params.append('page', page);
                 if (limit) params.append('limit', limit);
-                if (preference) params.append('preference', preference);
+                if (normalizedPreference) params.append('preference', normalizedPreference);
                 return {
                     url: `/sub-category/${slug}?${params.toString()}`,
                     method: 'GET',

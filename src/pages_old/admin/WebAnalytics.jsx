@@ -34,8 +34,7 @@ import { toast } from '../../utils/toast';
 export default function WebAnalytics() {
   const { isDarkMode } = useTheme();
   const user = useSelector((state) => state.auth.user);
-  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-  const canView = isAdmin || user?.permissions?.includes('web_analytics.view');
+  const canView = user?.permissions?.includes('web_analytics.view');
 
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');

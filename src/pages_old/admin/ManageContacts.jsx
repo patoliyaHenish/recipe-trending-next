@@ -76,12 +76,11 @@ const ManageContacts = () => {
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
     const user = useSelector((state) => state.auth.user);
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canList = isAdmin || userPermissions.includes('inquiry.list');
-    const canView = isAdmin || userPermissions.includes('inquiry.view');
-    const canReply = isAdmin || userPermissions.includes('inquiry.reply');
-    const canIgnore = isAdmin || userPermissions.includes('inquiry.ignore');
-    const canDelete = isAdmin || userPermissions.includes('inquiry.delete');
+    const canList = userPermissions.includes('inquiry.list');
+    const canView = userPermissions.includes('inquiry.view');
+    const canReply = userPermissions.includes('inquiry.reply');
+    const canIgnore = userPermissions.includes('inquiry.ignore');
+    const canDelete = userPermissions.includes('inquiry.delete');
 
 
     const searchParams = useSearchParams();

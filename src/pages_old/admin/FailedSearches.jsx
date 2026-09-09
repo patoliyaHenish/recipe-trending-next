@@ -42,9 +42,8 @@ const FailedSearches = () => {
     const { isDarkMode } = useTheme();
     const user = useSelector((state) => state.auth.user);
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canList = isAdmin || userPermissions.includes('search_failed.list');
-    const canDelete = isAdmin || userPermissions.includes('search_failed.delete');
+    const canList = userPermissions.includes('search_failed.list');
+    const canDelete = userPermissions.includes('search_failed.delete');
 
 
     const searchParams = useSearchParams();
@@ -115,7 +114,7 @@ const FailedSearches = () => {
         user: debouncedUser,
         createdAt: debouncedCreatedAt ? moment(debouncedCreatedAt).format('YYYY-MM-DD') : ''
     }, {
-        skip: !canList && !isAdmin
+        skip: !canList
     });
 
     const searches = useMemo(() => searchesData?.data || [], [searchesData]);
@@ -373,7 +372,7 @@ const FailedSearches = () => {
 
     // ── Table data mapping ───────────────────────────────────────────────────────
 
-    if (!canList && !isAdmin) {
+    if (!canList) {
         return <AccessDenied message="You do not have permission to view Failed Searches." />;
     }
 

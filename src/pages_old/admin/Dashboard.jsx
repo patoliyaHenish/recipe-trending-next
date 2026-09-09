@@ -157,8 +157,7 @@ export default function Dashboard() {
   const { isDarkMode } = useTheme();
   const user = useSelector((state) => state.auth.user);
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-  const canViewDashboard = isAdmin || userPermissions.includes('dashboard.view');
+  const canViewDashboard = userPermissions.includes('dashboard.view');
   const { data, isLoading, isError, error, refetch } = useGetDashboardStatsQuery();
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [timeLeft, setTimeLeft] = useState(10);

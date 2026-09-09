@@ -20,19 +20,18 @@ const NavbarManagement = () => {
     const { isDarkMode } = useTheme()
     const user = useSelector((state) => state.auth.user);
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canList = isAdmin || userPermissions.includes('nav.list');
-    const canView = isAdmin || userPermissions.includes('nav.view');
-    const canCreate = isAdmin || userPermissions.includes('nav.create');
-    const canUpdate = isAdmin || userPermissions.includes('nav.update');
-    const canDelete = isAdmin || userPermissions.includes('nav.delete');
-    const canPublish = isAdmin || userPermissions.includes('nav.publish');
+    const canList = userPermissions.includes('nav.list');
+    const canView = userPermissions.includes('nav.view');
+    const canCreate = userPermissions.includes('nav.create');
+    const canUpdate = userPermissions.includes('nav.update');
+    const canDelete = userPermissions.includes('nav.delete');
+    const canPublish = userPermissions.includes('nav.publish');
 
     useEffect(() => {
         document.title = 'Navbar'
     }, [])
 
-    const { data: navItems, isLoading, isFetching } = useGetNavItemsQuery(undefined, { skip: !canList && !isAdmin })
+    const { data: navItems, isLoading, isFetching } = useGetNavItemsQuery(undefined, { skip: !canList })
     const [deleteNavItem, { isLoading: isDeleting }] = useDeleteNavItemMutation()
     const [updateNavItem, { isLoading: isUpdating }] = useUpdateNavItemMutation()
 
@@ -207,7 +206,7 @@ const NavbarManagement = () => {
         },
     };
 
-    if (!canList && !isAdmin) {
+    if (!canList) {
         return <AccessDenied message="You do not have permission to view Navbar." />;
     }
 

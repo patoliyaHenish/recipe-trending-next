@@ -34,8 +34,7 @@ const AddFeatureSectionDialog = ({ open, onClose, nextPosition = 0, mode = 'add'
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
   const { user } = useUser();
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin';
-  const canPublishFeature = isAdmin || userPermissions.includes('home_section.feature_live');
+  const canPublishFeature = userPermissions.includes('home_section.feature_live');
 
   const [createHomeFeatureSection, { isLoading }] = useCreateHomeFeatureSectionMutation();
   const [updateHomeFeatureSection, { isLoading: isUpdating }] = useUpdateHomeFeatureSectionMutation();

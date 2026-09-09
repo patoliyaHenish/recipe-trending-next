@@ -24,8 +24,7 @@ const AddFooterItemDialog = ({ open, onClose, editItem }) => {
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'))
     const user = useSelector((state) => state.auth.user);
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canPublish = isAdmin || userPermissions.includes('footer.publish');
+    const canPublish = userPermissions.includes('footer.publish');
 
     const [createFooterItem, { isLoading: isCreating }] = useCreateFooterItemMutation()
     const [updateFooterItem, { isLoading: isUpdating }] = useUpdateFooterItemMutation()

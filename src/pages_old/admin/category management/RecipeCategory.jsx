@@ -72,15 +72,14 @@ const RecipeCategory = () => {
   const { isDarkMode } = useTheme()
   const user = useSelector((state) => state.auth.user);
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
 
-  const canCreate = isAdmin || userPermissions.includes('category.create');
-  const canUpdate = isAdmin || userPermissions.includes('category.update');
-  const canDelete = isAdmin || userPermissions.includes('category.delete');
-  const canView = isAdmin || userPermissions.includes('category.view');
-  const canList = isAdmin || userPermissions.includes('category.list');
+  const canCreate = userPermissions.includes('category.create');
+  const canUpdate = userPermissions.includes('category.update');
+  const canDelete = userPermissions.includes('category.delete');
+  const canView = userPermissions.includes('category.view');
+  const canList = userPermissions.includes('category.list');
 
-  if (!canList && !isAdmin) {
+  if (!canList) {
     return <AccessDenied message="You do not have permission to view this page." />;
   }
 

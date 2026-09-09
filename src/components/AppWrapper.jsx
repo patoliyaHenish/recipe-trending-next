@@ -9,12 +9,26 @@ const AppWrapper = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
+  const hasMyWorkPermission = Array.isArray(user?.permissions)
+    ? user.permissions.includes('my_work.view')
+    : false;
 
   useEffect(() => {
     if (user && pathname === '/auth') {
       router.push('/');
     }
   }, [user, pathname, router]);
+
+  useEffect(() => {
+    if (!user || !hasMyWorkPermission || isAdmin) return;
+
+    const allowedPaths = ['/admin/my-work', '/my-profile'];
+
+    if (!allowedPaths.includes(pathname)) {
+      router.replace('/admin/my-work');
+    }
+  }, [hasMyWorkPermission, isAdmin, pathname, router, user]);
 
   // 2. Handle Google OAuth redirect query params
   useEffect(() => {

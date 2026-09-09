@@ -287,7 +287,7 @@ const RecipeNotes = () => {
   
   
 
-  if (!canList && !isAdmin) {
+  if (!canList) {
     return <AccessDenied message="You do not have permission to view recipe notes." />;
   }
 

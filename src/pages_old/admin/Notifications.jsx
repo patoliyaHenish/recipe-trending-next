@@ -43,12 +43,11 @@ const Notifications = () => {
   const { isDarkMode } = useTheme()
   const user = useSelector((state) => state.auth.user);
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-  const canList = isAdmin || userPermissions.includes('notifications.list');
-  const canViewDetail = isAdmin || userPermissions.includes('notifications.view');
-  const canDelete = isAdmin || userPermissions.includes('notifications.delete');
+  const canList = userPermissions.includes('notifications.list');
+  const canViewDetail = userPermissions.includes('notifications.view');
+  const canDelete = userPermissions.includes('notifications.delete');
 
-  if (!canList && !isAdmin) {
+  if (!canList) {
     return <AccessDenied message="You do not have permission to view Notifications." />;
   }
   const [searchParams, setSearchParams] = useSearchParams()

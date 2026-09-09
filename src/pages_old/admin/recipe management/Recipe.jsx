@@ -1285,7 +1285,7 @@ const Recipe = () => {
   const myPendingNotesCount = displayedRecipes.filter((recipe) => isMyRecipe(recipe) && isPendingNotes(recipe)).length;
   const myCompletedNotesCount = displayedRecipes.filter((recipe) => isMyRecipe(recipe) && isCompletedNotes(recipe)).length;
 
-  if (!canList && !isAdmin) {
+  if (!canList) {
     return <AccessDenied message="You do not have permission to access Recipes Management." />;
   }
 

@@ -12,10 +12,16 @@ export const homeSectionItemApi = createApi({
     }),
     endpoints: (builder) => ({
         getHomeSectionItems: builder.query({
-            query: (homeSectionId) => ({
-                url: `/${homeSectionId}`,
-                method: "GET",
-            }),
+            query: (params) => {
+                const homeSectionId = typeof params === 'object' ? params.homeSectionId : params;
+                const page = typeof params === 'object' ? (params.page || 1) : 1;
+                const limit = typeof params === 'object' ? (params.limit || 10) : 10;
+                const search = typeof params === 'object' ? (params.search || '') : '';
+                return {
+                    url: `/${homeSectionId}?page=${page}&limit=${limit}${search ? `&search=${encodeURIComponent(search)}` : ''}`,
+                    method: "GET",
+                };
+            },
             providesTags: ["Refetch_HomeSectionItems"],
         }),
         addHomeSectionItems: builder.mutation({
@@ -33,23 +39,6 @@ export const homeSectionItemApi = createApi({
                 body: inputData,
             }),
             invalidatesTags: ["Refetch_HomeSectionItems"],
-            async onQueryStarted(inputData, { dispatch, queryFulfilled }) {
-                const patchResult = dispatch(
-                    homeSectionItemApi.util.updateQueryData('getHomeSectionItems', String(inputData.home_section_id), (draft) => {
-                        if (draft.data && Array.isArray(draft.data)) {
-                            draft.data = draft.data.filter(item => {
-                                const itemId = String(item.recipe_id || item.category_id || item.sub_category_id || item.id);
-                                return !inputData.item_ids.map(id => String(id)).includes(itemId);
-                            });
-                        }
-                    })
-                )
-                try {
-                    await queryFulfilled
-                } catch {
-                    patchResult.undo()
-                }
-            },
         }),
     }),
 });
@@ -59,5 +48,3 @@ export const {
     useAddHomeSectionItemsMutation,
     useRemoveHomeSectionItemsMutation,
 } = homeSectionItemApi;
-
-

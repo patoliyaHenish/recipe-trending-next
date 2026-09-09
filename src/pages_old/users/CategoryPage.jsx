@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import RecipeCard from '../../components/common/RecipeCard';
 import RecipeGridSkeleton from '../../components/common/RecipeGridSkeleton';
+import LoadMoreButton from '../../components/common/LoadMoreButton';
 import { useGetCategoryPageQuery, useGetSubCategoryPageQuery } from '../../features/api/recipeDetailsApi';
 import { useTheme } from '../../context/ThemeContext';
 import { getImage } from '../../utils/helper';
@@ -15,9 +16,25 @@ import noImageFound from '../../assets/no-image-found.png';
 import Cookies from 'js-cookie';
 import useTrackEngagement from '../../hooks/useTrackEngagement';
 import { trackEvent } from '../../utils/analytics';
-import { AdsterraBanner728x90, AdsterraBanner320x50, AdsterraNativeBanner } from '../../components/ads';
+import { AdsterraBanner728x90, AdsterraBanner300x250, AdsterraBanner320x50, AdsterraNativeBanner } from '../../components/ads';
 
 const RECIPES_PER_PAGE = 12;
+
+const normalizePreferenceValue = (value) => {
+  if (Array.isArray(value)) {
+    return value
+      .map(item => String(item).trim())
+      .filter(item => item && item.toLowerCase() !== 'all')
+      .join(',');
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed && trimmed.toLowerCase() !== 'all' ? trimmed : '';
+  }
+
+  return '';
+};
 
 const getDesktopAdIndices = (items, seed = 1) => {
   const indices = new Set();
@@ -55,7 +72,7 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
   const categorySlug = propCategorySlug;
   const subCategorySlug = propSubCategorySlug;
   const { isDarkMode } = useTheme();
-  const [userPreference, setUserPreference] = useState(initialPreference);
+  const [userPreference, setUserPreference] = useState(() => normalizePreferenceValue(initialPreference));
   const [isPreferenceChanged, setIsPreferenceChanged] = useState(false);
   const [page, setPage] = useState(1);
   
@@ -74,6 +91,7 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
   
   const observerRef = useRef(null);
   const loadMoreRef = useRef(null);
+  const hasMountedRef = useRef(false);
 
   const handleShare = () => {
     const url = window.location.href;
@@ -96,14 +114,14 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
 
   useEffect(() => {
     // If client cookie differs from server cookie on mount, mark as changed
-    const clientPref = Cookies.get('userPreference') || '';
-    if (clientPref !== initialPreference) {
+    const clientPref = normalizePreferenceValue(Cookies.get('userPreference') || '');
+    if (clientPref !== normalizePreferenceValue(initialPreference)) {
       setUserPreference(clientPref);
       setIsPreferenceChanged(true);
     }
     
     const handler = () => {
-      setUserPreference(Cookies.get('userPreference') || '');
+      setUserPreference(normalizePreferenceValue(Cookies.get('userPreference') || ''));
       setIsPreferenceChanged(true);
     };
     window.addEventListener('userPreferenceChanged', handler);
@@ -111,19 +129,33 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
   }, [initialPreference]);
 
   useEffect(() => {
+    // Skip the first mount — the component remounts via key prop on slug change,
+    // so we only need this for edge-case client-side navigation without remount.
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
     setPage(1);
+    setAllRecipes([]);
+    setHasMore(true);
     setIsPreferenceChanged(false);
   }, [categorySlug, subCategorySlug]);
 
   const isSubCategoryView = !!subCategorySlug;
-  
-  const skipQuery = page === 1 && !isPreferenceChanged;
+
+  // For CATEGORY pages: skip client API only if SSR already returned recipes or sub-category lists.
+  // For SUB-CATEGORY pages: ALWAYS call the client API — SSR only provides the header metadata,
+  // the recipe list must be fetched client-side so it respects saved-state, auth, and is fresh.
+  const ssrHasRecipes = Array.isArray(initialPageData?.recipes) && initialPageData.recipes.length > 0;
+  const ssrHasSubCategories = initialPageData?.type === 'sub_categories' && Array.isArray(initialPageData?.subCategories) && initialPageData.subCategories.length > 0;
+  const skipQuery = !isSubCategoryView && page === 1 && !isPreferenceChanged && (ssrHasRecipes || ssrHasSubCategories);
 
   const {
     data: categoryData,
     isLoading: isCategoryLoading,
     isFetching: isCategoryFetching,
     isError: isCategoryError,
+    refetch: refetchCategory,
   } = useGetCategoryPageQuery(
     { slug: categorySlug, page, limit: RECIPES_PER_PAGE, preference: userPreference },
     { skip: isSubCategoryView || skipQuery }
@@ -134,16 +166,26 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
     isLoading: isSubCategoryLoading,
     isFetching: isSubCategoryFetching,
     isError: isSubCategoryError,
+    refetch: refetchSubCategory,
   } = useGetSubCategoryPageQuery(
     { slug: subCategorySlug, page, limit: RECIPES_PER_PAGE, preference: userPreference },
-    { skip: !isSubCategoryView || skipQuery }
+    { skip: !isSubCategoryView }  // Always fetch for sub-category pages
   );
 
-  const isLoading = skipQuery ? false : (isSubCategoryView ? isSubCategoryLoading : isCategoryLoading);
-  const isFetching = skipQuery ? false : (isSubCategoryView ? isSubCategoryFetching : isCategoryFetching);
-  const isError = skipQuery ? !initialData : (isSubCategoryView ? isSubCategoryError : isCategoryError);
-  
-  const responseData = skipQuery ? initialData : (isSubCategoryView ? subCategoryData : categoryData);
+  const isLoading = isSubCategoryView
+    ? isSubCategoryLoading
+    : (skipQuery ? false : isCategoryLoading);
+  const isFetching = isSubCategoryView
+    ? isSubCategoryFetching
+    : (skipQuery ? false : isCategoryFetching);
+  const isError = isSubCategoryView
+    ? isSubCategoryError
+    : (skipQuery ? !initialData : isCategoryError);
+
+  // For sub-category: use live RTK Query data; for category with SSR: use SSR data when query is skipped
+  const responseData = isSubCategoryView
+    ? subCategoryData
+    : (skipQuery ? initialData : categoryData);
 
   const isInitialLoading = (isLoading || isFetching) && allRecipes.length === 0 && page === 1;
 
@@ -202,27 +244,32 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
       });
     }
 
-    if (!showRecipes || pageData.type !== 'recipes') return;
+    if (pageData.type !== 'recipes') return;
 
     const newRecipes = pageData.recipes || [];
     const pagination = pageData.pagination;
 
     if (page === 1) {
+      // Always set recipes on page 1 — covers both SSR hydration and fresh client fetches
       setAllRecipes(newRecipes);
+      if (pagination) {
+        setHasMore(pagination.currentPage < pagination.totalPages);
+      } else {
+        setHasMore(false);
+      }
     } else {
       setAllRecipes(prev => {
         const existingIds = new Set(prev.map(r => r.id || r.recipe_id));
         const uniqueNew = newRecipes.filter(r => !existingIds.has(r.id || r.recipe_id));
         return [...prev, ...uniqueNew];
       });
+      if (pagination) {
+        setHasMore(pagination.currentPage < pagination.totalPages);
+      } else {
+        setHasMore(false);
+      }
     }
-
-    if (pagination) {
-      setHasMore(pagination.currentPage < pagination.totalPages);
-    } else {
-      setHasMore(false);
-    }
-  }, [pageData, page, showRecipes]);
+  }, [pageData, page]);
 
   const loadMore = useCallback(() => {
     if (!isFetching && hasMore) {
@@ -230,8 +277,16 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
     }
   }, [isFetching, hasMore]);
 
+  const retryLoadMore = useCallback(() => {
+    if (isSubCategoryView) {
+      refetchSubCategory();
+    } else {
+      refetchCategory();
+    }
+  }, [isSubCategoryView, refetchSubCategory, refetchCategory]);
+
   const desktopAdIndices = useMemo(() => getDesktopAdIndices(allRecipes, 42), [allRecipes]);
-  const mobileAdIndices  = useMemo(() => getMobileAdIndices(allRecipes, 42), [allRecipes]);
+  const mobileAdIndices = useMemo(() => getMobileAdIndices(allRecipes, 42), [allRecipes]);
 
   const category = headerData?.category;
   const subCategory = headerData?.subCategory;
@@ -476,7 +531,9 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
     );
   }
 
-  if (isError || !pageData) {
+  const hasLoadedData = allRecipes.length > 0 || (initialPageData?.recipes?.length > 0);
+
+  if (isError && !hasLoadedData) {
     return (
       <Box
         sx={{
@@ -496,7 +553,7 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
             color: isDarkMode ? '#FFF7EC' : '#2B2828',
           }}
         >
-          Category not found
+          {isSubCategoryView ? 'Sub-category not found' : 'Category not found'}
         </Typography>
         <Typography
           sx={{
@@ -506,7 +563,9 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
             mb: 2,
           }}
         >
-          The category you're looking for doesn't exist or has been removed.
+          {isSubCategoryView
+            ? "The sub-category you're looking for doesn't exist or has been removed."
+            : "The category you're looking for doesn't exist or has been removed."}
         </Typography>
         <Link href="/" style={{ textDecoration: 'none' }}>
           <Box
@@ -740,6 +799,12 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
           </Box>
         </Box>
 
+        {!isSubCategoryView && (
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center', mb: 3 }}>
+            <AdsterraBanner300x250 />
+          </Box>
+        )}
+
         
         {showSubCategories && (
           <Box>
@@ -775,7 +840,7 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
                 >
                   {allRecipes.map((recipe, index) => {
                     const isLastItem = index === allRecipes.length - 1;
-                    const showMobileAd = mobileAdIndices.has(index) && !isLastItem;
+                    const showMobileAd = mobileAdIndices.has(index);
                     const showDesktopAd = desktopAdIndices.has(index) && !isLastItem;
 
                     return (
@@ -790,17 +855,16 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
                               gridColumn: '1 / -1',
                               display: {
                                 xs: showMobileAd ? 'flex' : 'none',
-                                sm: showMobileAd ? 'flex' : 'none',
-                                md: showDesktopAd ? 'flex' : 'none'
+                                md: showDesktopAd ? 'flex' : 'none',
                               },
                               justifyContent: 'center',
-                              my: 3
+                              my: { xs: 1.5, md: 3 },
                             }}
                           >
-                            <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                            <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
                               <AdsterraBanner320x50 />
                             </Box>
-                            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                               <AdsterraBanner728x90 />
                             </Box>
                           </Box>
@@ -819,49 +883,61 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
                       mb: 2 
                     }}
                   >
-                    <Button
-                      variant="contained"
-                      onClick={loadMore}
-                      disabled={isFetching}
-                      sx={{
-                        px: { xs: 3, md: 5 },
-                        py: { xs: 0.8, md: 1.1 },
-                        bgcolor: isDarkMode ? 'rgba(202,96,20,0.15)' : '#FEE7D6',
-                        color: isDarkMode ? '#FFEFD9' : '#CA6014',
-                        border: `1.5px solid ${isDarkMode ? 'rgba(202,96,20,0.4)' : '#CA6014'}`,
-                        borderRadius: '8px',
-                        fontFamily: "'Basic', sans-serif",
-                        fontSize: { xs: '0.9rem', md: '1rem' },
-                        fontWeight: 600,
-                        letterSpacing: '0.05em',
-                        textTransform: 'none',
-                        cursor: isFetching ? 'not-allowed' : 'pointer',
-                        opacity: isFetching ? 0.7 : 1,
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        boxShadow: isDarkMode ? 'none' : '0 4px 14px rgba(202, 96, 20, 0.15)',
-                        '&:hover': {
-                          bgcolor: isFetching ? undefined : '#CA6014',
-                          color: isFetching ? undefined : '#fff',
-                          transform: isFetching ? 'none' : 'translateY(-2px)',
-                          boxShadow: isFetching ? 'none' : '0 6px 20px rgba(202, 96, 20, 0.25)',
-                        },
-                        '&:active': {
-                          transform: 'translateY(0)',
-                        }
-                      }}
-                    >
-                      {isFetching ? (
+                    {isFetching ? (
+                      <Button
+                        variant="contained"
+                        disabled
+                        sx={{
+                          px: { xs: 3, md: 5 },
+                          py: { xs: 0.8, md: 1.1 },
+                          bgcolor: isDarkMode ? 'rgba(202,96,20,0.15)' : '#FEE7D6',
+                          color: isDarkMode ? '#FFEFD9' : '#CA6014',
+                          border: `1.5px solid ${isDarkMode ? 'rgba(202,96,20,0.4)' : '#CA6014'}`,
+                          borderRadius: '8px',
+                          fontFamily: "'Basic', sans-serif",
+                          fontSize: { xs: '0.9rem', md: '1rem' },
+                          fontWeight: 600,
+                          letterSpacing: '0.05em',
+                          textTransform: 'none',
+                          cursor: 'not-allowed',
+                          opacity: 0.7,
+                        }}
+                      >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                           <CircularProgress size={20} sx={{ color: 'inherit' }} />
                           <span>Loading...</span>
                         </Box>
-                      ) : (
-                        <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                          <span>Load More</span>
-                          <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↓</span>
-                        </Box>
-                      )}
-                    </Button>
+                      </Button>
+                    ) : isError && page > 1 ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Typography sx={{ color: isDarkMode ? '#FF8A65' : '#D32F2F', fontSize: '0.9rem' }}>
+                          Failed to load more recipes
+                        </Typography>
+                        <Button
+                          variant="outlined"
+                          onClick={retryLoadMore}
+                          sx={{
+                            color: isDarkMode ? '#FF8A65' : '#D32F2F',
+                            borderColor: isDarkMode ? 'rgba(255,138,101,0.5)' : '#D32F2F',
+                            fontFamily: "'Basic', sans-serif",
+                            fontSize: { xs: '0.85rem', md: '0.95rem' },
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            '&:hover': {
+                              borderColor: isDarkMode ? '#FF8A65' : '#B71C1C',
+                              backgroundColor: isDarkMode ? 'rgba(255,138,101,0.08)' : 'rgba(211,47,47,0.04)',
+                            },
+                          }}
+                        >
+                          Retry
+                        </Button>
+                      </Box>
+                    ) : (
+                      <LoadMoreButton
+                        onClick={loadMore}
+                        isLoading={isFetching}
+                      />
+                    )}
                   </Box>
                 )}
               </>
@@ -870,13 +946,8 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
         )}
 
         {/* Bottom Banner Ad above Footer */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5, mb: 1 }}>
-          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-            <AdsterraBanner320x50 />
-          </Box>
-          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-            <AdsterraBanner728x90 />
-          </Box>
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', mt: 5, mb: 1 }}>
+          <AdsterraBanner728x90 />
         </Box>
       </div>
     </Box>

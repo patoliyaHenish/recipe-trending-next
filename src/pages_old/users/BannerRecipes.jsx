@@ -5,9 +5,10 @@ import { usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { useSearchRecipesQuery } from '../../features/api/searchApi';
 import { useGetPublicCollectionDetailsQuery } from '../../features/api/homeSectionApi';
+import { useGetPublicBannerRecipesQuery } from '../../features/api/bannerApi';
 import RecipeCard from '../../components/common/RecipeCard';
+import LoadMoreButton from '../../components/common/LoadMoreButton';
 import { useTheme } from '../../context/ThemeContext';
 import { getImage } from '../../utils/helper';
 import noImageFound from '../../assets/no-image-found.png';
@@ -17,7 +18,7 @@ import { toast } from '../../utils/toast';
 import { trackEvent } from '../../utils/analytics';
 import { AdsterraBanner728x90, AdsterraBanner320x50, AdsterraNativeBanner } from '../../components/ads';
 
-const RECIPES_PER_PAGE    = 12;
+const RECIPES_PER_PAGE = 12;
 const COLLECTION_PER_PAGE = 12;
 
 const getDesktopAdIndices = (items, seed = 1) => {
@@ -58,48 +59,44 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
 
   const { collectionName } = useParams();
 
-  const { data: sectionData, isLoading: isLoadingSection } = useGetPublicCollectionDetailsQuery(
-    collectionName, 
+  const navState = typeof window !== 'undefined' ? window.history.state : {};
+
+  const searchQuery = bannerTitle || navState?.title || '';
+
+  const [userPreference, setUserPreference] = useState(Cookies.get('userPreference') || '');
+  const [page, setPage] = useState(1);
+  const [allRecipes, setAllRecipes] = useState([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const { data: sectionData, isLoading: isLoadingSection, isFetching: isFetchingSection, error: collectionError } = useGetPublicCollectionDetailsQuery(
+    { slug: collectionName, preference: userPreference, page, limit: 20 },
     { skip: !collectionName }
   );
 
-  const navState = typeof window !== 'undefined' ? window.history.state : {};
+  const section = sectionData?.data || navState?.section || null;
+  const isCollection = !!collectionName || !!section;
 
-  const section      = sectionData?.data || navState?.section || null;
-  const isCollection = !!section || !!collectionName;
-
-  const collectionTitle       = section?.name        || collectionName?.split('-').join(' ') || 'Collection';
+  const collectionTitle = section?.name || collectionName?.split('-').join(' ') || 'Collection';
   const collectionDescription = section?.description || '';
-  const collectionItems       = section?.items       || [];
 
-  const searchQuery = bannerTitle || navState?.title || '';
-  const pageTitle   = isCollection ? collectionTitle : (bannerTitle || navState?.title || 'Recipe Spotlight');
+  const pageTitle = isCollection ? collectionTitle : (bannerTitle || navState?.title || 'Recipe Spotlight');
 
-  const [userPreference, setUserPreference] = useState(Cookies.get('userPreference') || '');
-  const [page, setPage]               = useState(1);
-  const [allRecipes, setAllRecipes]   = useState([]);
-  const [hasMore, setHasMore]         = useState(true);
-  const [collectionPage, setCollectionPage] = useState(1);
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const visibleCollectionItems = collectionItems.slice(0, collectionPage * COLLECTION_PER_PAGE);
-  const collectionHasMore      = visibleCollectionItems.length < collectionItems.length;
-  const displayRecipes         = isCollection ? visibleCollectionItems : allRecipes;
-
+  const displayRecipes = allRecipes;
   const desktopAdIndices = getDesktopAdIndices(displayRecipes, 42);
-  const mobileAdIndices  = getMobileAdIndices(displayRecipes, 42);
+  const mobileAdIndices = getMobileAdIndices(displayRecipes, 42);
 
   useEffect(() => {
     document.title = `${pageTitle} | Recipe Trending`;
-    trackEvent("page_view", { page: "recipe_spotlight", page_title: pageTitle });
-    
+    trackEvent("page_view", { page: isCollection ? "collection_spotlight" : "recipe_spotlight", page_title: pageTitle });
+
     // SEO & Social Sharing Meta Tags
     const imgVal = bannerImage || section?.image || section?.background_image || navState?.image;
     const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
     const finalImg = imgVal || recipeImg;
     const imgUrl = (typeof finalImg === 'string' ? finalImg.trim() : '') || '';
     const shareImageUrl = imgUrl && imgUrl.toLowerCase() !== 'null' ? getImage(imgUrl) : '';
-    
+
     const metaDesc = (collectionDescription || `Explore the ${pageTitle} collection on Recipe Trending.`).replace(/^"|"$/g, '').trim();
 
     // Update Meta Description
@@ -127,9 +124,9 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
     updateOgTag('og:url', window.location.href);
     updateOgTag('og:type', 'website');
     if (shareImageUrl) updateOgTag('og:image', shareImageUrl);
-    
+
     return () => { document.title = 'Recipe Trending'; };
-  }, [pageTitle, collectionDescription, section, navState, displayRecipes]);
+  }, [pageTitle, collectionDescription, section, navState, displayRecipes, isCollection]);
 
   useEffect(() => {
     const handler = () => setUserPreference(Cookies.get('userPreference') || '');
@@ -137,43 +134,44 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
     return () => window.removeEventListener('userPreferenceChanged', handler);
   }, []);
 
-
   useEffect(() => {
     setPage(1);
     setAllRecipes([]);
-    setHasMore(true);
-  }, [searchQuery, userPreference]);
+    setHasMore(false);
+  }, [searchQuery, collectionName, userPreference]);
 
-  const { data, isLoading, isFetching, error } = useSearchRecipesQuery(
-    { q: searchQuery, page, limit: RECIPES_PER_PAGE, preference: userPreference },
-    { skip: isCollection }        
+  const { data: bannerRecipesData, isLoading: isLoadingBannerRecipes, isFetching: isFetchingBannerRecipes, error: bannerRecipesError } = useGetPublicBannerRecipesQuery(
+    { title: searchQuery, preference: userPreference, page, limit: 20 },
+    { skip: isCollection || !searchQuery }
   );
 
-  const isInitialLoading = isCollection 
-    ? (isLoadingSection && (!section || (section.items?.length === 0)))
-    : (isLoading || isFetching) && allRecipes.length === 0 && page === 1;
+  const activeResponseData = isCollection ? sectionData?.data : bannerRecipesData?.data;
+  const activeItems = isCollection ? (activeResponseData?.items || []) : (Array.isArray(activeResponseData) ? activeResponseData : (activeResponseData?.recipes || []));
+  const pagination = activeResponseData?.pagination;
 
-  const responseData = data?.data;
-  const pageData     = responseData?.recipes || [];
-  const pagination   = responseData?.pagination;
+  const error = isCollection ? collectionError : bannerRecipesError;
+  const isFetching = isCollection ? isFetchingSection : isFetchingBannerRecipes;
+
+  const isInitialLoading = isCollection
+    ? (isLoadingSection && page === 1)
+    : (isLoadingBannerRecipes && page === 1);
 
   useEffect(() => {
-    if (isCollection || !responseData) return;
+    if (!activeResponseData) return;
     if (page === 1) {
-      setAllRecipes(pageData);
+      setAllRecipes(activeItems);
     } else {
       setAllRecipes(prev => {
-        const existingIds = new Set(prev.map(r => r.id));
-        return [...prev, ...pageData.filter(r => !existingIds.has(r.id))];
-      }); 
+        const existingIds = new Set(prev.map(r => r.recipe_id || r.id || r.category_id || r.sub_category_id));
+        return [...prev, ...activeItems.filter(r => !existingIds.has(r.recipe_id || r.id || r.category_id || r.sub_category_id))];
+      });
     }
     setHasMore(pagination ? pagination.currentPage < pagination.totalPages : false);
-  }, [responseData, page, isCollection]);
+  }, [activeResponseData, page, isCollection, activeItems, pagination]);
 
   const loadMore = () => {
     if (!isFetching && hasMore) setPage(prev => prev + 1);
   };
-
   const handleShare = async () => {
     const url = window.location.href;
     const imgVal = bannerImage || section?.image || section?.background_image || navState?.image;
@@ -182,14 +180,14 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
     const imgUrl = (typeof finalImg === 'string' ? finalImg.trim() : '') || '';
     const shareImageUrl = imgUrl && imgUrl.toLowerCase() !== 'null' ? getImage(imgUrl) : null;
 
-    const shortDesc = collectionDescription 
-      ? (collectionDescription.length > 200 ? collectionDescription.substring(0, 197) + "..." : collectionDescription) 
+    const shortDesc = collectionDescription
+      ? (collectionDescription.length > 200 ? collectionDescription.substring(0, 197) + "..." : collectionDescription)
       : `${pageTitle}`;
 
-    const shareData = { 
-      title: pageTitle, 
-      text: `${pageTitle}\n\n${shortDesc}\n\nCheck it out here:\n${url}`, 
-      url 
+    const shareData = {
+      title: pageTitle,
+      text: `${pageTitle}\n\n${shortDesc}\n\nCheck it out here:\n${url}`,
+      url
     };
 
     try {
@@ -245,7 +243,7 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
     <Box sx={{ minHeight: '100vh', pt: { xs: 9, sm: 10, md: 17, lg: 18 }, pb: 6, width: '100%' }}>
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5, mb: { xs: 3, sm: 4, md: 3 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5, mb: { xs: 3, sm: 4, md: 3 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Link href="/" style={{ textDecoration: 'none' }}>
               <Typography sx={{
@@ -270,11 +268,11 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
           </Box>
         </Box>
 
-        <Box 
-          sx={{ 
+        <Box
+          sx={{
             mb: { xs: 4, md: 6 },
-            background: isDarkMode 
-              ? 'linear-gradient(135deg, rgba(202, 96, 20, 0.15) 0%, rgba(20, 20, 20, 0.4) 100%)' 
+            background: isDarkMode
+              ? 'linear-gradient(135deg, rgba(202, 96, 20, 0.15) 0%, rgba(20, 20, 20, 0.4) 100%)'
               : 'linear-gradient(135deg, #FEE7D6 0%, #FFF5ED 100%)',
             borderRadius: 0,
             overflow: 'hidden',
@@ -293,17 +291,17 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
               height: { xs: '220px', sm: '190px', md: '240px' },
               flexShrink: 0,
               px: { xs: 2, sm: 2.5, md: 3 },
-              pt: { xs: 3, sm: 2, md: 1.5 }, 
+              pt: { xs: 3, sm: 2, md: 1.5 },
               pb: { xs: 1, sm: 2, md: 1.5 },
-              pl: { xs: 3, sm: 4, md: 5 }, 
+              pl: { xs: 3, sm: 4, md: 5 },
               pr: 0,
             }}
           >
             <Box
               component="img"
               src={(() => {
-    const imgVal = bannerImage || section?.image || section?.background_image || navState?.image;
-    const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
+                const imgVal = bannerImage || section?.image || section?.background_image || navState?.image;
+                const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
                 const finalImg = imgVal || recipeImg;
                 const imgUrl = (typeof finalImg === 'string' ? finalImg.trim() : '') || '';
                 return imgUrl && imgUrl.toLowerCase() !== 'null' ? getImage(imgUrl) : noImageFound;
@@ -335,12 +333,12 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
             )}
           </Box>
 
-          <Box 
-            sx={{ 
+          <Box
+            sx={{
               px: { xs: 3, sm: 4, md: 5 },
               pt: { xs: 1, sm: 4, md: 5 },
               pb: { xs: 3, sm: 4, md: 5 },
-              pl: { xs: 2, sm: 3, md: 4 }, 
+              pl: { xs: 2, sm: 3, md: 4 },
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -361,9 +359,9 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
               {isCollection ? 'Collection' : 'Recipe Spotlight'}
             </Typography>
 
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'space-between',
               gap: 2,
               width: '100%',
@@ -400,9 +398,9 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
 
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Tooltip title="Share collection" arrow>
-                  <IconButton 
+                  <IconButton
                     onClick={handleShare}
-                    sx={{ 
+                    sx={{
                       p: 1,
                       transition: 'all 0.2s',
                       '&:hover': {
@@ -413,7 +411,7 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
                     aria-label="Share page"
                   >
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '26px', height: '26px' }}>
-                      <path d="M15 5L22 12L15 19V14.5C10 14.5 6.5 16 4 20C5 15 8 10 15 9V5Z" fill="#4D9CFF"/>
+                      <path d="M15 5L22 12L15 19V14.5C10 14.5 6.5 16 4 20C5 15 8 10 15 9V5Z" fill="#4D9CFF" />
                     </svg>
                   </IconButton>
                 </Tooltip>
@@ -443,7 +441,7 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
                 >
                   {collectionDescription}
                 </Typography>
-                
+
                 <Box
                   onClick={() => setIsExpanded(!isExpanded)}
                   sx={{
@@ -528,98 +526,10 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
                     })}
                   </Box>
 
-                  {isCollection ? (
-                    collectionHasMore && (
-                      <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 5, md: 7 }, mb: 4 }}>
-                        <Box
-                          component="button"
-                          onClick={() => setCollectionPage(prev => prev + 1)}
-                          sx={{
-                            px: { xs: 3, md: 5 },
-                            py: { xs: 0.8, md: 1.1 },
-                            bgcolor: isDarkMode ? 'rgba(202,96,20,0.15)' : '#FEE7D6',
-                            color: isDarkMode ? '#FFEFD9' : '#CA6014',
-                            border: `1.5px solid ${isDarkMode ? 'rgba(202,96,20,0.4)' : '#CA6014'}`,
-                            borderRadius: '8px',
-                            fontFamily: "'Basic', sans-serif",
-                            fontSize: { xs: '0.9rem', md: '1rem' },
-                            fontWeight: 600,
-                            letterSpacing: '0.05em',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: isDarkMode ? 'none' : '0 4px 14px rgba(202, 96, 20, 0.15)',
-                            '&:hover': {
-                              bgcolor: '#CA6014',
-                              color: '#fff',
-                              transform: 'translateY(-2px)',
-                              boxShadow: '0 6px 20px rgba(202, 96, 20, 0.25)',
-                            },
-                            '&:active': {
-                              transform: 'translateY(0)',
-                            }
-                          }}
-                        >
-                          {isLoadingSection ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <CircularProgress size={18} color="inherit" thickness={6} />
-                              <span>Loading...</span>
-                            </Box>
-                          ) : (
-                            <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                              <span>Load More</span>
-                              <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↓</span>
-                            </Box>
-                          )}
-                        </Box>
-                      </Box>
-                    )
-                  ) : (
-                    hasMore && (
-                      <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 5, md: 7 }, mb: 4 }}>
-                        <Box
-                          component="button"
-                          onClick={loadMore}
-                          disabled={isFetching}
-                          sx={{
-                            px: { xs: 3, md: 5 },
-                            py: { xs: 0.8, md: 1.1 },
-                            bgcolor: isDarkMode ? 'rgba(202,96,20,0.15)' : '#FEE7D6',
-                            color: isDarkMode ? '#FFEFD9' : '#CA6014',
-                            border: `1.5px solid ${isDarkMode ? 'rgba(202,96,20,0.4)' : '#CA6014'}`,
-                            borderRadius: '8px',
-                            fontFamily: "'Basic', sans-serif",
-                            fontSize: { xs: '0.9rem', md: '1rem' },
-                            fontWeight: 600,
-                            letterSpacing: '0.05em',
-                            cursor: isFetching ? 'not-allowed' : 'pointer',
-                            opacity: isFetching ? 0.7 : 1,
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: isDarkMode ? 'none' : '0 4px 14px rgba(202, 96, 20, 0.15)',
-                            '&:hover': {
-                              bgcolor: isFetching ? undefined : '#CA6014',
-                              color: isFetching ? undefined : '#fff',
-                              transform: isFetching ? 'none' : 'translateY(-2px)',
-                              boxShadow: isFetching ? 'none' : '0 6px 20px rgba(202, 96, 20, 0.25)',
-                            },
-                            '&:active': {
-                              transform: 'translateY(0)',
-                            }
-                          }}
-                        >
-                          {isFetching ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <CircularProgress size={18} color="inherit" thickness={6} />
-                              <span>Loading...</span>
-                            </Box>
-                          ) : (
-                            <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                              <span>Load More</span>
-                              <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↓</span>
-                            </Box>
-                          )}
-                        </Box>
-                      </Box>
-                    )
+                  {hasMore && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 5, md: 7 }, mb: 4 }}>
+                      <LoadMoreButton onClick={loadMore} isLoading={isFetching} />
+                    </Box>
                   )}
                 </>
               ) : !isFetching && (

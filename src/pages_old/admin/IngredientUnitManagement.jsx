@@ -72,12 +72,11 @@ const IngredientUnitManagement = () => {
   };
   const user = useSelector((state) => state.auth.user);
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
 
-  const canCreate = isAdmin || userPermissions.includes('ingredient_unit.create');
-  const canUpdate = isAdmin || userPermissions.includes('ingredient_unit.update');
-  const canDelete = isAdmin || userPermissions.includes('ingredient_unit.delete');
-  const canList = isAdmin || userPermissions.includes('ingredient_unit.list');
+  const canCreate = userPermissions.includes('ingredient_unit.create');
+  const canUpdate = userPermissions.includes('ingredient_unit.update');
+  const canDelete = userPermissions.includes('ingredient_unit.delete');
+  const canList = userPermissions.includes('ingredient_unit.list');
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -331,7 +330,7 @@ const IngredientUnitManagement = () => {
 
   const hasActiveFilters = search !== '';
 
-  if (!canList && !isAdmin) {
+  if (!canList) {
     return <AccessDenied message="You do not have permission to view this page." />;
   }
 

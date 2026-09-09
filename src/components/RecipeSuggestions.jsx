@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { Box, Typography, Button, CircularProgress } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useGetRecipeSuggestionsQuery } from "../features/api/recipeDetailsApi";
 import { useSearchRecipesQuery } from "../features/api/searchApi";
 import RecipeCard from "./common/RecipeCard";
 import RecipeGridSkeleton from "./common/RecipeGridSkeleton";
+import LoadMoreButton from "./common/LoadMoreButton";
 import { AdsterraNativeBanner, AdsterraBanner728x90, AdsterraBanner320x50 } from "./ads";
 
 const getDesktopAdIndices = (items, seed = 1) => {
@@ -131,49 +132,10 @@ const RecipeSuggestions = ({ recipeId, isDarkMode, foodType, initialSuggestions,
       
       {suggestions.length > 0 && suggestions.length >= limit && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 5, md: 7 }, mb: 4 }}>
-          <Button
-            variant="contained"
+          <LoadMoreButton
             onClick={handleLoadMore}
-            disabled={isFetchingSuggestions}
-            sx={{
-              px: { xs: 3, md: 5 },
-              py: { xs: 0.8, md: 1.1 },
-              bgcolor: isDarkMode ? 'rgba(202,96,20,0.15)' : '#FEE7D6',
-              color: isDarkMode ? '#FFEFD9' : '#CA6014',
-              border: `1.5px solid ${isDarkMode ? 'rgba(202,96,20,0.4)' : '#CA6014'}`,
-              borderRadius: '8px',
-              fontFamily: "'Basic', sans-serif",
-              fontSize: { xs: '0.9rem', md: '1rem' },
-              fontWeight: 600,
-              letterSpacing: '0.05em',
-              textTransform: 'none',
-              cursor: isFetchingSuggestions ? 'not-allowed' : 'pointer',
-              opacity: isFetchingSuggestions ? 0.7 : 1,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: isDarkMode ? 'none' : '0 4px 14px rgba(202, 96, 20, 0.15)',
-              '&:hover': {
-                bgcolor: isFetchingSuggestions ? undefined : '#CA6014',
-                color: isFetchingSuggestions ? undefined : '#fff',
-                transform: isFetchingSuggestions ? 'none' : 'translateY(-2px)',
-                boxShadow: isFetchingSuggestions ? 'none' : '0 6px 20px rgba(202, 96, 20, 0.25)',
-              },
-              '&:active': {
-                transform: 'translateY(0)',
-              }
-            }}
-          >
-            {isFetchingSuggestions ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <CircularProgress size={20} sx={{ color: 'inherit' }} />
-                <span>Loading...</span>
-              </Box>
-            ) : (
-              <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                <span>Load More</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↓</span>
-              </Box>
-            )}
-          </Button>
+            isLoading={isFetchingSuggestions}
+          />
         </Box>
       )}
     </Box>

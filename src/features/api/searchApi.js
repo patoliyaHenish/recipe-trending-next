@@ -21,7 +21,6 @@ export const searchApi = createApi({
                 if (params.recipeId) searchParams.append('recipeId', params.recipeId);
                 if (params.ingredientId) searchParams.append('ingredientId', params.ingredientId);
                 if (params.preference) searchParams.append('preference', params.preference);
-                if (params.badge) searchParams.append('badge', params.badge);
                 if (params.timeRange) searchParams.append('timeRange', params.timeRange);
                 if (params.page) searchParams.append('page', params.page);
                 if (params.limit) searchParams.append('limit', params.limit);

@@ -40,10 +40,9 @@ const PermissionManagement = () => {
   const { isDarkMode } = useTheme()
   const user = useSelector((state) => state.auth.user);
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-  const canList = isAdmin || userPermissions.includes('permission.list');
+  const canList = userPermissions.includes('permission.list');
 
-  if (!canList && !isAdmin) {
+  if (!canList) {
     return <AccessDenied message="You do not have permission to view Permission Management." />;
   }
   const [searchParams, setSearchParams] = useSearchParams()

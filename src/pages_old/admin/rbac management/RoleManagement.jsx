@@ -46,14 +46,13 @@ const RoleManagement = () => {
   const { isDarkMode } = useTheme()
   const user = useSelector((state) => state.auth.user);
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-  const canList = isAdmin || userPermissions.includes('role.list');
-  const canView = isAdmin || userPermissions.includes('role.view');
-  const canCreate = isAdmin || userPermissions.includes('role.create');
-  const canUpdate = isAdmin || userPermissions.includes('role.update');
-  const canDelete = isAdmin || userPermissions.includes('role.delete');
+  const canList = userPermissions.includes('role.list');
+  const canView = userPermissions.includes('role.view');
+  const canCreate = userPermissions.includes('role.create');
+  const canUpdate = userPermissions.includes('role.update');
+  const canDelete = userPermissions.includes('role.delete');
 
-  if (!canList && !isAdmin) {
+  if (!canList) {
     return <AccessDenied message="You do not have permission to view Role Management." />;
   }
   const [searchParams, setSearchParams] = useSearchParams()

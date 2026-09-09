@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useDispatch } from 'react-redux'
 import { bannerApi, useGetBannersQuery, useDeleteBannerMutation } from '../../../features/api/bannerApi'
-import { Box, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Switch, FormControl, MenuItem, Select, InputAdornment, TextField, Tooltip, Autocomplete, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Collapse, CircularProgress } from '@mui/material'
+import { Box, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Switch, FormControl, MenuItem, Select, InputAdornment, TextField, Tooltip, Autocomplete, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Collapse, CircularProgress, Chip } from '@mui/material'
 import { toast } from '../../../utils/toast';
 import { ConfirmDialog, AccessDenied, ActionButtons } from '../../../components/common'
 import CloseIcon from '@mui/icons-material/Close'
@@ -23,14 +23,13 @@ const BannerManagement = () => {
     const { isDarkMode } = useTheme()
     const { user } = useUser();
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canList = isAdmin || userPermissions.includes('banner.list');
-    const canView = isAdmin || userPermissions.includes('banner.view');
-    const canCreate = isAdmin || userPermissions.includes('banner.create');
-    const canUpdate = isAdmin || userPermissions.includes('banner.update');
-    const canDelete = isAdmin || userPermissions.includes('banner.delete');
+    const canList = userPermissions.includes('banner.list');
+    const canView = userPermissions.includes('banner.view');
+    const canCreate = userPermissions.includes('banner.create');
+    const canUpdate = userPermissions.includes('banner.update');
+    const canDelete = userPermissions.includes('banner.delete');
 
-    if (!canList && !isAdmin) {
+    if (!canList) {
         return <AccessDenied message="You do not have permission to view Banner Management." />;
     }
 
@@ -410,6 +409,7 @@ const BannerManagement = () => {
                                 <TableCell align="center" width={60}>#</TableCell>
                                 <TableCell align="center" width={140}>IMAGE</TableCell>
                                 <TableCell>TITLE</TableCell>
+                                <TableCell align="center">RECIPES</TableCell>
                                 <TableCell align="center">BUTTON TEXT</TableCell>
                                 <TableCell align="center">HERO</TableCell>
                                 <TableCell align="center">ORDER</TableCell>
@@ -419,13 +419,13 @@ const BannerManagement = () => {
                         <TableBody>
                             {(isLoading || isFetching) ? (
                                 <TableRow sx={{ height: '60px' }}>
-                                    <TableCell colSpan={7} align="center" sx={{ py: 8, borderBottom: 'none' }}>
+                                    <TableCell colSpan={8} align="center" sx={{ py: 8, borderBottom: 'none' }}>
                                         <CircularProgress size={40} sx={{ color: '#7367f0' }} />
                                     </TableCell>
                                 </TableRow>
                             ) : filteredBanners.length === 0 ? (
                                 <TableRow sx={{ height: '60px' }}>
-                                    <TableCell colSpan={7} align="center" sx={{ py: 8, color: isDarkMode ? '#b4b7bd' : '#6e6b7b', borderBottom: 'none' }}>
+                                    <TableCell colSpan={8} align="center" sx={{ py: 8, color: isDarkMode ? '#b4b7bd' : '#6e6b7b', borderBottom: 'none' }}>
                                         <Typography variant="body1">No banners found</Typography>
                                     </TableCell>
                                 </TableRow>
@@ -458,6 +458,18 @@ const BannerManagement = () => {
                                                 )}
                                             </TableCell>
                                             <TableCell>{rowItem.title || '—'}</TableCell>
+                                            <TableCell align="center">
+                                                <Chip
+                                                    label={rowItem.recipe_count ?? (rowItem.recipe_ids?.length || 0)}
+                                                    size="small"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        fontSize: '0.75rem',
+                                                        backgroundColor: isDarkMode ? 'rgba(115, 103, 240, 0.16)' : '#e0e7ff',
+                                                        color: isDarkMode ? '#a78bfa' : '#4338ca',
+                                                    }}
+                                                />
+                                            </TableCell>
                                             <TableCell align="center">{rowItem.button_text || '—'}</TableCell>
                                             <TableCell align="center">
                                                 {rowItem.is_hero ? (

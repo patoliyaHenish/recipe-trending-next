@@ -42,20 +42,19 @@ const HomeSectionManagement = () => {
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'))
   const { user } = useUser();
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin';
   
-  const canList = isAdmin || userPermissions.includes('home_section.list');
-  const canView = isAdmin || userPermissions.includes('home_section.view');
-  const canCreate = isAdmin || userPermissions.includes('home_section.create');
-  const canUpdate = isAdmin || userPermissions.includes('home_section.update');
-  const canDelete = isAdmin || userPermissions.includes('home_section.delete');
-  const canPublish = isAdmin || userPermissions.includes('home_section.live');
+  const canList = userPermissions.includes('home_section.list');
+  const canView = userPermissions.includes('home_section.view');
+  const canCreate = userPermissions.includes('home_section.create');
+  const canUpdate = userPermissions.includes('home_section.update');
+  const canDelete = userPermissions.includes('home_section.delete');
+  const canPublish = userPermissions.includes('home_section.live');
   
   // Feature specific permissions
-  const canViewFeature = isAdmin || userPermissions.includes('home_section.feature_view');
-  const canUpdateFeature = isAdmin || userPermissions.includes('home_section.feature_update');
-  const canDeleteFeature = isAdmin || userPermissions.includes('home_section.feature_delete');
-  const canPublishFeature = isAdmin || userPermissions.includes('home_section.feature_live');
+  const canViewFeature = userPermissions.includes('home_section.feature_view');
+  const canUpdateFeature = userPermissions.includes('home_section.feature_update');
+  const canDeleteFeature = userPermissions.includes('home_section.feature_delete');
+  const canPublishFeature = userPermissions.includes('home_section.feature_live');
 
   
 

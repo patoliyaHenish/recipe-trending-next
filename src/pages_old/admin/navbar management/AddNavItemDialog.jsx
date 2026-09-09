@@ -16,8 +16,7 @@ const AddNavItemDialog = ({ open, onClose, editItem }) => {
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'))
     const user = useSelector((state) => state.auth.user);
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canPublish = isAdmin || userPermissions.includes('nav.publish');
+    const canPublish = userPermissions.includes('nav.publish');
 
     const [createNavItem, { isLoading: isCreating }] = useCreateNavItemMutation()
 

@@ -18,12 +18,11 @@ const CronLogs = () => {
     const { isDarkMode } = useTheme();
     const user = useSelector((state) => state.auth.user);
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canList = isAdmin || userPermissions.includes('cron_logs.list');
-    const canViewDetail = isAdmin || userPermissions.includes('cron_logs.view');
-    const canDelete = isAdmin || userPermissions.includes('cron_logs.delete');
+    const canList = userPermissions.includes('cron_logs.list');
+    const canViewDetail = userPermissions.includes('cron_logs.view');
+    const canDelete = userPermissions.includes('cron_logs.delete');
 
-    if (!canList && !isAdmin) {
+    if (!canList) {
         return <AccessDenied message="You do not have permission to view System Logs." />;
     }
     const [searchParams, setSearchParams] = useSearchParams();

@@ -20,19 +20,18 @@ const FooterManagement = () => {
     const { isDarkMode } = useTheme()
     const user = useSelector((state) => state.auth.user);
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canList = isAdmin || userPermissions.includes('footer.list');
-    const canView = isAdmin || userPermissions.includes('footer.view');
-    const canCreate = isAdmin || userPermissions.includes('footer.create');
-    const canUpdate = isAdmin || userPermissions.includes('footer.update');
-    const canDelete = isAdmin || userPermissions.includes('footer.delete');
-    const canPublish = isAdmin || userPermissions.includes('footer.publish');
+    const canList = userPermissions.includes('footer.list');
+    const canView = userPermissions.includes('footer.view');
+    const canCreate = userPermissions.includes('footer.create');
+    const canUpdate = userPermissions.includes('footer.update');
+    const canDelete = userPermissions.includes('footer.delete');
+    const canPublish = userPermissions.includes('footer.publish');
 
     useEffect(() => {
         document.title = 'Footer'
     }, [])
 
-    const { data: footerItems, isLoading, isFetching } = useGetFooterItemsQuery(undefined, { skip: !canList && !isAdmin })
+    const { data: footerItems, isLoading, isFetching } = useGetFooterItemsQuery(undefined, { skip: !canList })
     const [deleteFooterItem, { isLoading: isDeleting }] = useDeleteFooterItemMutation()
     const [updateFooterItem, { isLoading: isUpdating }] = useUpdateFooterItemMutation()
 
@@ -150,7 +149,7 @@ const FooterManagement = () => {
         },
     };
 
-    if (!canList && !isAdmin) {
+    if (!canList) {
         return <AccessDenied message="You do not have permission to view Footer Management." />;
     }
 

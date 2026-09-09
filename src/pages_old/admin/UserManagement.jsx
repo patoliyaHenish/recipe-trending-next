@@ -150,8 +150,6 @@ const UserManagement = () => {
         return searchParams.get('role') || 'all';
     });
 
-    const [lastActiveSearch, setLastActiveSearch] = useState(() => searchParams.get('last_active') || '');
-    const [debouncedLastActive, setDebouncedLastActive] = useState(() => searchParams.get('last_active') || '');
     const [registeredAtSearch, setRegisteredAtSearch] = useState(() => searchParams.get('registered_at') || '');
     const [debouncedRegisteredAt, setDebouncedRegisteredAt] = useState(() => searchParams.get('registered_at') || '');
     const [updatedAtSearch, setUpdatedAtSearch] = useState(() => searchParams.get('updated_at') || '');
@@ -203,7 +201,6 @@ const UserManagement = () => {
         google: debouncedGoogle,
         preference: debouncedPreference,
         blocked: debouncedBlocked,
-        last_active: debouncedLastActive,
         registered_at: debouncedRegisteredAt,
         updated_at: debouncedUpdatedAt,
     });
@@ -227,9 +224,6 @@ const UserManagement = () => {
     const onGoogleFilterChange = (e) => setGoogleFilter(e.target.value);
     const onRoleFilterChange = (e) => setRoleFilter(e.target.value);
 
-    const onLastActiveChange = (newValue) => {
-        setLastActiveSearch(newValue ? newValue.format('YYYY-MM-DD') : '');
-    };
     const onRegisteredAtChange = (newValue) => {
         setRegisteredAtSearch(newValue ? newValue.format('YYYY-MM-DD') : '');
     };
@@ -256,7 +250,6 @@ const UserManagement = () => {
         const roleApiVal = roleFilter === 'all' ? '' : roleFilter;
         setDebouncedRole(roleApiVal);
         
-        setDebouncedLastActive(lastActiveSearch);
         setDebouncedRegisteredAt(registeredAtSearch);
         setDebouncedUpdatedAt(updatedAtSearch);
         
@@ -272,7 +265,6 @@ const UserManagement = () => {
             if (googleApiVal) next.set('google', googleApiVal); else next.delete('google');
             if (prefApiVal) next.set('preference', prefApiVal); else next.delete('preference');
             if (roleApiVal) next.set('role', roleApiVal); else next.delete('role');
-            if (lastActiveSearch) next.set('last_active', lastActiveSearch); else next.delete('last_active');
             if (registeredAtSearch) next.set('registered_at', registeredAtSearch); else next.delete('registered_at');
             if (updatedAtSearch) next.set('updated_at', updatedAtSearch); else next.delete('updated_at');
 
@@ -589,7 +581,6 @@ const UserManagement = () => {
         preferenceFilter !== 'all' ||
         nameSearch !== '' ||
         emailSearch !== '' ||
-        lastActiveSearch !== '' ||
         registeredAtSearch !== '' ||
         updatedAtSearch !== '';
 
@@ -601,7 +592,6 @@ const UserManagement = () => {
         setPreferenceFilter('all');
         setNameSearch('');
         setEmailSearch('');
-        setLastActiveSearch('');
         setRegisteredAtSearch('');
         setUpdatedAtSearch('');
 
@@ -612,7 +602,6 @@ const UserManagement = () => {
         setDebouncedPreference('');
         setDebouncedName('');
         setDebouncedEmail('');
-        setDebouncedLastActive('');
         setDebouncedRegisteredAt('');
         setDebouncedUpdatedAt('');
 
@@ -620,7 +609,7 @@ const UserManagement = () => {
         setSearchParams(new URLSearchParams());
     };
 
-    if (!canList && !isAdmin) {
+    if (!canList) {
         return <AccessDenied message="You do not have permission to view User Management." />;
     }
 
@@ -1181,15 +1170,6 @@ const UserManagement = () => {
 
                         <LocalizationProvider dateAdapter={AdapterMoment}>
                             <Box className="flex items-center gap-2">
-                                <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>Last Active:</Typography>
-                                <DatePicker
-                                    value={lastActiveSearch ? moment(lastActiveSearch) : null}
-                                    onChange={onLastActiveChange}
-                                    format="MM/DD/YYYY"
-                                    slotProps={{ textField: datePickerTextFieldStyles, popper: datePickerPopperStyles, day: datePickerDayStyles, dialog: datePickerDialogStyles, mobilePaper: datePickerMobilePaperStyles }}
-                                />
-                            </Box>
-                            <Box className="flex items-center gap-2">
                                 <Typography variant="body2" sx={{ color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>Registered:</Typography>
                                 <DatePicker
                                     value={registeredAtSearch ? moment(registeredAtSearch) : null}
@@ -1277,7 +1257,6 @@ const UserManagement = () => {
                                 <TableCell align="center" width="100">BLOCKED</TableCell>
                                 <TableCell align="center" sx={{ minWidth: 160 }}>BLOCKED AT</TableCell>
                                 {isUserLoginEnabled && <TableCell align="center" width="90">LOGIN</TableCell>}
-                                <TableCell align="center" sx={{ minWidth: 160 }}>LAST ACTIVE</TableCell>
                                 <TableCell align="center" sx={{ minWidth: 160 }}>REGISTERED AT</TableCell>
                                 <TableCell align="center" sx={{ minWidth: 160 }}>UPDATED AT</TableCell>
                             </TableRow>
@@ -1454,11 +1433,6 @@ const UserManagement = () => {
                                                     ) : '-'}
                                                 </TableCell>
                                             )}
-
-                                            {/* LAST ACTIVE */}
-                                            <TableCell align="center" sx={{ whiteSpace: 'nowrap', color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>
-                                                {userItem.last_active_at ? moment(userItem.last_active_at).format('MMM D, YYYY h:mm A') : '-'}
-                                            </TableCell>
 
                                             {/* REGISTERED AT */}
                                             <TableCell align="center" sx={{ whiteSpace: 'nowrap', color: isDarkMode ? '#b4b7bd' : '#6e6b7b' }}>

@@ -1422,13 +1422,12 @@ const MyWork = () => {
   const { isDarkMode } = useTheme();
   const user = useSelector((state) => state.auth.user);
   const userPermissions = user?.permissions || [];
-  const isAdmin = (user?.role || "").toLowerCase() === "admin" || (user?.role_name || "").toLowerCase() === "admin";
-  const canView = isAdmin || userPermissions.includes("my_work.view");
+  const canView = userPermissions.includes("my_work.view");
 
   // Fetch My Work stats from dedicated /api/my-work endpoint
   const { data, isLoading, isFetching, refetch } = useGetMyWorkQuery(
     {
-      assignedTo: isAdmin ? "" : (user?.user_id || user?.id || ""),
+      assignedTo: user?.user_id || user?.id || "",
     },
     { skip: !canView, refetchOnMountOrArgChange: true }
   );
@@ -1524,7 +1523,7 @@ const MyWork = () => {
         {/* ── Content Area ── */}
         <Box sx={{ p: 0, flex: 1, display: "flex", flexDirection: "column" }}>
           {/* ── Admin View vs Single User View ── */}
-          {isAdmin ? (
+          {user?.role && user.role !== 'user' ? (
             <TeamPanel isDarkMode={isDarkMode} usersWorkList={usersWorkList} isLoading={isLoading} />
           ) : (
             <Box sx={{ p: { xs: 3, sm: 4 }, display: "flex", flexDirection: "column", gap: { xs: 3, sm: 4 } }}>

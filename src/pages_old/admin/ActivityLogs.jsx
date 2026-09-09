@@ -18,10 +18,9 @@ const ActivityLogs = () => {
     const { isDarkMode } = useTheme();
     const user = useSelector((state) => state.auth.user);
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canList = isAdmin || userPermissions.includes('activity_logs.list');
-    const canViewDetail = isAdmin || userPermissions.includes('activity_logs.view');
-    const canDelete = isAdmin || userPermissions.includes('activity_logs.delete');
+    const canList = userPermissions.includes('activity_logs.list');
+    const canViewDetail = userPermissions.includes('activity_logs.view');
+    const canDelete = userPermissions.includes('activity_logs.delete');
 
 
     const [searchParams, setSearchParams] = useSearchParams();
@@ -191,7 +190,7 @@ const ActivityLogs = () => {
         created_at: debouncedCreatedAt,
         user: debouncedUser
     }, {
-        skip: !canList && !isAdmin
+        skip: !canList
     });
     const [deleteActivityLog, { isLoading: isDeleting }] = useDeleteActivityLogMutation();
 
@@ -222,7 +221,7 @@ const ActivityLogs = () => {
     const colCount = canViewDetail || canDelete ? 6 : 5;
     const headerCells = ['#', 'User', 'Action', 'Entity Type', 'Created At', ...(canViewDetail || canDelete ? ['Actions'] : [])];
 
-    if (!canList && !isAdmin) {
+    if (!canList) {
         return <AccessDenied message="You do not have permission to view Activity Logs." />;
     }
 

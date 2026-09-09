@@ -24,8 +24,7 @@ const AddHomeSectionDialog = ({
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
   const { user } = useUser();
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin';
-  const canPublish = isAdmin || userPermissions.includes('home_section.live');
+  const canPublish = userPermissions.includes('home_section.live');
 
   const [isFormDirty, setIsFormDirty] = useState(false);
 

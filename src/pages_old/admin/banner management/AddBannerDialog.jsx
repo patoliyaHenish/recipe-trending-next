@@ -5,11 +5,11 @@ import { useTheme as useMuiTheme } from '@mui/material/styles'
 import CloseIcon from '@mui/icons-material/Close'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
-import { toast } from '../../../utils/toast';
 import { useCreateBannerMutation, useUpdateBannerMutation } from '../../../features/api/bannerApi'
-
+import { useSearchPublicApprovedRecipesSimpleQuery } from '../../../features/api/recipeApi'
 import { useTheme } from '../../../context/ThemeContext'
 import { getImage } from '../../../utils/helper'
+import { toast } from '../../../utils/toast'
 import { useUser } from '../../../context/useUser'
 
 const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerData = null, existingBanners = [] }) => {
@@ -18,13 +18,20 @@ const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerD
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'))
   const { user } = useUser();
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-  const canSetHero = isAdmin || userPermissions.includes('banner.set_hero');
+  const canSetHero = userPermissions.includes('banner.set_hero');
 
   const [createBanner, { isLoading: isAdding }] = useCreateBannerMutation()
-
   const [updateBanner, { isLoading: isUpdating }] = useUpdateBannerMutation()
 
+  const [recipeSearch, setRecipeSearch] = useState('');
+  const { data: searchedRecipesData, isLoading: isSearchingRecipes } = useSearchPublicApprovedRecipesSimpleQuery(
+    { q: recipeSearch, limit: 50 },
+    { skip: !open }
+  );
+
+  const availableRecipes = useMemo(() => {
+    return searchedRecipesData?.data || searchedRecipesData || [];
+  }, [searchedRecipesData]);
 
   const [imagePreview, setImagePreview] = useState(null)
   const [dragActive, setDragActive] = useState(false)
@@ -38,26 +45,29 @@ const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerD
       } else {
         setImagePreview(null)
       }
-
     }
     return () => {
       if (imageUrlRef.current) URL.revokeObjectURL(imageUrlRef.current)
     }
   }, [open, mode, bannerData])
 
-
-
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     const formData = new FormData()
     formData.append('title', values.title)
     formData.append('button_text', values.button_text)
-
     formData.append('is_hero', values.is_hero ? 'true' : 'false')
     
     if (values.is_hero && values.order) {
       formData.append('order', values.order.toString())
     } else {
       formData.append('order', '0')
+    }
+
+    if (values.recipes && values.recipes.length > 0) {
+      const recipeIds = values.recipes.map(r => r.recipe_id || r.id);
+      formData.append('recipe_ids', JSON.stringify(recipeIds));
+    } else {
+      formData.append('recipe_ids', JSON.stringify([]));
     }
 
     if (values.image instanceof File) {
@@ -83,18 +93,30 @@ const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerD
     }
   }
 
+  const initialRecipes = useMemo(() => {
+    if (mode === 'edit' && bannerData?.recipe_ids && Array.isArray(bannerData.recipe_ids)) {
+      return bannerData.recipe_ids.map(id => {
+        const found = availableRecipes.find(r => (r.recipe_id || r.id) === id);
+        return found || { recipe_id: id, title: `Recipe #${id}` };
+      });
+    }
+    return [];
+  }, [mode, bannerData, availableRecipes]);
+
   const initialValues = mode === 'edit' && bannerData ? {
     title: bannerData.title || '',
     button_text: bannerData.button_text || '',
     image: null,
     is_hero: bannerData.is_hero || false,
-    order: bannerData.order || ''
+    order: bannerData.order || '',
+    recipes: initialRecipes
   } : {
     title: '',
     button_text: '',
     image: null,
     is_hero: false,
-    order: ''
+    order: '',
+    recipes: []
   }
 
   const validationSchema = useMemo(() => {
@@ -284,6 +306,127 @@ const AddBannerDialog = ({ open, onClose, mode = 'add', bannerId = null, bannerD
                     helperText={touched.button_text && errors.button_text} 
                     sx={customInputSx}
                   />
+
+                  <Autocomplete
+                    multiple
+                    options={availableRecipes.filter(r => !values.recipes.some(selected => (selected.recipe_id || selected.id) === (r.recipe_id || r.id)))}
+                    getOptionLabel={(option) => option.title || option.name || `Recipe #${option.recipe_id || option.id}`}
+                    value={values.recipes}
+                    loading={isSearchingRecipes}
+                    onChange={(_, newValue) => {
+                      setFieldValue('recipes', newValue);
+                    }}
+                    onInputChange={(_, newInputValue) => {
+                      setRecipeSearch(newInputValue);
+                    }}
+                    isOptionEqualToValue={(option, value) => (option.recipe_id || option.id) === (value.recipe_id || value.id)}
+                    disablePortal={true}
+                    slotProps={{
+                      paper: {
+                        sx: {
+                          bgcolor: isDarkMode ? '#283046' : '#ffffff',
+                          color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                          borderRadius: '6px',
+                          border: `1px solid ${isDarkMode ? '#404656' : '#d8d6de'}`,
+                          boxShadow: isDarkMode ? '0 4px 24px 0 rgba(0,0,0,0.24)' : '0 4px 24px 0 rgba(34,41,47,0.1)',
+                          '& .MuiAutocomplete-listbox': {
+                            padding: '0',
+                            '& .MuiAutocomplete-option': {
+                              fontSize: '0.9rem',
+                              color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                              '&[aria-selected="true"]': {
+                                bgcolor: 'rgba(115, 103, 240, 0.12) !important',
+                                color: '#7367f0 !important',
+                                fontWeight: 500,
+                                '&.Mui-focused': {
+                                  bgcolor: 'rgba(115, 103, 240, 0.16) !important'
+                                }
+                              },
+                              '&:hover': {
+                                bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
+                                color: '#7367f0 !important'
+                              },
+                              '&.Mui-focused': {
+                                bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.12) !important' : 'rgba(115, 103, 240, 0.08) !important',
+                                color: '#7367f0 !important'
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Select Recipes (Show inside banner page)"
+                        placeholder="Search and select recipes..."
+                        sx={{
+                          ...customInputSx,
+                          '& .MuiAutocomplete-tag': {
+                            display: 'none',
+                          },
+                          '& .MuiOutlinedInput-root': {
+                            ...customInputSx['& .MuiOutlinedInput-root'],
+                            bgcolor: isDarkMode ? '#283046' : '#fff',
+                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                            '& fieldset': {
+                              borderColor: isDarkMode ? '#404656' : '#d8d6de',
+                            },
+                            '&:hover fieldset': {
+                              borderColor: '#7367f0',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#7367f0',
+                              borderWidth: '1px',
+                            },
+                          },
+                          '& .MuiInputLabel-root': {
+                            color: isDarkMode ? '#b4b7bd' : '#6e6b7b',
+                            '&.Mui-focused': {
+                              color: '#7367f0',
+                            }
+                          },
+                          '& .MuiAutocomplete-popupIndicator': {
+                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                          },
+                          '& .MuiAutocomplete-clearIndicator': {
+                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                          }
+                        }}
+                      />
+                    )}
+                  />
+
+                  {values.recipes && values.recipes.length > 0 && (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
+                      {values.recipes.map((item) => (
+                        <Chip
+                          key={item.recipe_id || item.id}
+                          label={item.title || item.name || `Recipe #${item.recipe_id || item.id}`}
+                          onDelete={() => {
+                            setFieldValue('recipes', values.recipes.filter(r => (r.recipe_id || r.id) !== (item.recipe_id || item.id)));
+                          }}
+                          size="small"
+                          sx={{
+                            backgroundColor: isDarkMode ? '#7367f0 !important' : '#e0e7ff !important',
+                            color: isDarkMode ? '#ffffff !important' : '#4338ca !important',
+                            fontWeight: '600 !important',
+                            borderRadius: '4px',
+                            '& .MuiChip-label': {
+                              color: isDarkMode ? '#ffffff !important' : '#4338ca !important',
+                              fontWeight: '600 !important',
+                            },
+                            '& .MuiChip-deleteIcon': {
+                              color: isDarkMode ? '#ffffff !important' : '#4338ca !important',
+                              '&:hover': {
+                                color: isDarkMode ? '#f1f5f9 !important' : '#3730a3 !important',
+                              }
+                            }
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  )}
                   <Box
                     onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                     onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}

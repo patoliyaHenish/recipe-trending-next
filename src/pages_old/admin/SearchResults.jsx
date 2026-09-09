@@ -64,8 +64,7 @@ const SearchResults = () => {
     const { isDarkMode } = useTheme();
     const user = useSelector((state) => state.auth.user);
     const userPermissions = user?.permissions || [];
-    const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
-    const canView = isAdmin || userPermissions.includes('search_console.view');
+    const canView = userPermissions.includes('search_console.view');
 
     const [period, setPeriod] = useState('7d');
     const [graphInterval, setGraphInterval] = useState('daily');

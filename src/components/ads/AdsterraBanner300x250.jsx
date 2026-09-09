@@ -46,7 +46,7 @@ const AdsterraBanner300x250 = () => {
   }, []);
 
   return (
-    <div className="hidden md:flex justify-center items-center w-[300px] h-[250px] min-w-[300px] min-h-[250px]">
+    <div className="flex justify-center items-center w-[300px] h-[250px] min-w-[300px] min-h-[250px]">
       <iframe
         ref={iframeRef}
         title="Adsterra 300x250 Banner Ad"

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import RecipeCard from '../common/RecipeCard';
 import RecipeGridSkeleton from '../common/RecipeGridSkeleton';
+import LoadMoreButton from '../common/LoadMoreButton';
 import CollectionCard from './CollectionCard';
 import { Box, Typography, Grid, Skeleton, Divider, useMediaQuery, CircularProgress } from '@mui/material';
 import { useGetPublicHomeSectionsQuery } from '../../features/api/homeSectionApi';
@@ -316,48 +317,7 @@ const HomeSections = () => {
 
       {hasMore && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 4, md: 6 }, mb: 4 }}>
-          <Box
-            component="button"
-            onClick={loadMore}
-            disabled={isFetching}
-            sx={{
-              px: { xs: 3, md: 5 },
-              py: { xs: 0.8, md: 1.1 },
-              bgcolor: isDarkMode ? 'rgba(202,96,20,0.15)' : '#FEE7D6',
-              color: isDarkMode ? '#FFEFD9' : '#CA6014',
-              border: `1.5px solid ${isDarkMode ? 'rgba(202,96,20,0.4)' : '#CA6014'}`,
-              borderRadius: '8px',
-              fontFamily: "'Basic', sans-serif",
-              fontSize: { xs: '0.9rem', md: '1rem' },
-              fontWeight: 600,
-              letterSpacing: '0.05em',
-              cursor: isFetching ? 'not-allowed' : 'pointer',
-              opacity: isFetching ? 0.7 : 1,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: isDarkMode ? 'none' : '0 4px 14px rgba(202, 96, 20, 0.15)',
-              '&:hover': {
-                bgcolor: isFetching ? undefined : '#CA6014',
-                color: isFetching ? undefined : '#fff',
-                transform: isFetching ? 'none' : 'translateY(-2px)',
-                boxShadow: isFetching ? 'none' : '0 6px 20px rgba(202, 96, 20, 0.25)',
-              },
-              '&:active': {
-                transform: 'translateY(0)',
-              }
-            }}
-          >
-            {isFetching ? (
-              <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1.5 }}>
-                <CircularProgress size={18} color="inherit" thickness={6} />
-                <span>Loading...</span>
-              </Box>
-            ) : (
-              <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1.5 }}>
-                <span>Load More</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↓</span>
-              </Box>
-            )}
-          </Box>
+          <LoadMoreButton onClick={loadMore} isLoading={isFetching} />
         </Box>
       )}
     </Box>

@@ -9,7 +9,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuOpenRounded from '@mui/icons-material/MenuOpenRounded';
 import SearchIcon from '@mui/icons-material/Search';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -217,6 +216,7 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
   }, [selectedPreferences]);
 
   const searchInputRef = useRef(null);
+  const searchSuggestionContainerRef = useRef(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -362,6 +362,20 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
       return () => clearTimeout(timer);
     }
   }, [searchDrawerOpen]);
+
+  useEffect(() => {
+    if (!showSuggestionsDropdown) return;
+
+    const handlePointerDown = (event) => {
+      const container = searchSuggestionContainerRef.current;
+      if (container && !container.contains(event.target)) {
+        setShowSuggestionsDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [showSuggestionsDropdown]);
 
   const handleDrawerToggle = () => setDrawerOpen(!drawerOpen);
 
@@ -1769,80 +1783,77 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
             )}
 
             <Box
+              ref={searchSuggestionContainerRef}
               sx={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                px: 1,
-                py: 0.5,
-                borderRadius: 2,
-                border: isDarkMode ? '1px solid var(--border-color)' : '1px solid #e0e0e0',
-                bgcolor: isDarkMode ? 'var(--bg-secondary)' : '#f8f9fa',
-                '&:focus-within': {
-                  borderColor: '#ca6014',
-                  boxShadow: '0 0 0 2px rgba(202, 96, 20, 0.2)',
-                },
+                flexDirection: 'column',
+                gap: 1.5,
+                position: 'relative',
               }}
             >
-              <SearchIcon sx={{ color: '#ca6014', fontSize: 24 }} />
-              <InputBase
-                id="search-input-field"
-                placeholder="Search dish name..."
-                value={searchInputValue}
-                onChange={handleSearchInputChange}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && (searchInputValue.trim() || searchTags.length > 0)) {
-                    handleSearchSubmit(e);
-                  } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                  } else if (e.key === 'Backspace' && !searchInputValue && searchTags.length > 0) {
-                    setSearchTags(prev => prev.slice(0, -1));
-                  }
-                }}
-                fullWidth
-                sx={{
-                  fontFamily: "'Basic', sans-serif !important",
-                  fontSize: '1rem',
-                  color: isDarkMode ? '#FFF7EC' : '#2B2828',
-                  '& .MuiInputBase-input::placeholder': {
-                    opacity: 0.8,
-                    color: isDarkMode ? '#9ca3af' : '#6b7280',
-                  },
-                }}
-                inputProps={{ 'aria-label': 'Search recipes', ref: searchInputRef }}
-              />
-              <IconButton
-                type="submit"
-                onClick={handleSearchSubmit}
-                disabled={!searchInputValue.trim() && searchTags.length === 0}
-                sx={{
-                  color: '#ca6014',
-                  bgcolor: 'rgba(202, 96, 20, 0.12)',
-                  '&:hover': { bgcolor: 'rgba(202, 96, 20, 0.2)' },
-                  '&.Mui-disabled': {
-                    color: isDarkMode ? '#555' : '#ccc',
-                    bgcolor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
-                  },
-                }}
-                aria-label="Search"
-              >
-                <ArrowForwardIcon sx={{ transform: 'rotate(-45deg)' }} />
-              </IconButton>
-            </Box>
-
-            {showSuggestionsDropdown && sortedSuggestions.length > 0 && (
               <Box
                 sx={{
-                  backgroundColor: isDarkMode ? 'var(--bg-secondary)' : '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 2,
                   border: isDarkMode ? '1px solid var(--border-color)' : '1px solid #e0e0e0',
-                  borderTop: 'none',
-                  borderBottomLeftRadius: 2,
-                  borderBottomRightRadius: 2,
-                  maxHeight: '350px',
-                  overflowY: 'auto',
-                  boxShadow: isDarkMode ? '0 4px 8px rgba(0,0,0,0.3)' : '0 4px 8px rgba(0,0,0,0.1)',
+                  bgcolor: isDarkMode ? 'var(--bg-secondary)' : '#f8f9fa',
+                  '&:focus-within': {
+                    borderColor: '#ca6014',
+                    boxShadow: '0 0 0 2px rgba(202, 96, 20, 0.2)',
+                  },
                 }}
               >
+                <SearchIcon sx={{ color: '#ca6014', fontSize: 24 }} />
+                <InputBase
+                  id="search-input-field"
+                  placeholder="Search dish name..."
+                  value={searchInputValue}
+                  onChange={handleSearchInputChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (searchInputValue.trim() || searchTags.length > 0)) {
+                      handleSearchSubmit(e);
+                    } else if (e.key === 'Enter') {
+                      e.preventDefault();
+                    } else if (e.key === 'Backspace' && !searchInputValue && searchTags.length > 0) {
+                      setSearchTags(prev => prev.slice(0, -1));
+                    }
+                  }}
+                  fullWidth
+                  sx={{
+                    fontFamily: "'Basic', sans-serif !important",
+                    fontSize: '1rem',
+                    color: isDarkMode ? '#FFF7EC' : '#2B2828',
+                    '& .MuiInputBase-input::placeholder': {
+                      opacity: 0.8,
+                      color: isDarkMode ? '#9ca3af' : '#6b7280',
+                    },
+                  }}
+                  inputProps={{ 'aria-label': 'Search recipes', ref: searchInputRef }}
+                />
+              </Box>
+
+              {showSuggestionsDropdown && sortedSuggestions.length > 0 && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 'calc(100% + 4px)',
+                    left: 0,
+                    right: 0,
+                    zIndex: 10,
+                    backgroundColor: isDarkMode ? 'var(--bg-secondary)' : '#ffffff',
+                    border: isDarkMode ? '1px solid var(--border-color)' : '1px solid #e0e0e0',
+                    borderTop: 'none',
+                    borderBottomLeftRadius: 2,
+                    borderBottomRightRadius: 2,
+                    maxHeight: '350px',
+                    overflowY: 'auto',
+                    boxShadow: isDarkMode ? '0 4px 8px rgba(0,0,0,0.3)' : '0 4px 8px rgba(0,0,0,0.1)',
+                  }}
+                >
                 {sortedSuggestions.map((suggestion, idx) => (
                   <Box
                     key={`${suggestion.type}-${suggestion.id || idx}`}
@@ -1895,8 +1906,37 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                     </Box>
                   </Box>
                 ))}
-              </Box>
-            )}
+                </Box>
+              )}
+            </Box>
+
+            <Button
+              type="submit"
+              onClick={handleSearchSubmit}
+              disabled={!searchInputValue.trim() && searchTags.length === 0}
+              sx={{
+                width: '100%',
+                height: 44,
+                borderRadius: 2,
+                backgroundColor: '#ca6014',
+                color: '#fff',
+                textTransform: 'none',
+                fontFamily: "'Basic', sans-serif !important",
+                fontSize: '1rem',
+                fontWeight: 600,
+                boxShadow: 'none',
+                '&:hover': {
+                  backgroundColor: '#b0500e',
+                  boxShadow: 'none',
+                },
+                '&.Mui-disabled': {
+                  color: isDarkMode ? '#555' : '#ccc',
+                  backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                },
+              }}
+            >
+              Search
+            </Button>
 
             <Box sx={{ mt: -0.5, mb: 1 }}>
               <Typography

@@ -76,14 +76,13 @@ const IngredientManagement = () => {
   };
   const user = useSelector((state) => state.auth.user);
   const userPermissions = user?.permissions || [];
-  const isAdmin = user?.role === 'admin' || user?.role_name === 'admin';
 
-  const canCreate = isAdmin || userPermissions.includes('ingredient.create');
-  const canUpdate = isAdmin || userPermissions.includes('ingredient.update');
-  const canDelete = isAdmin || userPermissions.includes('ingredient.delete');
-  const canList = isAdmin || userPermissions.includes('ingredient.list');
+  const canCreate = userPermissions.includes('ingredient.create');
+  const canUpdate = userPermissions.includes('ingredient.update');
+  const canDelete = userPermissions.includes('ingredient.delete');
+  const canList = userPermissions.includes('ingredient.list');
 
-  if (!canList && !isAdmin) {
+  if (!canList) {
     return <AccessDenied message="You do not have permission to view this page." />;
   }
 
