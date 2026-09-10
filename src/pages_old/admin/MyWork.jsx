@@ -1523,7 +1523,7 @@ const MyWork = () => {
         {/* ── Content Area ── */}
         <Box sx={{ p: 0, flex: 1, display: "flex", flexDirection: "column" }}>
           {/* ── Admin View vs Single User View ── */}
-          {user?.role && user.role !== 'user' ? (
+          {user?.role === 'admin' ? (
             <TeamPanel isDarkMode={isDarkMode} usersWorkList={usersWorkList} isLoading={isLoading} />
           ) : (
             <Box sx={{ p: { xs: 3, sm: 4 }, display: "flex", flexDirection: "column", gap: { xs: 3, sm: 4 } }}>
