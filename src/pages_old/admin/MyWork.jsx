@@ -1425,10 +1425,9 @@ const MyWork = () => {
   const canView = userPermissions.includes("my_work.view");
 
   // Fetch My Work stats from dedicated /api/my-work endpoint
+  const isAdminUser = user?.role === 'admin';
   const { data, isLoading, isFetching, refetch } = useGetMyWorkQuery(
-    {
-      assignedTo: user?.user_id || user?.id || "",
-    },
+    isAdminUser ? {} : { assignedTo: user?.user_id || user?.id || "" },
     { skip: !canView, refetchOnMountOrArgChange: true }
   );
 
