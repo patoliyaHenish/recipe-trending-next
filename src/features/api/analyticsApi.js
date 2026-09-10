@@ -73,7 +73,31 @@ export const analyticsApi = createApi({
             }),
             providesTags: ['Analytics'],
         }),
+        getGa4RecipeViewsByTrafficSource: builder.query({
+            query: ({ period = '7d', startDate, endDate }) => ({
+                url: '/analytics/ga4-recipe-views-by-traffic-source',
+                method: 'GET',
+                params: { period, startDate, endDate },
+            }),
+            providesTags: ['Analytics'],
+        }),
+        getGa4NewVsReturningUsers: builder.query({
+            query: ({ period = '7d', startDate, endDate }) => ({
+                url: '/analytics/ga4-new-vs-returning-users',
+                method: 'GET',
+                params: { period, startDate, endDate },
+            }),
+            providesTags: ['Analytics'],
+        }),
+        getGa4RecipeFunnel: builder.query({
+            query: ({ period = '7d', startDate, endDate }) => ({
+                url: '/analytics/ga4-recipe-funnel',
+                method: 'GET',
+                params: { period, startDate, endDate },
+            }),
+            providesTags: ['Analytics'],
+        }),
     }),
 });
 
-export const { useGetSearchResultsQuery, useGetGa4DataQuery, useGetGa4TrendQuery, useGetGa4TopRecipesQuery, useGetGa4RealtimeDataQuery, useGetGa4RealtimeTrendQuery, useGetGa4RealtimeTopRecipesQuery, useGetGa4RecipeViewsByFoodTypeQuery } = analyticsApi;
+export const { useGetSearchResultsQuery, useGetGa4DataQuery, useGetGa4TrendQuery, useGetGa4TopRecipesQuery, useGetGa4RealtimeDataQuery, useGetGa4RealtimeTrendQuery, useGetGa4RealtimeTopRecipesQuery, useGetGa4RecipeViewsByFoodTypeQuery, useGetGa4RecipeViewsByTrafficSourceQuery, useGetGa4NewVsReturningUsersQuery, useGetGa4RecipeFunnelQuery } = analyticsApi;

@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Autocomplete, TextField, FormControl, IconButton, Tooltip, Tabs, Tab, Switch, FormControlLabel, Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar, InputAdornment } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import SearchIcon from '@mui/icons-material/Search';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import moment from 'moment';
 import { useTheme } from '../../context/ThemeContext';
-import { useGetGa4DataQuery, useGetGa4TrendQuery, useGetGa4TopRecipesQuery, useGetGa4RealtimeDataQuery, useGetGa4RealtimeTrendQuery, useGetGa4RealtimeTopRecipesQuery, useGetGa4RecipeViewsByFoodTypeQuery } from '../../features/api/analyticsApi';
+import { useGetGa4DataQuery, useGetGa4TrendQuery, useGetGa4TopRecipesQuery, useGetGa4RealtimeDataQuery, useGetGa4RealtimeTrendQuery, useGetGa4RealtimeTopRecipesQuery, useGetGa4RecipeViewsByFoodTypeQuery, useGetGa4RecipeViewsByTrafficSourceQuery, useGetGa4NewVsReturningUsersQuery, useGetGa4RecipeFunnelQuery } from '../../features/api/analyticsApi';
 import { useGetRecipeCategoryDropdownQuery } from '../../features/api/categoryApi';
 import { getImage } from '../../utils/helper';
 import AccessDenied from '../../components/common/AccessDenied';
@@ -41,7 +41,7 @@ export default function WebAnalytics() {
   const [activeTab, setActiveTab] = useState(urlTab === 'trend' ? 'trend' : 'kpi');
 
   useEffect(() => {
-    if (urlTab === 'trend' || urlTab === 'kpi' || urlTab === 'recipes' || urlTab === 'vsgraph') {
+    if (urlTab === 'trend' || urlTab === 'kpi' || urlTab === 'recipes' || urlTab === 'vsgraph-food' || urlTab === 'vsgraph-traffic' || urlTab === 'new-vs-returning' || urlTab === 'recipe-funnel') {
       setActiveTab(urlTab);
     }
   }, [urlTab]);
@@ -107,22 +107,73 @@ export default function WebAnalytics() {
   const isTopRecipesFetching = isRealtime ? rtRecipesRes.isFetching : histRecipesRes.isFetching;
   const refetchTopRecipes = isRealtime ? rtRecipesRes.refetch : histRecipesRes.refetch;
 
-  const histVsGraphRes = useGetGa4RecipeViewsByFoodTypeQuery({
+  const histFoodTypeRes = useGetGa4RecipeViewsByFoodTypeQuery({
     period,
     startDate: period === 'custom' && customStartDate ? customStartDate.format('YYYY-MM-DD') : undefined,
     endDate: period === 'custom' && customEndDate ? customEndDate.format('YYYY-MM-DD') : undefined,
-  }, { skip: activeTab !== 'vsgraph' || isRealtime });
+  }, { skip: activeTab !== 'vsgraph-food' || isRealtime });
 
-  const rtVsGraphRes = useGetGa4RecipeViewsByFoodTypeQuery({
+  const rtFoodTypeRes = useGetGa4RecipeViewsByFoodTypeQuery({
     period: 'today',
     startDate: undefined,
     endDate: undefined,
-  }, { skip: activeTab !== 'vsgraph' || !isRealtime });
+  }, { skip: activeTab !== 'vsgraph-food' || !isRealtime });
 
-  const vsGraphRes = isRealtime ? rtVsGraphRes.data : histVsGraphRes.data;
-  const isVsGraphLoading = isRealtime ? rtVsGraphRes.isLoading : histVsGraphRes.isLoading;
-  const isVsGraphFetching = isRealtime ? rtVsGraphRes.isFetching : histVsGraphRes.isFetching;
-  const refetchVsGraph = isRealtime ? rtVsGraphRes.refetch : histVsGraphRes.refetch;
+  const foodTypeRes = isRealtime ? rtFoodTypeRes.data : histFoodTypeRes.data;
+  const isFoodTypeLoading = isRealtime ? rtFoodTypeRes.isLoading : histFoodTypeRes.isLoading;
+  const isFoodTypeFetching = isRealtime ? rtFoodTypeRes.isFetching : histFoodTypeRes.isFetching;
+  const refetchFoodType = isRealtime ? rtFoodTypeRes.refetch : histFoodTypeRes.refetch;
+
+  const histTrafficRes = useGetGa4RecipeViewsByTrafficSourceQuery({
+    period,
+    startDate: period === 'custom' && customStartDate ? customStartDate.format('YYYY-MM-DD') : undefined,
+    endDate: period === 'custom' && customEndDate ? customEndDate.format('YYYY-MM-DD') : undefined,
+  }, { skip: activeTab !== 'vsgraph-traffic' || isRealtime });
+
+  const rtTrafficRes = useGetGa4RecipeViewsByTrafficSourceQuery({
+    period: 'today',
+    startDate: undefined,
+    endDate: undefined,
+  }, { skip: activeTab !== 'vsgraph-traffic' || !isRealtime });
+
+  const trafficRes = isRealtime ? rtTrafficRes.data : histTrafficRes.data;
+  const isTrafficLoading = isRealtime ? rtTrafficRes.isLoading : histTrafficRes.isLoading;
+  const isTrafficFetching = isRealtime ? rtTrafficRes.isFetching : histTrafficRes.isFetching;
+  const refetchTraffic = isRealtime ? rtTrafficRes.refetch : histTrafficRes.refetch;
+
+  const histNewVsReturningRes = useGetGa4NewVsReturningUsersQuery({
+    period,
+    startDate: period === 'custom' && customStartDate ? customStartDate.format('YYYY-MM-DD') : undefined,
+    endDate: period === 'custom' && customEndDate ? customEndDate.format('YYYY-MM-DD') : undefined,
+  }, { skip: activeTab !== 'new-vs-returning' || isRealtime });
+
+  const rtNewVsReturningRes = useGetGa4NewVsReturningUsersQuery({
+    period: 'today',
+    startDate: undefined,
+    endDate: undefined,
+  }, { skip: activeTab !== 'new-vs-returning' || !isRealtime });
+
+  const newVsReturningRes = isRealtime ? rtNewVsReturningRes.data : histNewVsReturningRes.data;
+  const isNewVsReturningLoading = isRealtime ? rtNewVsReturningRes.isLoading : histNewVsReturningRes.isLoading;
+  const isNewVsReturningFetching = isRealtime ? rtNewVsReturningRes.isFetching : histNewVsReturningRes.isFetching;
+  const refetchNewVsReturning = isRealtime ? rtNewVsReturningRes.refetch : histNewVsReturningRes.refetch;
+
+  const histFunnelRes = useGetGa4RecipeFunnelQuery({
+    period,
+    startDate: period === 'custom' && customStartDate ? customStartDate.format('YYYY-MM-DD') : undefined,
+    endDate: period === 'custom' && customEndDate ? customEndDate.format('YYYY-MM-DD') : undefined,
+  }, { skip: activeTab !== 'recipe-funnel' || isRealtime });
+
+  const rtFunnelRes = useGetGa4RecipeFunnelQuery({
+    period: 'today',
+    startDate: undefined,
+    endDate: undefined,
+  }, { skip: activeTab !== 'recipe-funnel' || !isRealtime });
+
+  const funnelRes = isRealtime ? rtFunnelRes.data : histFunnelRes.data;
+  const isFunnelLoading = isRealtime ? rtFunnelRes.isLoading : histFunnelRes.isLoading;
+  const isFunnelFetching = isRealtime ? rtFunnelRes.isFetching : histFunnelRes.isFetching;
+  const refetchFunnel = isRealtime ? rtFunnelRes.refetch : histFunnelRes.refetch;
 
   const { data: categoriesData } = useGetRecipeCategoryDropdownQuery();
 
@@ -200,8 +251,17 @@ export default function WebAnalytics() {
     } else if (activeTab === 'recipes') {
       const result = await refetchTopRecipes();
       if (result.data) success = true;
-    } else if (activeTab === 'vsgraph') {
-      const result = await refetchVsGraph();
+    } else if (activeTab === 'vsgraph-food') {
+      const result = await refetchFoodType();
+      if (result.data) success = true;
+    } else if (activeTab === 'vsgraph-traffic') {
+      const result = await refetchTraffic();
+      if (result.data) success = true;
+    } else if (activeTab === 'new-vs-returning') {
+      const result = await refetchNewVsReturning();
+      if (result.data) success = true;
+    } else if (activeTab === 'recipe-funnel') {
+      const result = await refetchFunnel();
       if (result.data) success = true;
     }
 
@@ -223,8 +283,17 @@ export default function WebAnalytics() {
     } else if (activeTab === 'recipes') {
       const result = await refetchTopRecipes();
       if (result.data) success = true;
-    } else if (activeTab === 'vsgraph') {
-      const result = await refetchVsGraph();
+    } else if (activeTab === 'vsgraph-food') {
+      const result = await refetchFoodType();
+      if (result.data) success = true;
+    } else if (activeTab === 'vsgraph-traffic') {
+      const result = await refetchTraffic();
+      if (result.data) success = true;
+    } else if (activeTab === 'new-vs-returning') {
+      const result = await refetchNewVsReturning();
+      if (result.data) success = true;
+    } else if (activeTab === 'recipe-funnel') {
+      const result = await refetchFunnel();
       if (result.data) success = true;
     }
 
@@ -275,7 +344,7 @@ export default function WebAnalytics() {
     },
     {
       key: 'activeUsers',
-      label: 'Active Users (Now)',
+      label: 'Active Users — Now',
       icon: <Person sx={{ fontSize: 28 }} />,
       gradient: 'linear-gradient(135deg, #28c76f 0%, #5ddb8c 100%)',
       lightBg: '#d1fae5',
@@ -315,7 +384,7 @@ export default function WebAnalytics() {
     },
     {
       key: 'avgSessionDuration',
-      label: 'Avg. Engagement Time',
+      label: 'Avg. Engagement Time per User',
       icon: <Timer sx={{ fontSize: 28 }} />,
       gradient: 'linear-gradient(135deg, #00cfe8 0%, #46e3f7 100%)',
       lightBg: '#dcf6f9',
@@ -427,8 +496,8 @@ export default function WebAnalytics() {
               }
             />
             <Tooltip title="Refresh Data">
-              <IconButton onClick={handleManualRefresh} disabled={isFetching || isTrendFetching || isTopRecipesFetching} sx={{ color: isDarkMode ? '#a5b4fc' : '#7367f0', bgcolor: isDarkMode ? 'rgba(115,103,240,0.12)' : '#ede9fe', '&:hover': { bgcolor: isDarkMode ? 'rgba(115,103,240,0.2)' : '#e0d8ff' } }}>
-                <RefreshIcon className={(isFetching || isTrendFetching || isTopRecipesFetching) ? "animate-spin" : ""} />
+              <IconButton onClick={handleManualRefresh} disabled={isFetching || isTrendFetching || isTopRecipesFetching || isFoodTypeFetching || isTrafficFetching || isNewVsReturningFetching || isFunnelFetching} sx={{ color: isDarkMode ? '#a5b4fc' : '#7367f0', bgcolor: isDarkMode ? 'rgba(115,103,240,0.12)' : '#ede9fe', '&:hover': { bgcolor: isDarkMode ? 'rgba(115,103,240,0.2)' : '#e0d8ff' } }}>
+                <RefreshIcon className={(isFetching || isTrendFetching || isTopRecipesFetching || isFoodTypeFetching || isTrafficFetching || isNewVsReturningFetching || isFunnelFetching) ? "animate-spin" : ""} />
               </IconButton>
             </Tooltip>
           </Box>
@@ -463,7 +532,10 @@ export default function WebAnalytics() {
               <Tab label="Top KPI cards" value="kpi" />
               <Tab label="Traffic Trend" value="trend" />
               <Tab label="Top Recipes" value="recipes" />
-              <Tab label="Vs Graph" value="vsgraph" />
+              <Tab label="Vs Graph (food type)" value="vsgraph-food" />
+              <Tab label="Vs Graph (traffic source)" value="vsgraph-traffic" />
+              <Tab label="New vs Returning Users" value="new-vs-returning" />
+              <Tab label="Recipe Funnel" value="recipe-funnel" />
             </Tabs>
           </Box>
 
@@ -650,6 +722,10 @@ export default function WebAnalytics() {
               {visibleKpiCards.map((card) => {
                 const rawValue = stats[card.key] ?? '0';
                 let value = rawValue;
+
+                if (!isRealtime && card.key === 'activeUsers') {
+                  value = stats.realtimeUsers ?? rawValue;
+                }
 
                 if (card.key === 'mobilePercentage') {
                   value = `${rawValue}%`;
@@ -1243,9 +1319,9 @@ export default function WebAnalytics() {
                 </TableContainer>
               )}
             </Box>
-          ) : activeTab === 'vsgraph' ? (
+          ) : activeTab === 'vsgraph-food' ? (
             <Box sx={{ width: '100%' }}>
-              {(isVsGraphLoading || isVsGraphFetching) && (!vsGraphRes?.data || vsGraphRes.data.length === 0) ? (
+              {(isFoodTypeLoading || isFoodTypeFetching) && (!foodTypeRes?.data || foodTypeRes.data.length === 0) ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
                   <CircularProgress size={40} sx={{ color: '#7367f0' }} />
                 </Box>
@@ -1258,7 +1334,7 @@ export default function WebAnalytics() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={vsGraphRes?.data || []}
+                          data={foodTypeRes?.data || []}
                           cx="50%"
                           cy="50%"
                           labelLine={false}
@@ -1268,7 +1344,7 @@ export default function WebAnalytics() {
                           dataKey="value"
                           nameKey="name"
                         >
-                          {(vsGraphRes?.data || []).map((entry, index) => (
+                          {(foodTypeRes?.data || []).map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
@@ -1281,13 +1357,189 @@ export default function WebAnalytics() {
                     </ResponsiveContainer>
                   </Box>
                   <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
-                    {(vsGraphRes?.data || []).map((item) => (
+                    {(foodTypeRes?.data || []).map((item) => (
                       <Box key={item.name} sx={{ textAlign: 'center' }}>
                         <Typography variant="h5" sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>
                           {item.value.toLocaleString()}
                         </Typography>
                         <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
                           {item.name} Views
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          ) : activeTab === 'vsgraph-traffic' ? (
+            <Box sx={{ width: '100%' }}>
+              {(isTrafficLoading || isTrafficFetching) && (!trafficRes?.data || trafficRes.data.length === 0) ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+                  <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                </Box>
+              ) : (
+                <Box className="flex flex-col items-center gap-6">
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>
+                    Traffic Source Distribution
+                  </Typography>
+                  <Box sx={{ width: '100%', maxWidth: 500, height: 400 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={trafficRes?.data || []}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={120}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                        >
+                          {(trafficRes?.data || []).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip
+                          formatter={(value, name) => [`${value} sessions`, name]}
+                          contentStyle={{ backgroundColor: isDarkMode ? '#283046' : '#fff', borderColor: isDarkMode ? '#404656' : '#d8d6de', color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    {(trafficRes?.data || []).map((item) => (
+                      <Box key={item.name} sx={{ textAlign: 'center' }}>
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>
+                          {item.value.toLocaleString()}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
+                          {item.name} Sessions
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          ) : activeTab === 'new-vs-returning' ? (
+            <Box sx={{ width: '100%' }}>
+              {(isNewVsReturningLoading || isNewVsReturningFetching) && (!newVsReturningRes?.data || newVsReturningRes.data.length === 0) ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+                  <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                </Box>
+              ) : (
+                <Box className="flex flex-col items-center gap-6">
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>
+                    New vs Returning Users
+                  </Typography>
+                  <Box sx={{ width: '100%', maxWidth: 900, height: 400 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={newVsReturningRes?.data || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#404656' : '#e5e7eb'} />
+                        <XAxis
+                          dataKey="date"
+                          stroke={isDarkMode ? '#9ca3af' : '#6b7280'}
+                          tick={{ fill: isDarkMode ? '#d0d2d6' : '#6e6b7b' }}
+                        />
+                        <YAxis
+                          stroke={isDarkMode ? '#9ca3af' : '#6b7280'}
+                          tick={{ fill: isDarkMode ? '#d0d2d6' : '#6e6b7b' }}
+                        />
+                        <RechartsTooltip
+                          contentStyle={{ backgroundColor: isDarkMode ? '#283046' : '#fff', borderColor: isDarkMode ? '#404656' : '#d8d6de', color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }} />
+                        <Line
+                          type="monotone"
+                          dataKey="new"
+                          name="New Users"
+                          stroke="#7367f0"
+                          strokeWidth={3}
+                          dot={{ r: 4 }}
+                          activeDot={{ r: 6 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="returning"
+                          name="Returning Users"
+                          stroke="#28c76f"
+                          strokeWidth={3}
+                          dot={{ r: 4 }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: '#7367f0' }}>
+                        {newVsReturningRes?.data?.reduce((sum, item) => sum + (item.new || 0), 0).toLocaleString()}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
+                        Total New Users
+                      </Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: '#28c76f' }}>
+                        {newVsReturningRes?.data?.reduce((sum, item) => sum + (item.returning || 0), 0).toLocaleString()}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
+                        Total Returning Users
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          ) : activeTab === 'recipe-funnel' ? (
+            <Box sx={{ width: '100%' }}>
+              {(isFunnelLoading || isFunnelFetching) && (!funnelRes?.data || funnelRes.data.length === 0) ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+                  <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                </Box>
+              ) : (
+                <Box className="flex flex-col items-center gap-6">
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>
+                    Recipe Funnel
+                  </Typography>
+                  <Box sx={{ width: '100%', maxWidth: 800 }}>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 120px 100px', gap: 2, mb: 1, px: 2 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: isDarkMode ? '#9ca3af' : '#6b7280', textTransform: 'uppercase' }}>Step</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: isDarkMode ? '#9ca3af' : '#6b7280', textTransform: 'uppercase', textAlign: 'right' }}>Users</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: isDarkMode ? '#9ca3af' : '#6b7280', textTransform: 'uppercase', textAlign: 'right' }}>Conversion</Typography>
+                    </Box>
+                    {funnelRes?.data?.map((step, index) => (
+                      <Box key={step.name} sx={{ mb: 2 }}>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 120px 100px', gap: 2, alignItems: 'center', px: 2, py: 1.5, borderRadius: '8px', bgcolor: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${isDarkMode ? '#404656' : '#e5e7eb'}` }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: step.color, flexShrink: 0 }} />
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#d0d2d6' : '#5e5873' }}>
+                              {step.name}
+                            </Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b', textAlign: 'right' }}>
+                            {step.value.toLocaleString()}
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: step.color, textAlign: 'right' }}>
+                            {step.conversionRate}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ width: '100%', height: 6, bgcolor: isDarkMode ? '#283046' : '#f3f2f7', borderRadius: '3px', overflow: 'hidden', mt: 1, mx: 2 }}>
+                          <Box sx={{ width: `${step.barWidth}%`, height: '100%', bgcolor: step.color, borderRadius: '3px', transition: 'width 0.5s ease' }} />
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', mt: 2 }}>
+                    {funnelRes?.data?.map((item) => (
+                      <Box key={item.name} sx={{ textAlign: 'center', bgcolor: isDarkMode ? '#283046' : '#fff', p: 2, borderRadius: '8px', border: `1px solid ${isDarkMode ? '#404656' : '#e5e7eb'}` }}>
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: item.color }}>
+                          {item.value.toLocaleString()}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
+                          {item.name}
                         </Typography>
                       </Box>
                     ))}
