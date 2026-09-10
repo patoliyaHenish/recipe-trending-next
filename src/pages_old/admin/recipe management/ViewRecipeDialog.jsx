@@ -368,6 +368,40 @@ const ViewRecipeDialog = ({
                 </Box>
             )}
 
+
+            {canViewAnalytics && (
+                <Box sx={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(3, 1fr)' }, 
+                    gap: 2,
+                    bgcolor: isDarkMode ? 'rgba(115, 103, 240, 0.04)' : 'rgba(115, 103, 240, 0.04)',
+                    p: 2.5,
+                    borderRadius: 2,
+                    border: `1px solid ${isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.12)'}`,
+                }}>
+                    <Box>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: isDarkMode ? '#9ca3af' : '#6b7280', letterSpacing: 0.5, textTransform: 'uppercase' }}>Last 7 Days</Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
+                            {(data.views_last_7_days != null ? data.views_last_7_days : 0).toLocaleString()}
+                        </Typography>
+                    </Box>
+                    <Box>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: isDarkMode ? '#9ca3af' : '#6b7280', letterSpacing: 0.5, textTransform: 'uppercase' }}>Last 28 Days</Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
+                            {(data.views_last_28_days != null ? data.views_last_28_days : 0).toLocaleString()}
+                        </Typography>
+                    </Box>
+                    <Box>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: isDarkMode ? '#9ca3af' : '#6b7280', letterSpacing: 0.5, textTransform: 'uppercase' }}>Total Views</Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: isDarkMode ? '#e5e7eb' : '#111827' }}>
+                            {(data.total_views != null ? data.total_views : 0).toLocaleString()}
+                        </Typography>
+                    </Box>
+                </Box>
+            )}
+
+
+
             <Box sx={{ 
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(1, 1fr)', 
@@ -377,7 +411,7 @@ const ViewRecipeDialog = ({
                 borderRadius: 2,
                 border: `1px solid ${isDarkMode ? 'rgba(115, 103, 240, 0.12)' : 'rgba(115, 103, 240, 0.12)'}`,
             }}>
-               <Typography variant="subtitle2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280', fontWeight: 700, mb: -1, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Recipe Instructions</Typography>
+               <Typography variant="subtitle2" sx={{ color: isDarkMode ? '#9ca3af' : '#6e6b7b', fontWeight: 700, mb: -1, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Recipe Instructions</Typography>
                <Box sx={{ pl: 0, m: 0 }}>
                  {(() => {
                    let subStepCounter = 0;

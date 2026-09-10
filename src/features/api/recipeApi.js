@@ -50,7 +50,7 @@ export const recipeApi = createApi({
             invalidatesTags: ["Refetch_Recipe"],
         }),
         getAllRecipesForAdmin: builder.query({
-            query: ({ search = '', page = 1, limit = 10, category_name = '', sub_category_name = '', public_approved = '', admin_approved = '', food_type = '', public_approved_from = '', public_approved_to = '', admin_approved_from = '', admin_approved_to = '', created_at_from = '', created_at_to = '', updated_at_from = '', updated_at_to = '', badge = '', created_by = '', pending_notes = '', has_updates = '', sort_by = 'created_at' }) => {
+            query: ({ search = '', page = 1, limit = 10, category_name = '', sub_category_name = '', public_approved = '', admin_approved = '', food_type = '', public_approved_from = '', public_approved_to = '', admin_approved_from = '', admin_approved_to = '', created_at_from = '', created_at_to = '', updated_at_from = '', updated_at_to = '', badge = '', created_by = '', pending_notes = '', has_updates = '', sort_by = 'created_at', show_analytics = '' }) => {
                 const params = new URLSearchParams();
                 if (search) params.append('search', search);
                 if (page) params.append('page', page);
@@ -73,6 +73,7 @@ export const recipeApi = createApi({
                 if (pending_notes) params.append('pending_notes', pending_notes);
                 if (has_updates) params.append('has_updates', has_updates);
                 if (sort_by) params.append('sort_by', sort_by);
+                if (show_analytics) params.append('show_analytics', show_analytics);
                 return {
                     url: `/get-all-recipes-for-admin?${params.toString()}`,
                     method: "GET",

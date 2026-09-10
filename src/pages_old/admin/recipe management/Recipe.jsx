@@ -414,8 +414,9 @@ const Recipe = () => {
     ...(apiFilters.badge ? { badge: apiFilters.badge } : {}),
     ...(apiFilters.createdBy ? { created_by: apiFilters.createdBy } : {}),
     ...(apiFilters.pendingNotesOnly ? { pending_notes: true } : {}),
-    ...(apiFilters.hasUpdatesAfterNotes ? { has_updates: true } : {}),
-    sort_by: apiFilters.sortBy
+      ...(apiFilters.hasUpdatesAfterNotes ? { has_updates: true } : {}),
+      sort_by: apiFilters.sortBy,
+      show_analytics: showAnalyticsColumns ? 'true' : ''
   }, { refetchOnMountOrArgChange: true });
   const [createRecipeByAdmin, { isLoading: isAdding }] = useCreateRecipeByAdminMutation();
   const [deleteRecipeByAdmin, { isLoading: isDeleting }] = useDeleteRecipeByAdminMutation();
@@ -2527,6 +2528,9 @@ const Recipe = () => {
                 {showAnalyticsColumns && (
                     <>
                         <TableCell align="center">Badge</TableCell>
+                        <TableCell align="center">Last 7 Days</TableCell>
+                        <TableCell align="center">Last 28 Days</TableCell>
+                        <TableCell align="center">Total Views</TableCell>
                     </>
                 )}
                 <TableCell align="center">Actions</TableCell>
@@ -2718,9 +2722,21 @@ const Recipe = () => {
                                             />
                                         ) : '-'}
                                     </TableCell>
-                                    
-
-
+                                    <TableCell align="center">
+                                        <span style={{ fontWeight: 500, color: isDarkMode ? '#9ca3af' : '#4b5563' }}>
+                                            {recipe.views_last_7_days != null ? recipe.views_last_7_days.toLocaleString() : '-'}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <span style={{ fontWeight: 500, color: isDarkMode ? '#9ca3af' : '#4b5563' }}>
+                                            {recipe.views_last_28_days != null ? recipe.views_last_28_days.toLocaleString() : '-'}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <span style={{ fontWeight: 500, color: isDarkMode ? '#9ca3af' : '#4b5563' }}>
+                                            {recipe.total_views != null ? recipe.total_views.toLocaleString() : '-'}
+                                        </span>
+                                    </TableCell>
                                 </>
                             )}
                         <TableCell align="center">
