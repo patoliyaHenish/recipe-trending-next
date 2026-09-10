@@ -118,12 +118,11 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
 
   useEffect(() => {
     if (recipe?.recipe_id) {
-      trackEvent("recipe_view", { recipe_id: recipe.recipe_id, recipe_name: recipe.title, recipe_food_type: recipe.food_type });
-
-      const ft = (recipe.food_type || '').toLowerCase();
-      if (ft.includes('veg') || ft.includes('egg') || ft.includes('non')) {
-        trackEvent("food_type", { recipe_id: recipe.recipe_id, recipe_food_type: recipe.food_type });
-      }
+      trackEvent("recipe_view", { 
+        recipe_id: recipe.recipe_id, 
+        recipe_name: recipe.title, 
+        food_type: recipe.food_type 
+      });
 
       if (window.performance) {
         const timeSincePageLoad = Math.round(performance.now());
