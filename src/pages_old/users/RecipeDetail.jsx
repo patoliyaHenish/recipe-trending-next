@@ -118,7 +118,7 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
 
   useEffect(() => {
     if (recipe?.recipe_id) {
-      trackEvent("recipe_view", { recipe_id: recipe.recipe_id, recipe_name: recipe.title });
+      trackEvent("recipe_view", { recipe_id: recipe.recipe_id, recipe_name: recipe.title, recipe_food_type: recipe.food_type });
 
       const ft = (recipe.food_type || '').toLowerCase();
       if (ft.includes('veg') || ft.includes('egg') || ft.includes('non')) {
