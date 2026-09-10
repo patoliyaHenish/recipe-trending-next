@@ -1,6 +1,8 @@
 "use client";
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useUser } from '../../context/useUser';
+import AccessDenied from '../../components/common/AccessDenied';
 
 // Import Admin Components
 import ActivityLogs from '../../pages_old/admin/ActivityLogs';
@@ -37,58 +39,78 @@ import SearchResults from '../../pages_old/admin/SearchResults';
 import WebAnalytics from '../../pages_old/admin/WebAnalytics';
 import MyWork from '../../pages_old/admin/MyWork';
 
+const checkPerm = (permission, userPermissions) => {
+  if (!permission) return true;
+  if (Array.isArray(permission)) return permission.some(p => userPermissions.includes(p));
+  return userPermissions.includes(permission);
+};
+
+const ProtectedRoute = ({ permission, children }) => {
+  const { user } = useUser();
+  const userPermissions = user?.permissions || [];
+
+  if (!checkPerm(permission, userPermissions)) {
+    return <AccessDenied message="You don't have the required permissions to view or manage this section." />;
+  }
+
+  return children;
+};
+
+const routeConfig = [
+  { path: '/', element: <Dashboard />, permission: 'dashboard.view' },
+  { path: 'dashboard', element: <Dashboard />, permission: 'dashboard.view' },
+  { path: 'my-work', element: <MyWork />, permission: 'my_work.view' },
+  { path: 'manage-users', element: <UserManagement />, permission: ['user.list', 'user.update'] },
+  { path: 'manage-ingredients', element: <IngredientManagement />, permission: 'ingredient.list' },
+  { path: 'manage-ingredient-units', element: <IngredientUnitManagement />, permission: 'ingredient_unit.list' },
+  { path: 'manage-recipe-category', element: <RecipeCategory />, permission: 'category.list' },
+  { path: 'manage-recipe-subcategories', element: <RecipeSubCategory />, permission: 'subcategory.list' },
+  { path: 'manage-recipes', element: <Recipe />, permission: ['recipe.list_all', 'recipe.list'] },
+  { path: 'manage-recipes/add', element: <AddEditRecipePage />, permission: ['recipe.list_all', 'recipe.list'] },
+  { path: 'manage-recipes/edit/:id', element: <AddEditRecipePage />, permission: ['recipe.list_all', 'recipe.list'] },
+  { path: 'manage-assigned-recipes', element: <AssignedRecipes />, permission: ['assigned_recipe.list', 'assigned_recipe.list_all'] },
+  { path: 'manage-recipe-notes', element: <RecipeNotes />, permission: ['recipe.note_list_all', 'recipe.note_list'] },
+  { path: 'manage-roles', element: <RoleManagement />, permission: 'role.list' },
+  { path: 'manage-roles/add', element: <AddEditRole />, permission: 'role.list' },
+  { path: 'manage-roles/edit/:id', element: <AddEditRole />, permission: 'role.list' },
+  { path: 'manage-permissions', element: <PermissionManagement />, permission: 'permission.list' },
+  { path: 'manage-banners', element: <BannerManagement />, permission: 'banner.list' },
+  { path: 'manage-footer', element: <FooterManagement />, permission: 'footer.list' },
+  { path: 'manage-navbar', element: <NavbarManagement />, permission: 'nav.list' },
+  { path: 'manage-home-section', element: <HomeSectionManagement />, permission: 'home_section.list' },
+  { path: 'manage-home-section-items', element: <HomeSectionItemsManagement />, permission: 'home_section_items.list' },
+  { path: 'manage-home-section-items/:id', element: <HomeSectionItemsManagement />, permission: 'home_section_items.list' },
+  { path: 'manage-config', element: <ManageConfig />, permission: 'config.manage' },
+  { path: 'manage-contacts', element: <ManageContacts />, permission: 'inquiry.list' },
+  { path: 'notifications', element: <Notifications />, permission: 'notifications.list' },
+  { path: 'manage-payment-slips', element: <PayrollManagement />, permission: 'payment_slip.list' },
+  { path: 'activity-logs', element: <ActivityLogs />, permission: 'activity_logs.list' },
+  { path: 'cron-logs', element: <CronLogs />, permission: 'cron_logs.list' },
+  { path: 'failed-logs', element: <FailedLogs />, permission: 'failed_logs.list' },
+  { path: 'failed-searches', element: <FailedSearches />, permission: 'search_failed.list' },
+  { path: 'search-results', element: <SearchResults />, permission: 'search_console.view' },
+  { path: 'web-analytics', element: <WebAnalytics />, permission: 'web_analytics.view' },
+];
+
 export default function AdminRouter() {
   return (
     <BrowserRouter basename="/admin">
       <Routes>
         <Route path="/" element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="my-work" element={<MyWork />} />
-        
-        {/* Core Management */}
-        <Route path="manage-users" element={<UserManagement />} />
-        <Route path="manage-ingredients" element={<IngredientManagement />} />
-        <Route path="manage-ingredient-units" element={<IngredientUnitManagement />} />
-        
-        {/* Categories */}
-        <Route path="manage-recipe-category" element={<RecipeCategory />} />
-        <Route path="manage-recipe-subcategories" element={<RecipeSubCategory />} />
-        
-        {/* Recipes */}
-        <Route path="manage-recipes" element={<Recipe />} />
-        <Route path="manage-recipes/add" element={<AddEditRecipePage />} />
-        <Route path="manage-recipes/edit/:id" element={<AddEditRecipePage />} />
-        <Route path="manage-assigned-recipes" element={<AssignedRecipes />} />
-        <Route path="manage-recipe-notes" element={<RecipeNotes />} />
-        
-        {/* RBAC */}
-        <Route path="manage-roles" element={<RoleManagement />} />
-        <Route path="manage-roles/add" element={<AddEditRole />} />
-        <Route path="manage-roles/edit/:id" element={<AddEditRole />} />
-        <Route path="manage-permissions" element={<PermissionManagement />} />
-        
-        {/* Site Management */}
-        <Route path="manage-banners" element={<BannerManagement />} />
-        <Route path="manage-footer" element={<FooterManagement />} />
-        <Route path="manage-navbar" element={<NavbarManagement />} />
-        <Route path="manage-home-section" element={<HomeSectionManagement />} />
-        <Route path="manage-home-section-items" element={<HomeSectionItemsManagement />} />
-        <Route path="manage-home-section-items/:id" element={<HomeSectionItemsManagement />} />
-        <Route path="manage-config" element={<ManageConfig />} />
-        
-        {/* System & Logs */}
-        <Route path="manage-contacts" element={<ManageContacts />} />
-        <Route path="notifications" element={<Notifications />} />
-        <Route path="manage-payment-slips" element={<PayrollManagement />} />
-        <Route path="activity-logs" element={<ActivityLogs />} />
-        <Route path="cron-logs" element={<CronLogs />} />
-        <Route path="failed-logs" element={<FailedLogs />} />
-        <Route path="failed-searches" element={<FailedSearches />} />
-        <Route path="search-results" element={<SearchResults />} />
-        <Route path="web-analytics" element={<WebAnalytics />} />
+        {routeConfig.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <ProtectedRoute permission={route.permission}>
+                {route.element}
+              </ProtectedRoute>
+            }
+          />
+        ))}
         
         {/* Catch all to redirect to users or a 404 inside admin */}
-        <Route path="*" element={<div>Admin Page Not Found</div>} />
+        <Route path="*" element={<AccessDenied message="The page you are looking for does not exist or you don't have permission to access it." />} />
       </Routes>
     </BrowserRouter>
   );
