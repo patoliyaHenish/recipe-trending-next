@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Autocomplete, TextField, FormControl, IconButton, Tooltip, Tabs, Tab, Switch, FormControlLabel, Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar, InputAdornment } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import SearchIcon from '@mui/icons-material/Search';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import moment from 'moment';
 import { useTheme } from '../../context/ThemeContext';
-import { useGetGa4DataQuery, useGetGa4TrendQuery, useGetGa4TopRecipesQuery, useGetGa4RealtimeDataQuery, useGetGa4RealtimeTrendQuery, useGetGa4RealtimeTopRecipesQuery } from '../../features/api/analyticsApi';
+import { useGetGa4DataQuery, useGetGa4TrendQuery, useGetGa4TopRecipesQuery, useGetGa4RealtimeDataQuery, useGetGa4RealtimeTrendQuery, useGetGa4RealtimeTopRecipesQuery, useGetGa4RecipeViewsByFoodTypeQuery } from '../../features/api/analyticsApi';
 import { useGetRecipeCategoryDropdownQuery } from '../../features/api/categoryApi';
 import { getImage } from '../../utils/helper';
 import AccessDenied from '../../components/common/AccessDenied';
@@ -41,7 +41,7 @@ export default function WebAnalytics() {
   const [activeTab, setActiveTab] = useState(urlTab === 'trend' ? 'trend' : 'kpi');
 
   useEffect(() => {
-    if (urlTab === 'trend' || urlTab === 'kpi' || urlTab === 'recipes') {
+    if (urlTab === 'trend' || urlTab === 'kpi' || urlTab === 'recipes' || urlTab === 'vsgraph') {
       setActiveTab(urlTab);
     }
   }, [urlTab]);
@@ -106,6 +106,23 @@ export default function WebAnalytics() {
   const isTopRecipesLoading = isRealtime ? rtRecipesRes.isLoading : histRecipesRes.isLoading;
   const isTopRecipesFetching = isRealtime ? rtRecipesRes.isFetching : histRecipesRes.isFetching;
   const refetchTopRecipes = isRealtime ? rtRecipesRes.refetch : histRecipesRes.refetch;
+
+  const histVsGraphRes = useGetGa4RecipeViewsByFoodTypeQuery({
+    period,
+    startDate: period === 'custom' && customStartDate ? customStartDate.format('YYYY-MM-DD') : undefined,
+    endDate: period === 'custom' && customEndDate ? customEndDate.format('YYYY-MM-DD') : undefined,
+  }, { skip: activeTab !== 'vsgraph' || isRealtime });
+
+  const rtVsGraphRes = useGetGa4RecipeViewsByFoodTypeQuery({
+    period: 'today',
+    startDate: undefined,
+    endDate: undefined,
+  }, { skip: activeTab !== 'vsgraph' || !isRealtime });
+
+  const vsGraphRes = isRealtime ? rtVsGraphRes.data : histVsGraphRes.data;
+  const isVsGraphLoading = isRealtime ? rtVsGraphRes.isLoading : histVsGraphRes.isLoading;
+  const isVsGraphFetching = isRealtime ? rtVsGraphRes.isFetching : histVsGraphRes.isFetching;
+  const refetchVsGraph = isRealtime ? rtVsGraphRes.refetch : histVsGraphRes.refetch;
 
   const { data: categoriesData } = useGetRecipeCategoryDropdownQuery();
 
@@ -183,6 +200,9 @@ export default function WebAnalytics() {
     } else if (activeTab === 'recipes') {
       const result = await refetchTopRecipes();
       if (result.data) success = true;
+    } else if (activeTab === 'vsgraph') {
+      const result = await refetchVsGraph();
+      if (result.data) success = true;
     }
 
     if (success) {
@@ -202,6 +222,9 @@ export default function WebAnalytics() {
       if (result.data) success = true;
     } else if (activeTab === 'recipes') {
       const result = await refetchTopRecipes();
+      if (result.data) success = true;
+    } else if (activeTab === 'vsgraph') {
+      const result = await refetchVsGraph();
       if (result.data) success = true;
     }
 
@@ -440,6 +463,7 @@ export default function WebAnalytics() {
               <Tab label="Top KPI cards" value="kpi" />
               <Tab label="Traffic Trend" value="trend" />
               <Tab label="Top Recipes" value="recipes" />
+              <Tab label="Vs Graph" value="vsgraph" />
             </Tabs>
           </Box>
 
@@ -1203,6 +1227,58 @@ export default function WebAnalytics() {
                     </TableBody>
                   </Table>
                 </TableContainer>
+              )}
+            </Box>
+          ) : activeTab === 'vsgraph' ? (
+            <Box sx={{ width: '100%' }}>
+              {(isVsGraphLoading || isVsGraphFetching) && (!vsGraphRes?.data || vsGraphRes.data.length === 0) ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+                  <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                </Box>
+              ) : (
+                <Box className="flex flex-col items-center gap-6">
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>
+                    Recipe Views by Food Type
+                  </Typography>
+                  <Box sx={{ width: '100%', maxWidth: 500, height: 400 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={vsGraphRes?.data || []}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={120}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                        >
+                          {(vsGraphRes?.data || []).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip
+                          formatter={(value, name) => [`${value} views`, name]}
+                          contentStyle={{ backgroundColor: isDarkMode ? '#283046' : '#fff', borderColor: isDarkMode ? '#404656' : '#d8d6de', color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    {(vsGraphRes?.data || []).map((item) => (
+                      <Box key={item.name} sx={{ textAlign: 'center' }}>
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>
+                          {item.value.toLocaleString()}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
+                          {item.name} Views
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
               )}
             </Box>
           ) : null}
