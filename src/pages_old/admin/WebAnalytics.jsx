@@ -1166,11 +1166,12 @@ export default function WebAnalytics() {
                       <TableRow>
                         <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', fontWeight: 600, borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>Rank</TableCell>
                         <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', fontWeight: 600, borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>Recipe</TableCell>
+                        <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', fontWeight: 600, borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>Food Type</TableCell>
                         <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', fontWeight: 600, borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>Device</TableCell>
                         <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', fontWeight: 600, borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }} align="right">Views</TableCell>
                         <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', fontWeight: 600, borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }} align="right">Users</TableCell>
                         <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', fontWeight: 600, borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }} align="right">Avg. Time</TableCell>
-                        <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', fontWeight: 600 }} align="right">Related Clicks</TableCell>
+                        <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }} align="right">Related Clicks</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -1178,6 +1179,10 @@ export default function WebAnalytics() {
                         const minutes = Math.floor(row.avgTime / 60);
                         const seconds = Math.floor(row.avgTime % 60);
                         const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+
+                        const foodTypeRaw = String(row.food_type || '').trim().toLowerCase();
+                        const foodTypeLabel = foodTypeRaw === 'veg' ? 'Veg' : foodTypeRaw === 'egg' ? 'Egg' : foodTypeRaw === 'non_veg' || foodTypeRaw === 'non-veg' || foodTypeRaw === 'non veg' ? 'Non-Veg' : '';
+                        const foodTypeColor = foodTypeRaw === 'veg' ? '#10b981' : foodTypeRaw === 'egg' ? '#f59e0b' : foodTypeRaw ? '#ef4444' : 'inherit';
 
                         return (
                           <TableRow key={row.slug} sx={{ '&:last-child td, &:last-child th': { borderBottom: 0 }, borderColor: isDarkMode ? '#404656' : '#ebe9f1' }}>
@@ -1209,6 +1214,15 @@ export default function WebAnalytics() {
                                 </IconButton>
                               </Box>
                             </TableCell>
+                            <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}`, textTransform: 'capitalize' }}>
+                              {foodTypeLabel ? (
+                                <Typography variant="caption" sx={{ color: foodTypeColor, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '0.05em' }}>
+                                  {foodTypeLabel}
+                                </Typography>
+                              ) : (
+                                '-'
+                              )}
+                            </TableCell>
                             <TableCell sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}`, textTransform: 'capitalize' }}>{row.device}</TableCell>
                             <TableCell align="right" sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>{row.views}</TableCell>
                             <TableCell align="right" sx={{ color: isDarkMode ? '#d0d2d6' : '#6e6b7b', borderRight: `1px solid ${isDarkMode ? '#404656' : '#ebe9f1'}` }}>{row.users}</TableCell>
@@ -1219,7 +1233,7 @@ export default function WebAnalytics() {
                       })}
                       {filteredTopRecipesData.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={6} align="center" sx={{ py: 4, color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }}>
+                          <TableCell colSpan={7} align="center" sx={{ py: 4, color: isDarkMode ? '#d0d2d6' : '#6e6b7b' }}>
                             No recipes found for the selected criteria.
                           </TableCell>
                         </TableRow>
