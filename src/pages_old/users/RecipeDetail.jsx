@@ -197,24 +197,40 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
       tag.setAttribute('content', content);
     };
 
+    const normalizedImageUrl = (recipeImageUrl || '').toLowerCase();
+    const rawImage = (recipe?.image || recipe?.image_url || '').toLowerCase();
+    const isLogoImage = normalizedImageUrl.includes('nav_logo') || normalizedImageUrl.includes('site_logo') || normalizedImageUrl.includes('logo') || rawImage.includes('nav_logo') || rawImage.includes('site_logo') || rawImage.includes('logo');
+    const isLocalAsset = normalizedImageUrl.startsWith('/assets/') || normalizedImageUrl.startsWith('/_next/static/') || rawImage.startsWith('/assets/') || rawImage.startsWith('/_next/static/');
+    const safeRecipeImageUrl = (!isLogoImage && !isLocalAsset) ? recipeImageUrl : '';
+
     updateTag('property', 'og:title', title);
     updateTag('property', 'og:description', metaDesc);
     updateTag('property', 'og:url', window.location.href);
     updateTag('property', 'og:type', 'article');
-    if (recipeImageUrl) {
-      updateTag('property', 'og:image', recipeImageUrl);
-      updateTag('property', 'og:image:secure_url', recipeImageUrl);
-      updateTag('name', 'twitter:image', recipeImageUrl);
-      updateTag('itemprop', 'image', recipeImageUrl);
+    if (safeRecipeImageUrl) {
+      updateTag('property', 'og:image', safeRecipeImageUrl);
+      updateTag('property', 'og:image:secure_url', safeRecipeImageUrl);
+      updateTag('name', 'twitter:image', safeRecipeImageUrl);
+      updateTag('itemprop', 'image', safeRecipeImageUrl);
 
-      // Also update link tags for image_src
       let imageSrcLink = document.querySelector('link[rel="image_src"]');
       if (!imageSrcLink) {
         imageSrcLink = document.createElement('link');
         imageSrcLink.rel = 'image_src';
         document.head.appendChild(imageSrcLink);
       }
-      imageSrcLink.href = recipeImageUrl;
+      imageSrcLink.href = safeRecipeImageUrl;
+    } else {
+      let ogImageTag = document.querySelector('meta[property="og:image"]');
+      if (ogImageTag) ogImageTag.setAttribute('content', '');
+      let ogImageSecureTag = document.querySelector('meta[property="og:image:secure_url"]');
+      if (ogImageSecureTag) ogImageSecureTag.setAttribute('content', '');
+      let twitterImageTag = document.querySelector('meta[name="twitter:image"]');
+      if (twitterImageTag) twitterImageTag.setAttribute('content', '');
+      let imageItempropTag = document.querySelector('meta[itemprop="image"]');
+      if (imageItempropTag) imageItempropTag.setAttribute('content', '');
+      let imageSrcLink = document.querySelector('link[rel="image_src"]');
+      if (imageSrcLink) imageSrcLink.href = '';
     }
     updateTag('name', 'twitter:card', 'summary_large_image');
     updateTag('name', 'twitter:title', title);
@@ -331,11 +347,14 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
     const shortDesc = (recipe?.meta_description || recipe?.description || "").replace(/^"|"$/g, '').trim();
     const truncatedDesc = shortDesc.length > 160 ? shortDesc.substring(0, 157) + "..." : shortDesc;
     const recipeTitle = recipe?.title || "Recipe";
+    const normalizedImageUrl = (recipeImageUrl || '').toLowerCase();
+    const rawImage = (recipe?.image || recipe?.image_url || '').toLowerCase();
+    const isLogoImage = normalizedImageUrl.includes('nav_logo') || normalizedImageUrl.includes('site_logo') || normalizedImageUrl.includes('logo') || rawImage.includes('nav_logo') || rawImage.includes('site_logo') || rawImage.includes('logo');
+    const isLocalAsset = normalizedImageUrl.startsWith('/assets/') || normalizedImageUrl.startsWith('/_next/static/') || rawImage.startsWith('/assets/') || rawImage.startsWith('/_next/static/');
 
     try {
       if (navigator.share) {
-        // Try sharing with image file first for better preview in WhatsApp/Social Apps
-        if (recipeImageUrl) {
+        if (recipeImageUrl && !isLogoImage && !isLocalAsset) {
           try {
             const response = await fetch(recipeImageUrl, { mode: 'cors' });
             if (response.ok) {
@@ -358,7 +377,6 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
           }
         }
 
-        // Fallback to standard link share
         await navigator.share({
           title: recipeTitle,
           text: truncatedDesc,
