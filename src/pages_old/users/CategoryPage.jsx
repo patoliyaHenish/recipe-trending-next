@@ -16,6 +16,7 @@ import noImageFound from '../../assets/no-image-found.png';
 import Cookies from 'js-cookie';
 import useTrackEngagement from '../../hooks/useTrackEngagement';
 import { trackEvent } from '../../utils/analytics';
+import { toast } from '../../utils/toast';
 import { AdsterraBanner728x90, AdsterraBanner300x250, AdsterraBanner320x50, AdsterraNativeBanner } from '../../components/ads';
 
 const RECIPES_PER_PAGE = 12;
@@ -93,22 +94,44 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
   const loadMoreRef = useRef(null);
   const hasMountedRef = useRef(false);
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const url = window.location.href;
+    const shortDesc = (pageData?.meta_description || pageData?.description || "").replace(/^"|"$/g, '').trim();
+    const truncatedDesc = shortDesc.length > 160 ? shortDesc.substring(0, 157) + "..." : shortDesc;
     const shareData = {
       title: pageTitle,
-      text: `Check out these recipes in ${pageTitle}:\n${url}`,
+      text: truncatedDesc,
       url,
     };
 
-    if (navigator.share) {
-      navigator.share(shareData).catch(() => {});
-      return;
-    }
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(() => {
-      }).catch(() => {});
+    try {
+      if (navigator.share) {
+        const firstImage = allRecipes?.[0]?.image;
+        const imgUrl = firstImage ? getImage(firstImage) : null;
+        if (imgUrl) {
+          try {
+            const response = await fetch(imgUrl, { mode: 'cors' });
+            if (response.ok) {
+              const blob = await response.blob();
+              const ext = blob.type.split('/')[1] || 'jpg';
+              const file = new File([blob], `category-${pageTitle}.${ext}`, { type: blob.type });
+              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                shareData.files = [file];
+              }
+            }
+          } catch (err) {
+            console.warn("Category image share failed:", err);
+          }
+        }
+        await navigator.share(shareData);
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied to clipboard!");
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error("Error sharing:", err);
+      }
     }
   };
 
