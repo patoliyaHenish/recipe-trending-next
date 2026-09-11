@@ -38,7 +38,7 @@ export default async function RootLayout({ children }) {
 
   if (apiUrl) {
     try {
-      const navRes = await fetch(`${apiUrl}/api/manage-nav-items/get-for-navbar`, { next: { revalidate: 60 } });
+      const navRes = await fetch(`${apiUrl}/api/manage-nav-items/get-for-navbar`, { cache: 'no-store' });
       if (navRes.ok) {
         const navData = await navRes.json();
         initialNavItems = navData?.data || [];
@@ -48,7 +48,7 @@ export default async function RootLayout({ children }) {
     }
 
     try {
-      const footerRes = await fetch(`${apiUrl}/api/manage-footer-items/get-for-footer`, { next: { revalidate: 60 } });
+      const footerRes = await fetch(`${apiUrl}/api/manage-footer-items/get-for-footer`, { cache: 'no-store' });
       if (footerRes.ok) {
         const footerData = await footerRes.json();
         initialFooterItems = footerData?.data || [];

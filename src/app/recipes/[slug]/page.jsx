@@ -9,7 +9,7 @@ async function getRecipeDetails(slug) {
   try {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5050';
     const res = await fetch(`${backendUrl}/api/v1/recipes/slug/${slug}`, {
-      next: { revalidate: 3600 }
+      cache: 'no-store'
     });
     
     if (!res.ok) {
