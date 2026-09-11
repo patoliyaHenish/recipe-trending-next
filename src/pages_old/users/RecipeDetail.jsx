@@ -331,7 +331,6 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
     const shortDesc = (recipe?.meta_description || recipe?.description || "").replace(/^"|"$/g, '').trim();
     const truncatedDesc = shortDesc.length > 160 ? shortDesc.substring(0, 157) + "..." : shortDesc;
     const recipeTitle = recipe?.title || "Recipe";
-    const messageText = `${recipeTitle}\n\n${truncatedDesc}\n\nCheck out this recipe at Recipe Trending!\n${recipeUrl}`;
 
     try {
       if (navigator.share) {
@@ -346,29 +345,27 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
 
               if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({
-                  title: `Check out ${recipe?.title} on Recipe Trending`,
-                  text: `I found this amazing recipe for ${recipe?.title}!`,
-                  files: [file]
+                  title: recipeTitle,
+                  text: truncatedDesc,
+                  url: recipeUrl,
+                  files: [file],
                 });
-                trackEvent("recipe_share", { recipe_id: recipe.recipe_id, method: "native_with_image" });
                 return;
               }
             }
-          } catch (imageErr) {
-            console.warn("Image sharing failed, falling back to link share:", imageErr);
+          } catch (err) {
+            console.warn("Image sharing failed, falling back to link share:", err);
           }
         }
 
         // Fallback to standard link share
         await navigator.share({
-          title: `Check out ${recipe?.title} on Recipe Trending`,
-          text: `I found this amazing recipe for ${recipe?.title}!`,
-          url: window.location.href,
+          title: recipeTitle,
+          text: truncatedDesc,
+          url: recipeUrl,
         });
-        trackEvent("recipe_share", { recipe_id: recipe.recipe_id, method: "native_link" });
       } else {
         await navigator.clipboard.writeText(recipeUrl);
-        trackEvent("recipe_share", { recipe_id: recipe.recipe_id, method: "clipboard" });
         toast.success("Link copied to clipboard!", {
           position: "bottom-center",
           autoClose: 2000,
