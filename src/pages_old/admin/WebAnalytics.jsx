@@ -9,7 +9,7 @@ import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import moment from 'moment';
 import { useTheme } from '../../context/ThemeContext';
-import { useGetGa4DataQuery, useGetGa4TrendQuery, useGetGa4TopRecipesQuery, useGetGa4RealtimeDataQuery, useGetGa4RealtimeTrendQuery, useGetGa4RealtimeTopRecipesQuery, useGetGa4RecipeViewsByFoodTypeQuery, useGetGa4RecipeViewsByTrafficSourceQuery, useGetGa4NewVsReturningUsersQuery, useGetGa4RecipeFunnelQuery } from '../../features/api/analyticsApi';
+import { useGetGa4DataQuery, useGetGa4TrendQuery, useGetGa4TopRecipesQuery, useGetGa4RealtimeDataQuery, useGetGa4RealtimeTrendQuery, useGetGa4RealtimeTopRecipesQuery, useGetGa4RecipeViewsByFoodTypeQuery, useGetGa4RecipeViewsByTrafficSourceQuery, useGetGa4NewVsReturningUsersQuery, useGetGa4RecipeFunnelQuery, useGetGa4LandingPagesQuery } from '../../features/api/analyticsApi';
 import { useGetRecipeCategoryDropdownQuery } from '../../features/api/categoryApi';
 import { getImage } from '../../utils/helper';
 import AccessDenied from '../../components/common/AccessDenied';
@@ -27,7 +27,8 @@ import {
   FlashOn,
   Refresh as RefreshIcon,
   Category,
-  ViewList
+  ViewList,
+  EmojiEvents
 } from '@mui/icons-material';
 import { toast } from '../../utils/toast';
 
@@ -41,7 +42,7 @@ export default function WebAnalytics() {
   const [activeTab, setActiveTab] = useState(urlTab === 'trend' ? 'trend' : 'kpi');
 
   useEffect(() => {
-    if (urlTab === 'trend' || urlTab === 'kpi' || urlTab === 'recipes' || urlTab === 'vsgraph-food' || urlTab === 'vsgraph-traffic' || urlTab === 'new-vs-returning' || urlTab === 'recipe-funnel') {
+    if (urlTab === 'trend' || urlTab === 'kpi' || urlTab === 'recipes' || urlTab === 'vsgraph-food' || urlTab === 'vsgraph-traffic' || urlTab === 'new-vs-returning' || urlTab === 'recipe-funnel' || urlTab === 'landing-pages') {
       setActiveTab(urlTab);
     }
   }, [urlTab]);
@@ -170,6 +171,23 @@ export default function WebAnalytics() {
     endDate: undefined,
   }, { skip: activeTab !== 'recipe-funnel' || !isRealtime });
 
+  const histLandingRes = useGetGa4LandingPagesQuery({
+    period,
+    startDate: period === 'custom' && customStartDate ? customStartDate.format('YYYY-MM-DD') : undefined,
+    endDate: period === 'custom' && customEndDate ? customEndDate.format('YYYY-MM-DD') : undefined,
+  }, { skip: activeTab !== 'landing-pages' || isRealtime });
+
+  const rtLandingRes = useGetGa4LandingPagesQuery({
+    period: 'today',
+    startDate: undefined,
+    endDate: undefined,
+  }, { skip: activeTab !== 'landing-pages' || !isRealtime });
+
+  const landingRes = isRealtime ? rtLandingRes.data : histLandingRes.data;
+  const isLandingLoading = isRealtime ? rtLandingRes.isLoading : histLandingRes.isLoading;
+  const isLandingFetching = isRealtime ? rtLandingRes.isFetching : histLandingRes.isFetching;
+  const refetchLanding = isRealtime ? rtLandingRes.refetch : histLandingRes.refetch;
+
   const funnelRes = isRealtime ? rtFunnelRes.data : histFunnelRes.data;
   const isFunnelLoading = isRealtime ? rtFunnelRes.isLoading : histFunnelRes.isLoading;
   const isFunnelFetching = isRealtime ? rtFunnelRes.isFetching : histFunnelRes.isFetching;
@@ -263,6 +281,9 @@ export default function WebAnalytics() {
     } else if (activeTab === 'recipe-funnel') {
       const result = await refetchFunnel();
       if (result.data) success = true;
+    } else if (activeTab === 'landing-pages') {
+      const result = await refetchLanding();
+      if (result.data) success = true;
     }
 
     if (success) {
@@ -294,6 +315,9 @@ export default function WebAnalytics() {
       if (result.data) success = true;
     } else if (activeTab === 'recipe-funnel') {
       const result = await refetchFunnel();
+      if (result.data) success = true;
+    } else if (activeTab === 'landing-pages') {
+      const result = await refetchLanding();
       if (result.data) success = true;
     }
 
@@ -496,8 +520,8 @@ export default function WebAnalytics() {
               }
             />
             <Tooltip title="Refresh Data">
-              <IconButton onClick={handleManualRefresh} disabled={isFetching || isTrendFetching || isTopRecipesFetching || isFoodTypeFetching || isTrafficFetching || isNewVsReturningFetching || isFunnelFetching} sx={{ color: isDarkMode ? '#a5b4fc' : '#7367f0', bgcolor: isDarkMode ? 'rgba(115,103,240,0.12)' : '#ede9fe', '&:hover': { bgcolor: isDarkMode ? 'rgba(115,103,240,0.2)' : '#e0d8ff' } }}>
-                <RefreshIcon className={(isFetching || isTrendFetching || isTopRecipesFetching || isFoodTypeFetching || isTrafficFetching || isNewVsReturningFetching || isFunnelFetching) ? "animate-spin" : ""} />
+              <IconButton onClick={handleManualRefresh} disabled={isFetching || isTrendFetching || isTopRecipesFetching || isFoodTypeFetching || isTrafficFetching || isNewVsReturningFetching || isFunnelFetching || isLandingFetching} sx={{ color: isDarkMode ? '#a5b4fc' : '#7367f0', bgcolor: isDarkMode ? 'rgba(115,103,240,0.12)' : '#ede9fe', '&:hover': { bgcolor: isDarkMode ? 'rgba(115,103,240,0.2)' : '#e0d8ff' } }}>
+                <RefreshIcon className={(isFetching || isTrendFetching || isTopRecipesFetching || isFoodTypeFetching || isTrafficFetching || isNewVsReturningFetching || isFunnelFetching || isLandingFetching) ? "animate-spin" : ""} />
               </IconButton>
             </Tooltip>
           </Box>
@@ -536,6 +560,7 @@ export default function WebAnalytics() {
               <Tab label="Vs Graph (traffic source)" value="vsgraph-traffic" />
               <Tab label="New vs Returning Users" value="new-vs-returning" />
               <Tab label="Recipe Funnel" value="recipe-funnel" />
+              <Tab label="Landing Pages" value="landing-pages" />
             </Tabs>
           </Box>
 
@@ -1842,8 +1867,62 @@ export default function WebAnalytics() {
               )}
 
             </Box>
-          
-        ) : null}
+          ) : activeTab === 'landing-pages' ? (
+            <Box sx={{ width: '100%' }}>
+              {(isLandingLoading || isLandingFetching) ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+                  <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+                </Box>
+              ) : landingRes?.success ? (
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '1fr 1fr 1fr' }, gap: { xs: 3, sm: 4 } }}>
+                  <Box className="dashboard-kpi-card" sx={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', background: isDarkMode ? '#1a1d27' : '#ede9fe', border: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.08)' }}>
+                    <Box sx={{ height: 4, width: '100%', background: 'linear-gradient(135deg, #7367f0 0%, #9e95f5 100%)' }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: { xs: 2.5, sm: 3 } }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 52, height: 52, borderRadius: '8px', background: isDarkMode ? 'rgba(115,103,240,0.12)' : 'linear-gradient(135deg, #7367f0 0%, #9e95f5 100%)', color: isDarkMode ? '#a5b4fc' : '#ffffff', flexShrink: 0 }}><People sx={{ fontSize: 28 }} /></Box>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '1.8rem' }, color: isDarkMode ? '#e2e8f0' : '#1e293b', lineHeight: 1.2 }}>{landingRes.data.landingUsers.toLocaleString()}</Typography>
+                        <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500, mt: 0.5, fontSize: '0.85rem' }}>Active Users</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box className="dashboard-kpi-card" sx={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', background: isDarkMode ? '#1a1d27' : '#ffe5e5', border: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.08)' }}>
+                    <Box sx={{ height: 4, width: '100%', background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E8B 100%)' }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: { xs: 2.5, sm: 3 } }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 52, height: 52, borderRadius: '8px', background: isDarkMode ? 'rgba(255,107,107,0.12)' : 'linear-gradient(135deg, #FF6B6B 0%, #FF8E8B 100%)', color: isDarkMode ? '#fca5a5' : '#ffffff', flexShrink: 0 }}><Loop sx={{ fontSize: 28 }} /></Box>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '1.8rem' }, color: isDarkMode ? '#e2e8f0' : '#1e293b', lineHeight: 1.2 }}>{landingRes.data.landingSessions.toLocaleString()}</Typography>
+                        <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500, mt: 0.5, fontSize: '0.85rem' }}>Landing Sessions</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box className="dashboard-kpi-card" sx={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', background: isDarkMode ? '#1a1d27' : '#dcf6f9', border: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.08)' }}>
+                    <Box sx={{ height: 4, width: '100%', background: 'linear-gradient(135deg, #00cfe8 0%, #46e3f7 100%)' }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: { xs: 2.5, sm: 3 } }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 52, height: 52, borderRadius: '8px', background: isDarkMode ? 'rgba(0,207,232,0.12)' : 'linear-gradient(135deg, #00cfe8 0%, #46e3f7 100%)', color: isDarkMode ? '#67e8f9' : '#ffffff', flexShrink: 0 }}><Timer sx={{ fontSize: 28 }} /></Box>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '1.8rem' }, color: isDarkMode ? '#e2e8f0' : '#1e293b', lineHeight: 1.2 }}>{Math.floor(landingRes.data.avgEngagementTime / 60)}m {Math.floor(landingRes.data.avgEngagementTime % 60)}s</Typography>
+                        <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500, mt: 0.5, fontSize: '0.85rem' }}>Avg Engagement Time</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box className="dashboard-kpi-card" sx={{ position: 'relative', borderRadius: '6px', overflow: 'hidden', background: isDarkMode ? '#1a1d27' : '#fef3c7', border: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.08)' }}>
+                    <Box sx={{ height: 4, width: '100%', background: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)' }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: { xs: 2.5, sm: 3 } }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 52, height: 52, borderRadius: '8px', background: isDarkMode ? 'rgba(245,158,11,0.12)' : 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)', color: isDarkMode ? '#fcd34d' : '#ffffff', flexShrink: 0 }}><EmojiEvents sx={{ fontSize: 28 }} /></Box>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '1.8rem' }, color: isDarkMode ? '#e2e8f0' : '#1e293b', lineHeight: 1.2, wordBreak: 'break-all' }}>{landingRes.data.topLandingPage}</Typography>
+                        <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500, mt: 0.5, fontSize: '0.85rem' }}>Top Landing Page</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+                  <Typography color="error">Failed to load landing pages data. Check server logs.</Typography>
+                </Box>
+              )}
+            </Box>
+          ) : null}
         </Box>
       </Box>
     </Box>

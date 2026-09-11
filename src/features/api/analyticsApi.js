@@ -97,7 +97,15 @@ export const analyticsApi = createApi({
             }),
             providesTags: ['Analytics'],
         }),
+        getGa4LandingPages: builder.query({
+            query: ({ period = '7d', startDate, endDate }) => ({
+                url: '/analytics/ga4-landing-pages',
+                method: 'GET',
+                params: { period, startDate, endDate },
+            }),
+            providesTags: ['Analytics'],
+        }),
     }),
 });
 
-export const { useGetSearchResultsQuery, useGetGa4DataQuery, useGetGa4TrendQuery, useGetGa4TopRecipesQuery, useGetGa4RealtimeDataQuery, useGetGa4RealtimeTrendQuery, useGetGa4RealtimeTopRecipesQuery, useGetGa4RecipeViewsByFoodTypeQuery, useGetGa4RecipeViewsByTrafficSourceQuery, useGetGa4NewVsReturningUsersQuery, useGetGa4RecipeFunnelQuery } = analyticsApi;
+export const { useGetSearchResultsQuery, useGetGa4DataQuery, useGetGa4TrendQuery, useGetGa4TopRecipesQuery, useGetGa4RealtimeDataQuery, useGetGa4RealtimeTrendQuery, useGetGa4RealtimeTopRecipesQuery, useGetGa4RecipeViewsByFoodTypeQuery, useGetGa4RecipeViewsByTrafficSourceQuery, useGetGa4NewVsReturningUsersQuery, useGetGa4RecipeFunnelQuery, useGetGa4LandingPagesQuery } = analyticsApi;

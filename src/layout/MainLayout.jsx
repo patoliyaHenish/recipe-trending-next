@@ -56,10 +56,6 @@ const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
   }, [pathname]);
 
   useEffect(() => {
-    document.title = 'Recipe Trending';
-  });
-
-  useEffect(() => {
     if (typeof window !== 'undefined') {
       const path = pathname || '/';
       const title = document.title || 'Recipe Trending';
