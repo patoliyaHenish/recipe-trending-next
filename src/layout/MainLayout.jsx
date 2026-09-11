@@ -10,6 +10,7 @@ import { useTheme } from '../context/ThemeContext';
 import Footer from '../components/Footer';
 import AccessDenied from '../components/common/AccessDenied';
 import { clearForbidden } from '../features/globalSlice';
+import { trackLandingPage } from '../utils/analytics';
 
 const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
   const pathname = usePathname();
@@ -57,6 +58,14 @@ const MainLayout = ({ children, initialNavItems, initialFooterItems }) => {
   useEffect(() => {
     document.title = 'Recipe Trending';
   });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const path = pathname || '/';
+      const title = document.title || 'Recipe Trending';
+      trackLandingPage(path, title);
+    }
+  }, [pathname]);
 
   // Only apply sidebar margin on large screens (≥ 1024px);
   // on tablet + mobile the sidebar slides in as an overlay — no margin needed.

@@ -4,11 +4,12 @@ import Banner from '../components/home-page/Banner'
 import SearchByIngredients from '../components/home-page/SearchByIngredients'
 import HomeSections from '../components/home-page/HomeSections'
 import { AdsterraBanner728x90, AdsterraNativeBanner } from '../components/ads'
-import { trackEvent } from '../utils/analytics'
+import { trackEvent, trackLandingPage } from '../utils/analytics'
 
 const Home = () => {
     useEffect(() => {
         trackEvent("page_view", { page: "home" });
+        trackLandingPage("home", "Recipe Trending | Find Your Next Favorite Recipe");
 
         const title = "Recipe Trending | Find Your Next Favorite Recipe";
         const metaDesc = "Join Recipe Trending to find amazing recipes based on ingredients you have. Explore diverse cuisines, save your favorites, and enjoy cooking made simple.";
