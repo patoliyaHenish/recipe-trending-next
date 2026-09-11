@@ -107,7 +107,7 @@ const FailedSearches = () => {
         document.title = 'Failed Searches';
     }, []);
 
-    const { data: searchesData, isLoading, isFetching } = useGetAllFailedSearchesQuery({
+    const { data: searchesData, isLoading, isFetching, refetch: refetchSearches } = useGetAllFailedSearchesQuery({
         page,
         limit,
         search: debouncedSearch,
@@ -139,6 +139,7 @@ const FailedSearches = () => {
             toast.success(res.message || 'Failed search deleted successfully');
             setDeleteDialogOpen(false);
             setSelectedId(null);
+            await refetchSearches();
         } catch (err) {
             toast.error(err?.data?.message || 'Failed to delete search');
         }
