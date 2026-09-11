@@ -28,10 +28,8 @@ const getMobileAdIndices = (items, seed = 1) => {
   const indices = new Set();
   if (!items || items.length === 0) return indices;
   let curr = 0;
-  let s = seed * 48271;
+  const step = 4;
   while (curr < items.length) {
-    s = (s * 9301 + 49297) % 233280;
-    const step = (s / 233280) > 0.5 ? 4 : 6;
     curr += step;
     if (curr <= items.length && curr - 1 !== items.length - 1) {
       indices.add(curr - 1);
