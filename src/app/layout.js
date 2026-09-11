@@ -1,8 +1,21 @@
 import "./globals.css";
 
 export const metadata = {
+  metadataBase: new URL("https://www.recipetrending.com"),
   title: "Recipe Trending",
   description: "Join Recipe Trending to find amazing recipes based on ingredients you have. Explore diverse cuisines, save your favorites, and enjoy cooking made simple.",
+  openGraph: {
+    title: "Recipe Trending",
+    description: "Join Recipe Trending to find amazing recipes based on ingredients you have. Explore diverse cuisines, save your favorites, and enjoy cooking made simple.",
+    type: "website",
+    siteName: "Recipe Trending",
+    url: "https://www.recipetrending.com",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Recipe Trending",
+    description: "Join Recipe Trending to find amazing recipes based on ingredients you have. Explore diverse cuisines, save your favorites, and enjoy cooking made simple.",
+  },
 };
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 import { ThemeProvider } from "../context/ThemeContext";
@@ -12,6 +25,7 @@ import MainLayout from "../layout/MainLayout";
 import Analytics from "../components/Analytics";
 import ProgressBar from "../components/ProgressBar";
 import { MuiToastContainer } from "../utils/toast";
+import WebSiteJsonLd from "../components/WebSiteJsonLd";
 
 export default async function RootLayout({ children }) {
   let initialNavItems = [];
@@ -50,6 +64,7 @@ export default async function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" style={{ backgroundColor: 'var(--bg-primary)', transition: 'background-color 0.3s ease', fontFamily: 'Roboto, Inter, sans-serif' }}>
+        <WebSiteJsonLd />
         {process.env.NEXT_GOOGLE_ANALYTICS_ID && process.env.NODE_ENV === 'production' && (
            <Analytics gaId={process.env.NEXT_GOOGLE_ANALYTICS_ID} />
         )}
