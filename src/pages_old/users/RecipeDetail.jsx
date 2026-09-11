@@ -1229,11 +1229,14 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                         alignItems: "flex-start",
                       }}
                     >
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        {recipe.ingredients &&
-                          recipe.ingredients.length > 0 && (
-                            <Box>
-                              <Box sx={{ mb: 3 }}>
+                       <Box sx={{ flex: 1, minWidth: 0 }}>
+                         {recipe.ingredients &&
+                           recipe.ingredients.length > 0 && (
+                             <Box>
+                               <Box sx={{ display: { xs: "block", md: "none" }, my: 1.5 }}>
+                                 <AdsterraBanner320x50 />
+                               </Box>
+                               <Box sx={{ mb: 3 }}>
                                 <Typography
                                   variant="h4"
                                   sx={{
@@ -1537,6 +1540,9 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                         {recipe.instructions &&
                           recipe.instructions.length > 0 && (
                             <Box>
+                              <Box sx={{ display: { xs: "block", md: "none" }, my: 1.5 }}>
+                                <AdsterraBanner320x50 />
+                              </Box>
                               <Box
                                 sx={{
                                   display: "flex",
@@ -1742,6 +1748,10 @@ const RecipeDetail = ({ initialData, recipeSlug, initialSuggestions, initialFall
                     recipe.ingredients.length > 0 && (
                       <>
                         <div ref={emojiSectionRef} />
+
+                        <Box sx={{ display: { xs: "block", md: "none" }, my: 1.5 }}>
+                          <AdsterraBanner320x50 />
+                        </Box>
 
                         <NutritionInfoSection
                           recipeSlug={recipeSlug}
