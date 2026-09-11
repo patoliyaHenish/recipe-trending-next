@@ -1495,59 +1495,346 @@ export default function WebAnalytics() {
             </Box>
           ) : activeTab === 'recipe-funnel' ? (
             <Box sx={{ width: '100%' }}>
-              {(isFunnelLoading || isFunnelFetching) && (!funnelRes?.data || funnelRes.data.length === 0) ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
-                  <CircularProgress size={40} sx={{ color: '#7367f0' }} />
+
+              {/* -------------------------------------------------- */}
+              {/* LOADING */}
+              {/* -------------------------------------------------- */}
+
+              {(isFunnelLoading || isFunnelFetching) &&
+                (!funnelRes?.data || funnelRes.data.length === 0) ? (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: 300,
+                  }}
+                >
+                  <CircularProgress
+                    size={40}
+                    sx={{ color: '#7367f0' }}
+                  />
                 </Box>
               ) : (
-                <Box className="flex flex-col items-center gap-6">
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b' }}>
+
+                <Box
+                  sx={{
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+
+                  {/* -------------------------------------------------- */}
+                  {/* TITLE */}
+                  {/* -------------------------------------------------- */}
+
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      color: isDarkMode
+                        ? '#e2e8f0'
+                        : '#1e293b',
+                    }}
+                  >
                     Recipe Funnel
                   </Typography>
-                  <Box sx={{ width: '100%', maxWidth: 800 }}>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 120px 100px', gap: 2, mb: 1, px: 2 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: isDarkMode ? '#9ca3af' : '#6b7280', textTransform: 'uppercase' }}>Step</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: isDarkMode ? '#9ca3af' : '#6b7280', textTransform: 'uppercase', textAlign: 'right' }}>Users</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: isDarkMode ? '#9ca3af' : '#6b7280', textTransform: 'uppercase', textAlign: 'right' }}>Conversion</Typography>
+
+
+                   {/* -------------------------------------------------- */}
+                   {/* FUNNEL TABLE */}
+                   {/* -------------------------------------------------- */}
+
+                  <Box
+                    sx={{
+                      width: '100%',
+                      maxWidth: 800,
+                    }}
+                  >
+
+                    {/* HEADER */}
+
+                    <Box
+                      sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          sm: '1fr 120px 100px',
+                        },
+                        gap: 2,
+                        mb: 1,
+                        px: 2,
+                      }}
+                    >
+
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: 700,
+                          color: isDarkMode
+                            ? '#9ca3af'
+                            : '#6b7280',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        Step
+                      </Typography>
+
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: 700,
+                          color: isDarkMode
+                            ? '#9ca3af'
+                            : '#6b7280',
+                          textTransform: 'uppercase',
+                          textAlign: 'right',
+                          display: {
+                            xs: 'none',
+                            sm: 'block',
+                          },
+                        }}
+                      >
+                        Users
+                      </Typography>
+
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: 700,
+                          color: isDarkMode
+                            ? '#9ca3af'
+                            : '#6b7280',
+                          textTransform: 'uppercase',
+                          textAlign: 'right',
+                          display: {
+                            xs: 'none',
+                            sm: 'block',
+                          },
+                        }}
+                      >
+                        Conversion
+                      </Typography>
+
                     </Box>
-                    {funnelRes?.data?.map((step, index) => (
-                      <Box key={step.name} sx={{ mb: 2 }}>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 120px 100px', gap: 2, alignItems: 'center', px: 2, py: 1.5, borderRadius: '8px', bgcolor: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${isDarkMode ? '#404656' : '#e5e7eb'}` }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: step.color, flexShrink: 0 }} />
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: isDarkMode ? '#d0d2d6' : '#5e5873' }}>
-                              {step.name}
-                            </Typography>
+
+
+                    {/* FUNNEL ROWS */}
+
+                    {Array.isArray(funnelRes?.data) &&
+                      funnelRes.data.length > 0 ? (
+
+                      funnelRes.data.map((step) => {
+
+                        const value =
+                          Number(step?.value) || 0;
+
+                        const barWidth =
+                          Math.min(
+                            Math.max(
+                              Number(step?.barWidth) || 0,
+                              0
+                            ),
+                            100
+                          );
+
+                        return (
+                          <Box
+                            key={step.name}
+                            sx={{
+                              mb: 2,
+                            }}
+                          >
+
+                            {/* ROW */}
+
+                            <Box
+                              sx={{
+                                display: 'grid',
+                                gridTemplateColumns: {
+                                  xs: '1fr',
+                                  sm: '1fr 120px 100px',
+                                },
+                                gap: 2,
+                                alignItems: 'center',
+                                px: 2,
+                                py: 1.5,
+
+                                borderRadius: '8px',
+
+                                bgcolor: isDarkMode
+                                  ? 'rgba(255,255,255,0.03)'
+                                  : 'rgba(0,0,0,0.02)',
+
+                                border: `1px solid ${isDarkMode
+                                  ? '#404656'
+                                  : '#e5e7eb'
+                                  }`,
+                              }}
+                            >
+
+                              {/* STEP NAME */}
+
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 2,
+                                }}
+                              >
+
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: '50%',
+                                    bgcolor: step.color,
+                                    flexShrink: 0,
+                                  }}
+                                />
+
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    fontWeight: 600,
+                                    color: isDarkMode
+                                      ? '#d0d2d6'
+                                      : '#5e5873',
+                                  }}
+                                >
+                                  {step.name}
+                                </Typography>
+
+                              </Box>
+
+
+                              {/* USERS */}
+
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontWeight: 700,
+                                  color: isDarkMode
+                                    ? '#e2e8f0'
+                                    : '#1e293b',
+                                  textAlign: {
+                                    xs: 'left',
+                                    sm: 'right',
+                                  },
+                                }}
+                              >
+                                {value.toLocaleString()}
+                              </Typography>
+
+
+                              {/* CONVERSION */}
+
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontWeight: 700,
+                                  color: step.color,
+                                  textAlign: {
+                                    xs: 'left',
+                                    sm: 'right',
+                                  },
+                                }}
+                              >
+                                {step.conversionRate || '0.0%'}
+                              </Typography>
+
+                            </Box>
+
+
+                            {/* PROGRESS BAR */}
+
+                            <Box
+                              sx={{
+                                width: 'calc(100% - 16px)',
+                                height: 6,
+
+                                bgcolor: isDarkMode
+                                  ? '#283046'
+                                  : '#f3f2f7',
+
+                                borderRadius: '3px',
+                                overflow: 'hidden',
+                                mt: 1,
+                                ml: 2,
+                              }}
+                            >
+
+                              <Box
+                                sx={{
+                                  width: `${barWidth}%`,
+                                  height: '100%',
+                                  bgcolor: step.color,
+                                  borderRadius: '3px',
+                                  transition:
+                                    'width 0.5s ease',
+                                }}
+                              />
+
+                            </Box>
+
                           </Box>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: isDarkMode ? '#e2e8f0' : '#1e293b', textAlign: 'right' }}>
-                            {step.value.toLocaleString()}
-                          </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: step.color, textAlign: 'right' }}>
-                            {step.conversionRate}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ width: '100%', height: 6, bgcolor: isDarkMode ? '#283046' : '#f3f2f7', borderRadius: '3px', overflow: 'hidden', mt: 1, mx: 2 }}>
-                          <Box sx={{ width: `${step.barWidth}%`, height: '100%', bgcolor: step.color, borderRadius: '3px', transition: 'width 0.5s ease' }} />
-                        </Box>
-                      </Box>
-                    ))}
-                  </Box>
-                  <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', mt: 2 }}>
-                    {funnelRes?.data?.map((item) => (
-                      <Box key={item.name} sx={{ textAlign: 'center', bgcolor: isDarkMode ? '#283046' : '#fff', p: 2, borderRadius: '8px', border: `1px solid ${isDarkMode ? '#404656' : '#e5e7eb'}` }}>
-                        <Typography variant="h5" sx={{ fontWeight: 700, color: item.color }}>
-                          {item.value.toLocaleString()}
+                        );
+                      })
+
+                    ) : (
+
+                      /* -------------------------------------------------- */
+                      /* NO DATA */
+                      /* -------------------------------------------------- */
+
+                      <Box
+                        sx={{
+                          minHeight: 200,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexDirection: 'column',
+                          gap: 1,
+                        }}
+                      >
+
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontWeight: 600,
+                            color: isDarkMode
+                              ? '#e2e8f0'
+                              : '#1e293b',
+                          }}
+                        >
+                          No funnel data available
                         </Typography>
-                        <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
-                          {item.name}
+
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: isDarkMode
+                              ? '#9ca3af'
+                              : '#6b7280',
+                          }}
+                        >
+                          Try refreshing the analytics data.
                         </Typography>
+
                       </Box>
-                    ))}
+
+                    )}
+
                   </Box>
                 </Box>
               )}
+
             </Box>
-          ) : null}
+          
+        ) : null}
         </Box>
       </Box>
     </Box>

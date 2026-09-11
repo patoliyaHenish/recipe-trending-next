@@ -68,7 +68,7 @@ const OverviewBox = ({ title, totalRecipes, approvedRecipes, pendingRecipes, uni
               <Typography variant="h4" sx={{ color: '#ea5455', fontWeight: 700 }}>{pendingRecipes ?? 0}</Typography>
             </Box>
             <Box>
-              <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#64748b', fontWeight: 500, mb: 0.5 }}>Users added recipes</Typography>
+               <Typography variant="body2" sx={{ color: isDarkMode ? '#9ca3af' : '#64748b', fontWeight: 500, mb: 0.5 }}>Unique users who added recipes</Typography>
               <Typography variant="h4" sx={{ color: isDarkMode ? '#e2e8f0' : '#1e293b', fontWeight: 700 }}>{uniqueUsers ?? 0}</Typography>
             </Box>
           </Box>
