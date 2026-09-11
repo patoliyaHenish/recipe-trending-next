@@ -1523,7 +1523,7 @@ export default function WebAnalytics() {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 4,
+                    gap: { xs: 1, sm: 2 },
                   }}
                 >
 
@@ -1532,12 +1532,14 @@ export default function WebAnalytics() {
                   {/* -------------------------------------------------- */}
 
                   <Typography
-                    variant="h6"
+                    variant="subtitle2"
                     sx={{
                       fontWeight: 700,
                       color: isDarkMode
                         ? '#e2e8f0'
                         : '#1e293b',
+                      mb: { xs: 0.25, sm: 0.5 },
+                      fontSize: { xs: '0.8rem', sm: '0.875rem' },
                     }}
                   >
                     Recipe Funnel
@@ -1557,18 +1559,19 @@ export default function WebAnalytics() {
 
                     {/* HEADER */}
 
-                    <Box
-                      sx={{
-                        display: 'grid',
-                        gridTemplateColumns: {
-                          xs: '1fr',
-                          sm: '1fr 120px 100px',
-                        },
-                        gap: 2,
-                        mb: 1,
-                        px: 2,
-                      }}
-                    >
+                      <Box
+                        sx={{
+                          display: 'grid',
+                          gridTemplateColumns: {
+                            xs: '1fr 50px 60px',
+                            sm: '1fr 120px 100px',
+                          },
+                          gap: { xs: 0.5, sm: 2 },
+                          mb: { xs: 0.25, sm: 0.5 },
+                          px: { xs: 1, sm: 2 },
+                          alignItems: 'center',
+                        }}
+                      >
 
                       <Typography
                         variant="caption"
@@ -1578,6 +1581,7 @@ export default function WebAnalytics() {
                             ? '#9ca3af'
                             : '#6b7280',
                           textTransform: 'uppercase',
+                          fontSize: { xs: '0.65rem', sm: '0.75rem' },
                         }}
                       >
                         Step
@@ -1596,6 +1600,7 @@ export default function WebAnalytics() {
                             xs: 'none',
                             sm: 'block',
                           },
+                          fontSize: { xs: '0.65rem', sm: '0.75rem' },
                         }}
                       >
                         Users
@@ -1614,6 +1619,7 @@ export default function WebAnalytics() {
                             xs: 'none',
                             sm: 'block',
                           },
+                          fontSize: { xs: '0.65rem', sm: '0.75rem' },
                         }}
                       >
                         Conversion
@@ -1642,12 +1648,12 @@ export default function WebAnalytics() {
                           );
 
                         return (
-                          <Box
-                            key={step.name}
-                            sx={{
-                              mb: 2,
-                            }}
-                          >
+                            <Box
+                              key={step.name}
+                              sx={{
+                                mb: { xs: 0.5, sm: 1 },
+                              }}
+                            >
 
                             {/* ROW */}
 
@@ -1655,15 +1661,15 @@ export default function WebAnalytics() {
                               sx={{
                                 display: 'grid',
                                 gridTemplateColumns: {
-                                  xs: '1fr',
+                                  xs: '1fr 50px 60px',
                                   sm: '1fr 120px 100px',
                                 },
-                                gap: 2,
+                                gap: { xs: 0.5, sm: 2 },
                                 alignItems: 'center',
-                                px: 2,
-                                py: 1.5,
+                                px: { xs: 1, sm: 2 },
+                                py: { xs: 0.75, sm: 1 },
 
-                                borderRadius: '8px',
+                                borderRadius: '6px',
 
                                 bgcolor: isDarkMode
                                   ? 'rgba(255,255,255,0.03)'
@@ -1682,14 +1688,14 @@ export default function WebAnalytics() {
                                 sx={{
                                   display: 'flex',
                                   alignItems: 'center',
-                                  gap: 2,
+                                  gap: { xs: 1, sm: 2 },
                                 }}
                               >
 
                                 <Box
                                   sx={{
-                                    width: 12,
-                                    height: 12,
+                                    width: { xs: 8, sm: 12 },
+                                    height: { xs: 8, sm: 12 },
                                     borderRadius: '50%',
                                     bgcolor: step.color,
                                     flexShrink: 0,
@@ -1703,6 +1709,7 @@ export default function WebAnalytics() {
                                     color: isDarkMode
                                       ? '#d0d2d6'
                                       : '#5e5873',
+                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
                                   }}
                                 >
                                   {step.name}
@@ -1724,6 +1731,7 @@ export default function WebAnalytics() {
                                     xs: 'left',
                                     sm: 'right',
                                   },
+                                  fontSize: { xs: '0.8rem', sm: '0.875rem' },
                                 }}
                               >
                                 {value.toLocaleString()}
@@ -1741,6 +1749,7 @@ export default function WebAnalytics() {
                                     xs: 'left',
                                     sm: 'right',
                                   },
+                                  fontSize: { xs: '0.8rem', sm: '0.875rem' },
                                 }}
                               >
                                 {step.conversionRate || '0.0%'}
@@ -1753,17 +1762,17 @@ export default function WebAnalytics() {
 
                             <Box
                               sx={{
-                                width: 'calc(100% - 16px)',
-                                height: 6,
+                                width: { xs: 'calc(100% - 8px)', sm: 'calc(100% - 16px)' },
+                                height: { xs: 4, sm: 6 },
 
                                 bgcolor: isDarkMode
                                   ? '#283046'
                                   : '#f3f2f7',
 
-                                borderRadius: '3px',
+                                borderRadius: '2px',
                                 overflow: 'hidden',
-                                mt: 1,
-                                ml: 2,
+                                mt: { xs: 0.25, sm: 0.5 },
+                                ml: { xs: 1, sm: 2 },
                               }}
                             >
 
