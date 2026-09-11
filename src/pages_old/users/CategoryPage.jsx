@@ -106,15 +106,21 @@ const CategoryPage = ({ categorySlug: propCategorySlug, subCategorySlug: propSub
 
     try {
       if (navigator.share) {
-        const firstImage = allRecipes?.[0]?.image;
-        const imgUrl = firstImage ? getImage(firstImage) : null;
-        if (imgUrl) {
+        const imgVal = isSubCategoryView ? pageData?.subCategory?.image : pageData?.category?.image;
+        const rawImg = (typeof imgVal === 'string' ? imgVal.trim() : '') || '';
+        const imgUrl = rawImg && rawImg.toLowerCase() !== 'null' ? getImage(rawImg) : null;
+        const normalizedImageUrl = (imgUrl || '').toLowerCase();
+        const isLogoImage = normalizedImageUrl.includes('nav_logo') || normalizedImageUrl.includes('site_logo') || normalizedImageUrl.includes('logo');
+        const isLocalAsset = normalizedImageUrl.startsWith('/assets/') || normalizedImageUrl.startsWith('/_next/static/');
+        const safeImgUrl = (!isLogoImage && !isLocalAsset) ? imgUrl : null;
+
+        if (safeImgUrl) {
           try {
-            const response = await fetch(imgUrl, { mode: 'cors' });
+            const response = await fetch(safeImgUrl, { mode: 'cors' });
             if (response.ok) {
               const blob = await response.blob();
               const ext = blob.type.split('/')[1] || 'jpg';
-              const file = new File([blob], `category-${pageTitle}.${ext}`, { type: blob.type });
+              const file = new File([blob], `${isSubCategoryView ? 'subcategory' : 'category'}-${pageTitle}.${ext}`, { type: blob.type });
               if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 shareData.files = [file];
               }

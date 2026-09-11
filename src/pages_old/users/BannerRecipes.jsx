@@ -178,7 +178,10 @@ const BannerRecipes = ({ bannerTitle, bannerImage }) => {
     const recipeImg = displayRecipes?.[0]?.image || displayRecipes?.[0]?.background_image;
     const finalImg = imgVal || recipeImg;
     const imgUrl = (typeof finalImg === 'string' ? finalImg.trim() : '') || '';
-    const shareImageUrl = imgUrl && imgUrl.toLowerCase() !== 'null' ? getImage(imgUrl) : null;
+    const rawImg = (imgUrl || '').toLowerCase();
+    const isLogoImage = rawImg.includes('nav_logo') || rawImg.includes('site_logo') || rawImg.includes('logo');
+    const isLocalAsset = rawImg.startsWith('/assets/') || rawImg.startsWith('/_next/static/');
+    const shareImageUrl = (imgUrl && !isLogoImage && !isLocalAsset) ? getImage(imgUrl) : null;
 
     const shortDesc = collectionDescription
       ? (collectionDescription.length > 200 ? collectionDescription.substring(0, 197) + "..." : collectionDescription)
