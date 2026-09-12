@@ -32,7 +32,8 @@ import { useGetCombinedSuggestionsQuery } from '../features/api/searchApi';
 import { useGetRecentCronLogsSummaryQuery, useMarkNotificationsAsReadMutation } from '../features/api/cronLogApi';
 import Cookies from 'js-cookie';
 import { useUpdatePreferenceMutation } from '../features/api/authApi';
-import navLogo from '../assets/nav_logo.png';
+import navLogo from '../assets/logo.png';
+import mainLogo from '../assets/logo.png';
 import Link from 'next/link';
 
 const RouterLink = React.forwardRef((props, ref) => {
@@ -1286,10 +1287,10 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Box
                     component="img"
-                    src={navLogo?.src || navLogo}
+                    src={mainLogo?.src || mainLogo}
                     alt="Recipe Trending"
                     sx={{
-                      height: { xs: 34, sm: 40 },
+                      height: { xs: 46, sm: 54 },
                       width: 'auto',
                       objectFit: 'contain'
                     }}
@@ -1300,6 +1301,8 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      textAlign: 'left',
                       lineHeight: 1,
                       gap: { xs: 0.2, sm: 0.25 }
                     }}
@@ -1307,7 +1310,6 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                     <Typography
                       sx={{
                         fontSize: { xs: '0.95rem', sm: '1rem' },
-                        fontWeight: 700,
                         color: '#ffffff',
                         letterSpacing: '0.05em',
                         lineHeight: 0.9,
@@ -1319,7 +1321,6 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                     <Typography
                       sx={{
                         fontSize: { xs: '0.72rem', sm: '0.75rem' },
-                        fontWeight: 700,
                         color: '#ffffff',
                         letterSpacing: '0.1em',
                         lineHeight: 0.9,
