@@ -23,6 +23,7 @@ import StoreProvider from "../redux/StoreProvider";
 import { UserProvider } from "../context/UserContext";
 import MainLayout from "../layout/MainLayout";
 import Analytics from "../components/Analytics";
+import GoogleAds from "../components/GoogleAds";
 import ProgressBar from "../components/ProgressBar";
 import { MuiToastContainer } from "../utils/toast";
 import WebSiteJsonLd from "../components/WebSiteJsonLd";
@@ -75,6 +76,9 @@ export default async function RootLayout({ children }) {
         <WebSiteJsonLd />
         {process.env.NEXT_GOOGLE_ANALYTICS_ID && process.env.NODE_ENV === 'production' && (
            <Analytics gaId={process.env.NEXT_GOOGLE_ANALYTICS_ID} />
+        )}
+        {process.env.NEXT_PUBLIC_GOOGLE_ADS_ID && process.env.NODE_ENV === 'production' && (
+           <GoogleAds adsId={process.env.NEXT_PUBLIC_GOOGLE_ADS_ID} />
         )}
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider>
