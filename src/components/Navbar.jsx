@@ -26,10 +26,8 @@ import { useTheme } from '../context/ThemeContext';
 import { getImage } from '../utils/helper';
 import ThemeToggle from './ThemeToggle';
 import AuthModal from './AuthModal';
-import { NotificationsDialog } from './common';
 import { useGetNavItemsForNavbarQuery } from '../features/api/navItemApi';
 import { useGetCombinedSuggestionsQuery } from '../features/api/searchApi';
-import { useGetRecentCronLogsSummaryQuery, useMarkNotificationsAsReadMutation } from '../features/api/cronLogApi';
 import Cookies from 'js-cookie';
 import { useUpdatePreferenceMutation } from '../features/api/authApi';
 import navLogo from '../assets/logo.png';
@@ -134,28 +132,6 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
   const [expandedMobileItems, setExpandedMobileItems] = useState({});
   const [prefVersion, setPrefVersion] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-  const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
-  const { data: notificationsData, refetch: refetchNotifications } = useGetRecentCronLogsSummaryQuery(undefined, {
-    skip: !user || user.role === 'user' // only fetch for admins
-  });
-  const [markAsRead] = useMarkNotificationsAsReadMutation();
-  const unreadCount = notificationsData?.data?.filter(log => !log.is_read)?.length || 0;
-
-  const handleNotificationClick = async (event) => {
-    setNotificationAnchorEl(event.currentTarget);
-    // 1. Refetch to get any new notifications from the backend (e.g. background cron jobs or recipes created without invalidating this specific query)
-    const { data: freshData } = await refetchNotifications();
-    
-    // 3. Mark as read if there are unread items in the FRESH data
-    const currentUnread = freshData?.data?.filter(log => !log.is_read)?.length || 0;
-    if (currentUnread > 0) {
-      try {
-        await markAsRead().unwrap();
-      } catch (err) {
-        console.error("Failed to mark notifications as read:", err);
-      }
-    }
-  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -850,33 +826,6 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
               {/* Theme toggle */}
               <ThemeToggle color={isDarkMode ? '#d0d2d6' : '#6e6b7b'} />
 
-              {/* Notification bell */}
-              {user?.role === 'admin' && (
-                <IconButton 
-                  onClick={handleNotificationClick}
-                  sx={{
-                  color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
-                  '&:hover': { bgcolor: isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }
-                }}>
-                  <Box sx={{ position: 'relative', display: 'flex' }}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                    </svg>
-                    {unreadCount > 0 && (
-                      <Box sx={{
-                        position: 'absolute', top: -4, right: -4,
-                        width: 16, height: 16, borderRadius: '50%',
-                        bgcolor: '#ea5455',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '0.6rem', color: '#fff', fontWeight: 700, lineHeight: 1,
-                      }}>
-                        {unreadCount}
-                      </Box>
-                    )}
-                  </Box>
-                </IconButton>
-              )}
-
               {/* Avatar */}
               <IconButton
                 component={RouterLink}
@@ -902,10 +851,6 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
 
 
 
-        <NotificationsDialog 
-          anchorEl={notificationAnchorEl} 
-          onClose={() => setNotificationAnchorEl(null)} 
-        />
       </>
     );
   }
@@ -2018,15 +1963,11 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
         </Box>
       </Drawer>
 
-      <AuthModal
-        open={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-      />
-      <NotificationsDialog 
-        anchorEl={notificationAnchorEl} 
-        onClose={() => setNotificationAnchorEl(null)} 
-      />
-    </>
+        <AuthModal
+          open={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+        />
+      </>
   );
 };
 

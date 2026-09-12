@@ -23,7 +23,6 @@ import { rbacApi } from "../features/api/rbacApi";
 import { recipeNoteApi } from "../features/api/recipeNoteApi";
 import { paymentSlipApi } from "../features/api/paymentSlipApi";
 import { assignedRecipeApi } from "../features/api/assignedRecipeApi";
-import { notificationApi } from "../features/api/notificationApi";
 import { dashboardApi } from "../features/api/dashboardApi";
 import { analyticsApi } from "../features/api/analyticsApi";
 import { myWorkApi } from "../features/api/myWorkApi";
@@ -59,7 +58,6 @@ export const appStore = configureStore({
             recipeNoteApi.middleware,
             paymentSlipApi.middleware,
             assignedRecipeApi.middleware,
-            notificationApi.middleware,
             dashboardApi.middleware,
             analyticsApi.middleware,
             myWorkApi.middleware,

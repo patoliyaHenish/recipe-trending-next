@@ -24,7 +24,6 @@ import { rbacApi } from "../features/api/rbacApi";
 import { recipeNoteApi } from "../features/api/recipeNoteApi";
 import { paymentSlipApi } from "../features/api/paymentSlipApi";
 import { assignedRecipeApi } from "../features/api/assignedRecipeApi";
-import { notificationApi } from "../features/api/notificationApi";
 import { dashboardApi } from "../features/api/dashboardApi";
 import { analyticsApi } from "../features/api/analyticsApi";
 import { myWorkApi } from "../features/api/myWorkApi";
@@ -54,7 +53,6 @@ const rootReducer = combineReducers({
     [recipeNoteApi.reducerPath]: recipeNoteApi.reducer,
     [paymentSlipApi.reducerPath]: paymentSlipApi.reducer,
     [assignedRecipeApi.reducerPath]: assignedRecipeApi.reducer,
-    [notificationApi.reducerPath]: notificationApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
     [analyticsApi.reducerPath]: analyticsApi.reducer,
     [myWorkApi.reducerPath]: myWorkApi.reducer,

@@ -13,7 +13,6 @@ import IngredientManagement from '../../pages_old/admin/IngredientManagement';
 import IngredientUnitManagement from '../../pages_old/admin/IngredientUnitManagement';
 import ManageConfig from '../../pages_old/admin/ManageConfig';
 import ManageContacts from '../../pages_old/admin/ManageContacts';
-import Notifications from '../../pages_old/admin/Notifications';
 import UserManagement from '../../pages_old/admin/UserManagement';
 
 import BannerManagement from '../../pages_old/admin/banner management/BannerManagement';
@@ -82,7 +81,6 @@ const routeConfig = [
   { path: 'manage-home-section-items/:id', element: <HomeSectionItemsManagement />, permission: 'home_section_items.list' },
   { path: 'manage-config', element: <ManageConfig />, permission: 'config.manage' },
   { path: 'manage-contacts', element: <ManageContacts />, permission: 'inquiry.list' },
-  { path: 'notifications', element: <Notifications />, permission: 'notifications.list' },
   { path: 'manage-payment-slips', element: <PayrollManagement />, permission: 'payment_slip.list' },
   { path: 'activity-logs', element: <ActivityLogs />, permission: 'activity_logs.list' },
   { path: 'cron-logs', element: <CronLogs />, permission: 'cron_logs.list' },

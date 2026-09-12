@@ -115,9 +115,8 @@ const adminLinks = [
   {
     label: 'System',
     icon: <Settings />,
-    permission: ['cron_logs.list', 'failed_logs.list', 'config.manage', 'payment_slip.list', 'activity_logs.list', 'notifications.list'],
+    permission: ['cron_logs.list', 'failed_logs.list', 'config.manage', 'payment_slip.list', 'activity_logs.list'],
     subLinks: [
-      { label: 'Notifications', icon: <AnnouncementIcon />, to: '/admin/notifications', permission: 'notifications.list' },
       { label: 'Cron Logs', icon: <Analytics />, to: '/admin/cron-logs', permission: 'cron_logs.list' },
       { label: 'Activity Logs', icon: <Analytics />, to: '/admin/activity-logs', permission: 'activity_logs.list' },
       { label: 'Failed Logs', icon: <AnnouncementIcon />, to: '/admin/failed-logs', permission: 'failed_logs.list' },
