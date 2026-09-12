@@ -977,7 +977,7 @@ const Navbar = ({ adminNavOpen, onAdminNavToggle, sidebarWidth = 0, adminDesktop
                     src={navLogo?.src || navLogo}
                     alt="Recipe Trending"
                     sx={{
-                      height: { xs: 36, sm: 40, md: 54 },
+                      height: { xs: 46, sm: 54, md: 54 },
                       width: 'auto',
                       objectFit: 'contain'
                     }}
