@@ -63,6 +63,14 @@ export default async function RootLayout({ children }) {
       className="h-full antialiased"
       suppressHydrationWarning
     >
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/pwa-192x192.png" type="image/png" sizes="192x192" />
+        <link rel="icon" href="/pwa-512x512.png" type="image/png" sizes="512x512" />
+        <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#CA6014" />
+      </head>
       <body className="min-h-full flex flex-col" style={{ backgroundColor: 'var(--bg-primary)', transition: 'background-color 0.3s ease', fontFamily: 'Roboto, Inter, sans-serif' }}>
         <WebSiteJsonLd />
         {process.env.NEXT_GOOGLE_ANALYTICS_ID && process.env.NODE_ENV === 'production' && (
