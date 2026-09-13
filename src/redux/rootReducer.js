@@ -10,7 +10,6 @@ import { bannerApi } from '../features/api/bannerApi';
 import { searchApi } from '../features/api/searchApi';
 import { recipeDetailsApi } from '../features/api/recipeDetailsApi';
 import { cronLogApi } from '../features/api/cronLogApi';
-import { activityLogApi } from '../features/api/activityLogApi';
 import { homeSectionApi } from '../features/api/homeSectionApi';
 import { homeSectionItemApi } from '../features/api/homeSectionItemApi';
 import { navItemApi } from '../features/api/navItemApi';
@@ -28,6 +27,7 @@ import { dashboardApi } from "../features/api/dashboardApi";
 import { analyticsApi } from "../features/api/analyticsApi";
 import { myWorkApi } from "../features/api/myWorkApi";
 import { pinterestApi } from "../features/api/pinterestApi";
+import { instagramApi } from "../features/api/instagramApi";
 
 const rootReducer = combineReducers({
     [authApi.reducerPath]: authApi.reducer,
@@ -40,7 +40,6 @@ const rootReducer = combineReducers({
     [searchApi.reducerPath]: searchApi.reducer,
     [recipeDetailsApi.reducerPath]: recipeDetailsApi.reducer,
     [cronLogApi.reducerPath]: cronLogApi.reducer,
-    [activityLogApi.reducerPath]: activityLogApi.reducer,
     [homeSectionApi.reducerPath]: homeSectionApi.reducer,
     [homeSectionItemApi.reducerPath]: homeSectionItemApi.reducer,
     [navItemApi.reducerPath]: navItemApi.reducer,
@@ -57,6 +56,7 @@ const rootReducer = combineReducers({
     [analyticsApi.reducerPath]: analyticsApi.reducer,
     [myWorkApi.reducerPath]: myWorkApi.reducer,
     [pinterestApi.reducerPath]: pinterestApi.reducer,
+    [instagramApi.reducerPath]: instagramApi.reducer,
     auth: authReducer,
     global: globalReducer,
 })

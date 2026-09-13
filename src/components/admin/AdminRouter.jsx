@@ -5,7 +5,6 @@ import { useUser } from '../../context/useUser';
 import AccessDenied from '../../components/common/AccessDenied';
 
 // Import Admin Components
-import ActivityLogs from '../../pages_old/admin/ActivityLogs';
 import CronLogs from '../../pages_old/admin/CronLogs';
 import FailedLogs from '../../pages_old/admin/FailedLogs';
 import FailedSearches from '../../pages_old/admin/FailedSearches';
@@ -82,7 +81,6 @@ const routeConfig = [
   { path: 'manage-config', element: <ManageConfig />, permission: 'config.manage' },
   { path: 'manage-contacts', element: <ManageContacts />, permission: 'inquiry.list' },
   { path: 'manage-payment-slips', element: <PayrollManagement />, permission: 'payment_slip.list' },
-  { path: 'activity-logs', element: <ActivityLogs />, permission: 'activity_logs.list' },
   { path: 'cron-logs', element: <CronLogs />, permission: 'cron_logs.list' },
   { path: 'failed-logs', element: <FailedLogs />, permission: 'failed_logs.list' },
   { path: 'failed-searches', element: <FailedSearches />, permission: 'search_failed.list' },

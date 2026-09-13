@@ -83,7 +83,9 @@ import { useGetRecipeCategoryDropdownQuery } from '../../../features/api/categor
 import ViewRecipeDialog from './ViewRecipeDialog';
 import RecipeNotesDialog from './RecipeNotesDialog';
 import PinterestIcon from '@mui/icons-material/Pinterest';
+import InstagramIcon from '@mui/icons-material/Instagram';
 import PinterestShareDialog from './PinterestShareDialog';
+import InstagramShareDialog from '../../../components/common/InstagramShareDialog';
 
 
 
@@ -173,6 +175,12 @@ const Recipe = () => {
   const canNotesDelete = isAdmin || userPermissions.includes('recipe.notes_delete');
   const canNotesUpdateStatus = isAdmin || userPermissions.includes('recipe.notes_update_status');
   const canAdminApprovedEdit = isAdmin || userPermissions.includes('recipe.admin_approved_edit');
+  const canPinterestList = isAdmin || userPermissions.includes('pinterest.post.list');
+  const canPinterestCreate = isAdmin || userPermissions.includes('pinterest.post.create');
+  const canPinterestDelete = isAdmin || userPermissions.includes('pinterest.post.delete');
+  const canInstagramList = isAdmin || userPermissions.includes('instagram.post.list');
+  const canInstagramCreate = isAdmin || userPermissions.includes('instagram.post.create');
+  const canInstagramDelete = isAdmin || userPermissions.includes('instagram.post.delete');
 
   useEffect(() => {
     document.title = 'Recipes Management'
@@ -203,6 +211,8 @@ const Recipe = () => {
   const [viewId, setViewId] = useState(null);
   const [pinterestRecipe, setPinterestRecipe] = useState(null);
   const [pinterestDialogOpen, setPinterestDialogOpen] = useState(false);
+  const [instagramRecipe, setInstagramRecipe] = useState(null);
+  const [instagramDialogOpen, setInstagramDialogOpen] = useState(false);
   const [noteRecipeId, setNoteRecipeId] = useState(null);
   const [badgeDialogOpen, setBadgeDialogOpen] = useState(false);
   const [badgeDialogRecipeId, setBadgeDialogRecipeId] = useState(null);
@@ -2518,9 +2528,9 @@ const Recipe = () => {
                         <TableCell align="center" sx={{ minWidth: 190 }}>Approved Date</TableCell>
                     </>
                 )}
-                {isAdmin && (
-                    <TableCell align="center">Admin Approved</TableCell>
-                )}
+                                    {isAdmin && (
+                     <TableCell align="center">Admin Approved</TableCell>
+                 )}
                 <TableCell align="center" sx={{ minWidth: 190 }}>Admin Approved Time</TableCell>
                 <TableCell align="center" sx={{ minWidth: 190 }}>Created Date</TableCell>
                 <TableCell align="center" sx={{ minWidth: 190 }}>Updated Date</TableCell>
@@ -2668,11 +2678,11 @@ const Recipe = () => {
                                     </TableCell>
                                 </>
                             )}
-                            
+                             
                             {isAdmin && (
-                                <TableCell align="center">
-                                    <Switch
-                                        checked={!!recipe.is_admin_approved}
+                                 <TableCell align="center">
+                                     <Switch
+                                         checked={!!recipe.is_admin_approved}
                                         onChange={() => setAdminToggleItem(recipe)}
                                         size="small"
                                         color="primary"
@@ -2749,7 +2759,7 @@ const Recipe = () => {
                                         showEdit={canUpdate && canModifyEdit}
                                         showDelete={canDelete && canModifyDelete}
                                     />
-                                    {isAdmin && (
+                                    {canPinterestCreate && (
                                         <IconButton
                                             onClick={() => {
                                                 setPinterestRecipe(recipe);
@@ -2767,6 +2777,26 @@ const Recipe = () => {
                                             }}
                                         >
                                             <PinterestIcon fontSize="small" />
+                                        </IconButton>
+                                    )}
+                                    {canInstagramCreate && (
+                                        <IconButton
+                                            onClick={() => {
+                                                setInstagramRecipe(recipe);
+                                                setInstagramDialogOpen(true);
+                                            }}
+                                            size="small"
+                                            title="Share to Instagram"
+                                            sx={{
+                                                color: '#E1306C',
+                                                backgroundColor: 'transparent',
+                                                borderRadius: 0,
+                                                border: 'none',
+                                                '&:hover': { color: '#c0355e', backgroundColor: 'rgba(225, 48, 108, 0.08)' },
+                                                transition: 'all 0.3s ease'
+                                            }}
+                                        >
+                                            <InstagramIcon fontSize="small" />
                                         </IconButton>
                                     )}
                                     {canNotesList && !recipe.is_admin_approved && (
@@ -3266,6 +3296,16 @@ const Recipe = () => {
           setPinterestRecipe(null);
         }}
         recipe={pinterestRecipe}
+      />
+
+      <InstagramShareDialog
+        open={instagramDialogOpen}
+        onClose={() => {
+          setInstagramDialogOpen(false);
+          setInstagramRecipe(null);
+        }}
+        recipe={instagramRecipe}
+        canDelete={canInstagramDelete}
       />
 
 

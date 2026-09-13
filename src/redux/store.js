@@ -9,7 +9,6 @@ import { bannerApi } from '../features/api/bannerApi';
 import { searchApi } from '../features/api/searchApi';
 import { recipeDetailsApi } from '../features/api/recipeDetailsApi';
 import { cronLogApi } from '../features/api/cronLogApi';
-import { activityLogApi } from '../features/api/activityLogApi';
 import { homeSectionApi } from '../features/api/homeSectionApi';
 import { homeSectionItemApi } from '../features/api/homeSectionItemApi';
 import { navItemApi } from '../features/api/navItemApi';
@@ -27,6 +26,7 @@ import { dashboardApi } from "../features/api/dashboardApi";
 import { analyticsApi } from "../features/api/analyticsApi";
 import { myWorkApi } from "../features/api/myWorkApi";
 import { pinterestApi } from "../features/api/pinterestApi";
+import { instagramApi } from "../features/api/instagramApi";
 
 import { rtkQueryErrorMiddleware } from "./middleware";
 
@@ -45,7 +45,6 @@ export const appStore = configureStore({
             searchApi.middleware,
             recipeDetailsApi.middleware,
             cronLogApi.middleware,
-            activityLogApi.middleware,
             homeSectionApi.middleware,
             homeSectionItemApi.middleware,
             navItemApi.middleware,
@@ -62,6 +61,7 @@ export const appStore = configureStore({
             analyticsApi.middleware,
             myWorkApi.middleware,
             pinterestApi.middleware,
+            instagramApi.middleware,
         )
 
 });
