@@ -28,6 +28,7 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import HistoryIcon from '@mui/icons-material/History';
 import ImageIcon from '@mui/icons-material/Image';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 import { useTheme } from '../../context/ThemeContext';
 import { getImage } from '../../utils/helper';
@@ -36,7 +37,8 @@ import ConfirmDialog from './ConfirmDialog';
 import {
     useCreateInstagramPostMutation,
     useGetRecipeInstagramPostsQuery,
-    useDeleteInstagramPostMutation
+    useDeleteInstagramPostMutation,
+    useGenerateInstagramCaptionMutation
 } from '../../features/api/instagramApi';
 
 const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
@@ -48,9 +50,11 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
     const [imageUrl, setImageUrl] = useState('');
     const [publishedPostUrl, setPublishedPostUrl] = useState('');
     const [copied, setCopied] = useState(false);
+    const [recipeUrl, setRecipeUrl] = useState('');
 
     const [createPost, { isLoading: isPosting }] = useCreateInstagramPostMutation();
     const [deletePost, { isLoading: isDeleting }] = useDeleteInstagramPostMutation();
+    const [generateCaption, { isLoading: isGeneratingCaption }] = useGenerateInstagramCaptionMutation();
     const { data: postsHistoryData, isLoading: isLoadingHistory } = useGetRecipeInstagramPostsQuery(recipe?.recipe_id, {
         skip: !open || !recipe?.recipe_id
     });
@@ -68,6 +72,12 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
             setPublishedPostUrl('');
             setCopied(false);
             setTabIndex(0);
+            let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://recipetrending.com';
+            if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
+                baseUrl = window.location.origin;
+            }
+            const recipeSlug = recipe.slug || recipe.recipe_id;
+            setRecipeUrl(`${baseUrl}/recipes/${recipeSlug}`);
         }
     }, [recipe, open]);
 
@@ -123,6 +133,31 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
             }
         } catch (err) {
             const msg = err?.data?.message || err?.message || 'Failed to delete Instagram post.';
+            toast.error(msg);
+        }
+    };
+
+    const handleGenerateCaption = async () => {
+        if (!title.trim()) {
+            toast.error('Please enter a title first to generate a caption.');
+            return;
+        }
+
+        try {
+            const res = await generateCaption({
+                title: title.trim(),
+                description: recipe?.description || recipe?.meta_description || '',
+                meta_description: recipe?.meta_description || ''
+            }).unwrap();
+
+            if (res.success && res.caption) {
+                setCaption(res.caption);
+                toast.success('Caption generated successfully!');
+            } else {
+                toast.error(res?.message || 'Failed to generate caption. Please try again.');
+            }
+        } catch (err) {
+            const msg = err?.data?.message || err?.message || 'Failed to generate caption.';
             toast.error(msg);
         }
     };
@@ -389,7 +424,7 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                                     </Box>
                                     <Box sx={{ p: 2 }}>
                                         <Typography variant="subtitle2" fontWeight="600" sx={{ color: textPrimary }} noWrap>
-                                            {title || 'Recipe Title'}
+                                            {title ? `Checkout ${title} - ${recipeUrl}` : 'Checkout Recipe Title - Recipe Link'}
                                         </Typography>
                                         <Typography
                                             variant="body2"
@@ -442,7 +477,30 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                                 />
 
                                 <TextField
-                                    label="Caption *"
+                                    label={
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <span>Caption *</span>
+                                            <Tooltip title="Generate Caption with AI">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={handleGenerateCaption}
+                                                    disabled={isGeneratingCaption || !title.trim()}
+                                                    sx={{
+                                                        color: '#E1306C',
+                                                        padding: 0,
+                                                        '&:hover': { color: '#c0355e' },
+                                                        '&.Mui-disabled': { color: isDarkMode ? '#4a5568' : '#a0aec0' }
+                                                    }}
+                                                >
+                                                    {isGeneratingCaption ? (
+                                                        <CircularProgress size={16} sx={{ color: '#E1306C' }} />
+                                                    ) : (
+                                                        <AutoAwesomeIcon fontSize="small" />
+                                                    )}
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Box>
+                                    }
                                     size="small"
                                     fullWidth
                                     multiline

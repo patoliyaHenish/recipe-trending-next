@@ -37,6 +37,13 @@ export const instagramApi = createApi({
             }),
             invalidatesTags: ["Instagram_Posts"],
         }),
+        generateInstagramCaption: builder.mutation({
+            query: (data) => ({
+                url: "/generate-caption",
+                method: "POST",
+                body: data,
+            }),
+        }),
     }),
 });
 
@@ -44,4 +51,5 @@ export const {
     useCreateInstagramPostMutation,
     useGetRecipeInstagramPostsQuery,
     useDeleteInstagramPostMutation,
+    useGenerateInstagramCaptionMutation,
 } = instagramApi;
