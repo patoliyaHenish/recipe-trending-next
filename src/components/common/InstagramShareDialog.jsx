@@ -387,7 +387,7 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                                         boxShadow: 'none'
                                     }}
                                 >
-                                    <Box sx={{ position: 'relative', width: '100%', pt: '120%', backgroundColor: isDarkMode ? '#1f2937' : '#e5e7eb' }}>
+                                    <Box sx={{ position: 'relative', width: '100%', pt: '56.25%', backgroundColor: isDarkMode ? '#1f2937' : '#e5e7eb' }}>
                                         {imageUrl ? (
                                             <img
                                                 src={imageUrl}
@@ -583,6 +583,25 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                                             <Typography variant="subtitle2" fontWeight="600" sx={{ color: textPrimary }} noWrap>
                                                 {post.title}
                                             </Typography>
+                                            <Box sx={{ mt: 0.3 }}>
+                                                <Chip
+                                                    label={post._instagramFetched === false ? 'Not Found on Instagram' : (post.status || 'published')}
+                                                    size="small"
+                                                    sx={{
+                                                        height: 20,
+                                                        backgroundColor: post._instagramFetched === false
+                                                            ? (isDarkMode ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)')
+                                                            : (post.status === 'published' || !post.status)
+                                                                ? (isDarkMode ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.1)')
+                                                                : (isDarkMode ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.1)'),
+                                                        color: post._instagramFetched === false
+                                                            ? '#ef4444'
+                                                            : (post.status === 'published' || !post.status) ? '#10b981' : '#f59e0b',
+                                                        fontWeight: 500,
+                                                        fontSize: '0.65rem'
+                                                    }}
+                                                />
+                                            </Box>
                                             <Typography variant="caption" sx={{ color: textSecondary, display: 'block', mt: 0.3 }}>
                                                 Post ID: <strong>{post.instagram_post_id}</strong>
                                             </Typography>

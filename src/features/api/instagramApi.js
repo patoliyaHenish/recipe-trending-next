@@ -26,6 +26,12 @@ export const instagramApi = createApi({
             }),
             invalidatesTags: ["Instagram_Posts"],
         }),
+        getAllInstagramPosts: builder.query({
+            query: ({ search = '', recipe = '', page = 1, limit = 20 } = {}) => ({
+                url: `/posts?search=${encodeURIComponent(search)}&recipe=${encodeURIComponent(recipe)}&page=${page}&limit=${limit}`,
+            }),
+            providesTags: ["Instagram_Posts"],
+        }),
         getRecipeInstagramPosts: builder.query({
             query: (recipe_id) => `/posts/${recipe_id}`,
             providesTags: ["Instagram_Posts"],
@@ -49,6 +55,7 @@ export const instagramApi = createApi({
 
 export const {
     useCreateInstagramPostMutation,
+    useGetAllInstagramPostsQuery,
     useGetRecipeInstagramPostsQuery,
     useDeleteInstagramPostMutation,
     useGenerateInstagramCaptionMutation,

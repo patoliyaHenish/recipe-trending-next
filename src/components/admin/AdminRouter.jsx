@@ -36,6 +36,7 @@ import Dashboard from '../../pages_old/admin/Dashboard';
 import SearchResults from '../../pages_old/admin/SearchResults';
 import WebAnalytics from '../../pages_old/admin/WebAnalytics';
 import MyWork from '../../pages_old/admin/MyWork';
+import InstagramPosts from '../../pages_old/admin/InstagramPosts';
 
 const checkPerm = (permission, userPermissions) => {
   if (!permission) return true;
@@ -86,6 +87,7 @@ const routeConfig = [
   { path: 'failed-searches', element: <FailedSearches />, permission: 'search_failed.list' },
   { path: 'search-results', element: <SearchResults />, permission: 'search_console.view' },
   { path: 'web-analytics', element: <WebAnalytics />, permission: 'web_analytics.view' },
+  { path: 'instagram-posts', element: <InstagramPosts />, permission: 'instagram.post.list' },
 ];
 
 export default function AdminRouter() {
