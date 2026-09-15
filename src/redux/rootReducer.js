@@ -28,6 +28,7 @@ import { analyticsApi } from "../features/api/analyticsApi";
 import { myWorkApi } from "../features/api/myWorkApi";
 import { pinterestApi } from "../features/api/pinterestApi";
 import { instagramApi } from "../features/api/instagramApi";
+import { unusedImageApi } from "../features/api/unusedImageApi";
 
 const rootReducer = combineReducers({
     [authApi.reducerPath]: authApi.reducer,
@@ -57,6 +58,7 @@ const rootReducer = combineReducers({
     [myWorkApi.reducerPath]: myWorkApi.reducer,
     [pinterestApi.reducerPath]: pinterestApi.reducer,
     [instagramApi.reducerPath]: instagramApi.reducer,
+    [unusedImageApi.reducerPath]: unusedImageApi.reducer,
     auth: authReducer,
     global: globalReducer,
 })

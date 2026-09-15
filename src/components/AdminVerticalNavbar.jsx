@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Close,
   Work as WorkIcon,
+  Image,
 } from '@mui/icons-material';
 import AnnouncementIcon from '@mui/icons-material/Announcement';
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -133,6 +134,12 @@ const adminLinks = [
       { label: 'Roles', icon: <People />, to: '/admin/manage-roles', permission: 'role.list' },
       { label: 'Permissions', icon: <Analytics />, to: '/admin/manage-permissions', permission: 'permission.list' },
     ],
+  },
+  {
+    label: 'Unused Images',
+    icon: <Image />,
+    to: '/admin/unused-images',
+    permission: 'unused_image.list',
   },
 ];
 

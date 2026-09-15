@@ -105,7 +105,7 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                 setPublishedPostUrl(url);
             }
         } catch (err) {
-            const msg = err?.data?.message || err?.message || 'Failed to post on Instagram.';
+            const msg = err?.data?.userMessage || err?.data?.message || err?.message || 'Failed to post on Instagram.';
             toast.error(msg);
         }
     };
@@ -124,15 +124,19 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
         try {
             const res = await deletePost(deleteId).unwrap();
 
-            if (res.success && res.instagramDeleted && res.databaseDeleted) {
-                toast.success('Instagram post deleted successfully.');
+            if (res.success && res.databaseDeleted) {
+                if (res.instagramDeleted) {
+                    toast.success('Instagram post deleted successfully from Instagram and local history.');
+                } else {
+                    toast.success('Instagram post removed from local history. It was already not found on Instagram.');
+                }
                 setDeleteId(null);
             } else {
-                toast.error(res?.message || 'Instagram post could not be deleted through the API. The local history record has been kept so you can retry or delete manually.');
+                toast.error(res?.userMessage || res?.message || 'Instagram post could not be deleted through the API. The local history record has been kept so you can retry or delete manually.');
                 setDeleteId(null);
             }
         } catch (err) {
-            const msg = err?.data?.message || err?.message || 'Failed to delete Instagram post.';
+            const msg = err?.data?.userMessage || err?.data?.message || err?.message || 'Failed to delete Instagram post.';
             toast.error(msg);
         }
     };
@@ -617,7 +621,7 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                                             alignItems: 'center',
                                             flexWrap: 'wrap'
                                         }}>
-                                            {post.post_url ? (
+                                            {post.post_url && post._instagramFetched !== false ? (
                                                 <>
                                                     <Button
                                                         size="small"

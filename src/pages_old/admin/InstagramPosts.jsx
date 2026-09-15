@@ -41,10 +41,10 @@ import FilterAltOffOutlined from '@mui/icons-material/FilterAltOffOutlined';
 import CloseIcon from '@mui/icons-material/Close';
 
 import { useTheme } from '../../context/ThemeContext';
-import { useGetAllInstagramPostsQuery } from '../../features/api/instagramApi';
+import { useGetAllInstagramPostsQuery, useDeleteInstagramPostMutation } from '../../features/api/instagramApi';
 import { toast } from '../../utils/toast';
 import { getImage } from '../../utils/helper';
-import { AccessDenied } from '../../components/common';
+import { AccessDenied, ConfirmDialog } from '../../components/common';
 
 const InstagramPosts = () => {
     useEffect(() => {
@@ -76,6 +76,8 @@ const InstagramPosts = () => {
     const [debouncedRecipeFilter, setDebouncedRecipeFilter] = useState(() => searchParams.get('recipe') || '')
     const [showFilters, setShowFilters] = useState(false);
     const [viewPost, setViewPost] = useState(null);
+    const [deleteId, setDeleteId] = useState(null);
+    const [deletePost, { isLoading: isDeleting }] = useDeleteInstagramPostMutation();
 
     useEffect(() => {
         setSearchParams((prev) => {
@@ -160,6 +162,30 @@ const InstagramPosts = () => {
         if (!url) return;
         navigator.clipboard.writeText(url);
         toast.success('Post URL copied to clipboard!');
+    };
+
+    const handleDeletePost = async () => {
+        if (!deleteId) return;
+
+        try {
+            const res = await deletePost(deleteId).unwrap();
+
+            if (res.success && res.databaseDeleted) {
+                if (res.instagramDeleted) {
+                    toast.success('Instagram post deleted successfully from Instagram and local history.');
+                } else {
+                    toast.success('Instagram post removed from local history. It was already not found on Instagram.');
+                }
+                setDeleteId(null);
+                setViewPost(null);
+            } else {
+                toast.error(res?.userMessage || res?.message || 'Instagram post could not be deleted. The local database record has been kept.');
+                setDeleteId(null);
+            }
+        } catch (err) {
+            const msg = err?.data?.userMessage || err?.data?.message || err?.message || 'Failed to delete Instagram post.';
+            toast.error(msg);
+        }
     };
 
     const selectStyles = {
@@ -443,7 +469,7 @@ const InstagramPosts = () => {
                                         </TableCell>
                                         <TableCell align="center">
                                             <Box display="flex" gap={0.5} justifyContent="center" alignItems="center">
-                                                {post.post_url && (
+                                                {post.post_url && post._instagramFetched !== false && (
                                                     <Tooltip title="View on Instagram" arrow>
                                                         <IconButton
                                                             size="small"
@@ -456,7 +482,7 @@ const InstagramPosts = () => {
                                                         </IconButton>
                                                     </Tooltip>
                                                 )}
-                                                {post.post_url && (
+                                                {post.post_url && post._instagramFetched !== false && (
                                                     <Tooltip title="Copy Link" arrow>
                                                         <IconButton
                                                             size="small"
@@ -471,7 +497,7 @@ const InstagramPosts = () => {
                                                     <Tooltip title="Delete Post Record" arrow>
                                                         <IconButton
                                                             size="small"
-                                                            onClick={() => setViewPost(post)}
+                                                            onClick={() => setDeleteId(post.id)}
                                                             sx={{ color: isDarkMode ? '#ef4444' : '#dc2626' }}
                                                         >
                                                         </IconButton>
@@ -791,6 +817,18 @@ const InstagramPosts = () => {
                     </>
                 )}
             </Dialog>
+
+            <ConfirmDialog
+                open={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={handleDeletePost}
+                title="Delete Instagram Post"
+                message="Are you sure you want to delete this Instagram post? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                isLoading={isDeleting}
+                loadingText="Deleting..."
+            />
         </Box>
     );
 };

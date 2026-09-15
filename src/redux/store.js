@@ -27,6 +27,7 @@ import { analyticsApi } from "../features/api/analyticsApi";
 import { myWorkApi } from "../features/api/myWorkApi";
 import { pinterestApi } from "../features/api/pinterestApi";
 import { instagramApi } from "../features/api/instagramApi";
+import { unusedImageApi } from "../features/api/unusedImageApi";
 
 import { rtkQueryErrorMiddleware } from "./middleware";
 
@@ -62,6 +63,7 @@ export const appStore = configureStore({
             myWorkApi.middleware,
             pinterestApi.middleware,
             instagramApi.middleware,
+            unusedImageApi.middleware,
         )
 
 });
