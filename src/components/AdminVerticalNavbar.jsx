@@ -117,13 +117,14 @@ const adminLinks = [
   {
     label: 'System',
     icon: <Settings />,
-    permission: ['cron_logs.list', 'failed_logs.list', 'config.manage', 'payment_slip.list', 'instagram.post.list'],
+    permission: ['cron_logs.list', 'failed_logs.list', 'config.manage', 'payment_slip.list', 'instagram.post.list', 'unused_image.list'],
     subLinks: [
       { label: 'Cron Logs', icon: <Analytics />, to: '/admin/cron-logs', permission: 'cron_logs.list' },
       { label: 'Failed Logs', icon: <AnnouncementIcon />, to: '/admin/failed-logs', permission: 'failed_logs.list' },
       { label: 'Manage Config', icon: <Settings />, to: '/admin/manage-config', permission: 'config.manage' },
       { label: 'Payroll', icon: <ReceiptLong />, to: '/admin/manage-payment-slips', permission: 'payment_slip.list' },
       { label: 'Instagram Posts', icon: <InstagramIcon />, to: '/admin/instagram-posts', permission: 'instagram.post.list' },
+      { label: 'Unused Images', icon: <Image />, to: '/admin/unused-images', permission: 'unused_image.list' },
     ],
   },
   {
@@ -134,12 +135,6 @@ const adminLinks = [
       { label: 'Roles', icon: <People />, to: '/admin/manage-roles', permission: 'role.list' },
       { label: 'Permissions', icon: <Analytics />, to: '/admin/manage-permissions', permission: 'permission.list' },
     ],
-  },
-  {
-    label: 'Unused Images',
-    icon: <Image />,
-    to: '/admin/unused-images',
-    permission: 'unused_image.list',
   },
 ];
 
