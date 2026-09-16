@@ -11,6 +11,8 @@ import {
   Box,
   IconButton,
   GlobalStyles,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
@@ -32,6 +34,9 @@ const ConfirmDialog = ({
   severity = 'warning',
   maxWidth = 'xs',
   confirmDisabled = false,
+  checkboxLabel,
+  checkboxChecked = false,
+  onCheckboxChange,
 }) => {
   const { isDarkMode } = useTheme();
 
@@ -103,6 +108,27 @@ const ConfirmDialog = ({
         <Typography component="div" variant="body1" sx={{ textAlign: 'center', color: isDarkMode ? '#d1d5db' : '#4b5563' }}>
           {message}
         </Typography>
+        {checkboxLabel && (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={checkboxChecked}
+                onChange={(e) => onCheckboxChange?.(e.target.checked)}
+                disabled={isLoading}
+                sx={{
+                  color: isDarkMode ? '#9ca3af' : '#6b7280',
+                  '&.Mui-checked': { color: '#ef4444' },
+                }}
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ color: isDarkMode ? '#d1d5db' : '#4b5563' }}>
+                {checkboxLabel}
+              </Typography>
+            }
+            sx={{ mt: 1, justifyContent: 'center' }}
+          />
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3, pt: 0, justifyContent: 'center', gap: 2 }}>

@@ -35,6 +35,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SearchIcon from '@mui/icons-material/Search';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import FilterAltOutlined from '@mui/icons-material/FilterAltOutlined';
 import FilterAltOffOutlined from '@mui/icons-material/FilterAltOffOutlined';
@@ -77,6 +78,7 @@ const InstagramPosts = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [viewPost, setViewPost] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
+    const [deletePermanent, setDeletePermanent] = useState(false);
     const [deletePost, { isLoading: isDeleting }] = useDeleteInstagramPostMutation();
 
     useEffect(() => {
@@ -168,7 +170,7 @@ const InstagramPosts = () => {
         if (!deleteId) return;
 
         try {
-            const res = await deletePost(deleteId).unwrap();
+            const res = await deletePost({ id: deleteId, permanent: deletePermanent }).unwrap();
 
             if (res.success && res.databaseDeleted) {
                 if (res.instagramDeleted) {
@@ -177,14 +179,17 @@ const InstagramPosts = () => {
                     toast.success('Instagram post removed from local history. It was already not found on Instagram.');
                 }
                 setDeleteId(null);
+                setDeletePermanent(false);
                 setViewPost(null);
             } else {
                 toast.error(res?.userMessage || res?.message || 'Instagram post could not be deleted. The local database record has been kept.');
                 setDeleteId(null);
+                setDeletePermanent(false);
             }
         } catch (err) {
             const msg = err?.data?.userMessage || err?.data?.message || err?.message || 'Failed to delete Instagram post.';
             toast.error(msg);
+            setDeletePermanent(false);
         }
     };
 
@@ -500,6 +505,7 @@ const InstagramPosts = () => {
                                                             onClick={() => setDeleteId(post.id)}
                                                             sx={{ color: isDarkMode ? '#ef4444' : '#dc2626' }}
                                                         >
+                                                            <DeleteIcon fontSize="small" />
                                                         </IconButton>
                                                     </Tooltip>
                                                 )}
@@ -820,7 +826,7 @@ const InstagramPosts = () => {
 
             <ConfirmDialog
                 open={!!deleteId}
-                onClose={() => setDeleteId(null)}
+                onClose={() => { setDeleteId(null); setDeletePermanent(false); }}
                 onConfirm={handleDeletePost}
                 title="Delete Instagram Post"
                 message="Are you sure you want to delete this Instagram post? This action cannot be undone."
@@ -828,6 +834,9 @@ const InstagramPosts = () => {
                 cancelText="Cancel"
                 isLoading={isDeleting}
                 loadingText="Deleting..."
+                checkboxLabel="Also permanently delete this entry from the database"
+                checkboxChecked={deletePermanent}
+                onCheckboxChange={setDeletePermanent}
             />
         </Box>
     );

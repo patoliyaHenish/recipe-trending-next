@@ -37,8 +37,8 @@ export const instagramApi = createApi({
             providesTags: ["Instagram_Posts"],
         }),
         deleteInstagramPost: builder.mutation({
-            query: (id) => ({
-                url: `/posts/${id}`,
+            query: ({ id, permanent = false }) => ({
+                url: `/posts/${id}?permanent=${permanent}`,
                 method: "DELETE",
             }),
             invalidatesTags: ["Instagram_Posts"],

@@ -60,6 +60,7 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
     });
 
     const [deleteId, setDeleteId] = useState(null);
+    const [deletePermanent, setDeletePermanent] = useState(false);
 
     const previousPosts = postsHistoryData?.posts || [];
 
@@ -122,7 +123,7 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
         if (!deleteId) return;
 
         try {
-            const res = await deletePost(deleteId).unwrap();
+            const res = await deletePost({ id: deleteId, permanent: deletePermanent }).unwrap();
 
             if (res.success && res.databaseDeleted) {
                 if (res.instagramDeleted) {
@@ -131,13 +132,16 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                     toast.success('Instagram post removed from local history. It was already not found on Instagram.');
                 }
                 setDeleteId(null);
+                setDeletePermanent(false);
             } else {
                 toast.error(res?.userMessage || res?.message || 'Instagram post could not be deleted through the API. The local history record has been kept so you can retry or delete manually.');
                 setDeleteId(null);
+                setDeletePermanent(false);
             }
         } catch (err) {
             const msg = err?.data?.userMessage || err?.data?.message || err?.message || 'Failed to delete Instagram post.';
             toast.error(msg);
+            setDeletePermanent(false);
         }
     };
 
@@ -686,7 +690,7 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
 
             <ConfirmDialog
                 open={!!deleteId}
-                onClose={() => setDeleteId(null)}
+                onClose={() => { setDeleteId(null); setDeletePermanent(false); }}
                 onConfirm={handleDeletePost}
                 title="Delete Instagram Post Record"
                 message="If the current Instagram API supports deletion, the post will be removed from Instagram and from local history. If deletion is not supported, the local history record will remain so you can retry or delete manually from Instagram."
@@ -695,6 +699,9 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                 severity="error"
                 isLoading={isDeleting}
                 loadingText="Deleting..."
+                checkboxLabel="Also permanently delete this entry from the database"
+                checkboxChecked={deletePermanent}
+                onCheckboxChange={setDeletePermanent}
             />
 
             <DialogActions
