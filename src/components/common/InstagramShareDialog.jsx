@@ -77,7 +77,7 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                 baseUrl = window.location.origin;
             }
             const recipeSlug = recipe.slug || recipe.recipe_id;
-            setRecipeUrl(`${baseUrl}/recipes/${recipeSlug}`);
+            setRecipeUrl(`${baseUrl}/${recipeSlug}`);
         }
     }, [recipe, open]);
 
