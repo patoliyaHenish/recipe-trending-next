@@ -44,10 +44,12 @@ import FilterAltOffOutlined from '@mui/icons-material/FilterAltOffOutlined';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import CloseIcon from '@mui/icons-material/Close';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import moment from 'moment';
+import * as XLSX from 'xlsx';
 import { useTheme } from '../../context/ThemeContext';
 import { toast } from '../../utils/toast';
 import { getImage } from '../../utils/helper';
@@ -151,6 +153,65 @@ const SearchResults = () => {
         } catch (error) {
             toast.error("Failed to refresh data.");
         }
+    };
+
+    const exportToExcel = () => {
+        if (!sortedResults || sortedResults.length === 0) {
+            toast.error('No data available to export.');
+            return;
+        }
+
+        const getColumnLabel = () => {
+            if (dimension === 'query') return 'Query';
+            if (dimension === 'page') return 'Page';
+            if (dimension === 'country') return 'Country';
+            if (dimension === 'device') return 'Device';
+            return 'Dimension';
+        };
+
+        const headers = [
+            '#',
+            getColumnLabel(),
+            ...(dimension === 'query' || dimension === 'page' ? ['DATE'] : []),
+            'CLICKS',
+            'IMPRESSIONS',
+            'CTR',
+            'AVG POSITION'
+        ];
+
+        const rows = sortedResults.map((row, index) => {
+            const base = [
+                index + 1,
+                dimension === 'country'
+                    ? (countries.getName(row.dimensionValue.toUpperCase(), 'en') || row.dimensionValue)
+                    : row.dimensionValue,
+            ];
+
+            const dateColumn = (dimension === 'query' || dimension === 'page')
+                ? [row.date ? moment(row.date).format('MMM DD, YYYY') : '—']
+                : [];
+
+            const metrics = [
+                row.clicks || 0,
+                row.impressions || 0,
+                `${((row.ctr || 0) * 100).toFixed(2)}%`,
+                (row.position || 0).toFixed(2),
+            ];
+
+            return [...base, ...dateColumn, ...metrics];
+        });
+
+        const worksheetData = [headers, ...rows];
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+        worksheet['!cols'] = headers.map(() => ({ wch: 22 }));
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Search Console Data');
+
+        const fileName = `search-console-${dimension}-${period}${searchDate ? `-${searchDate}` : ''}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+        toast.success('Excel file exported successfully!');
     };
 
     const allResults = useMemo(() => {
@@ -783,11 +844,39 @@ const SearchResults = () => {
                 ) : (
                     <>
                         <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2, borderBottom: `1px solid ${isDarkMode ? '#3b4253' : '#ebe9f1'}` }}>
-                            <Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 {(dimension === 'query' || dimension === 'page') && (
                                     <Typography variant="body1" sx={{ color: isDarkMode ? '#e2e8f0' : '#1e293b', fontWeight: 500 }}>
                                         Total {dimension === 'query' ? 'Queries' : 'Pages'}: {pagination.total || 0}
                                     </Typography>
+                                )}
+                                {(dimension === 'query' || dimension === 'page') && (
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        startIcon={<DownloadOutlinedIcon sx={{ fontSize: 16 }} />}
+                                        onClick={exportToExcel}
+                                        disabled={sortedResults.length === 0}
+                                        sx={{
+                                            textTransform: 'none',
+                                            fontSize: '0.8rem',
+                                            height: 32,
+                                            borderRadius: '6px',
+                                            borderColor: isDarkMode ? '#404656' : '#d8d6de',
+                                            color: isDarkMode ? '#d0d2d6' : '#6e6b7b',
+                                            '&:hover': {
+                                                borderColor: '#7367f0',
+                                                color: '#7367f0',
+                                                backgroundColor: isDarkMode ? 'rgba(115,103,240,0.08)' : 'rgba(115,103,240,0.04)',
+                                            },
+                                            '&.Mui-disabled': {
+                                                borderColor: isDarkMode ? '#404656' : '#d8d6de',
+                                                color: isDarkMode ? '#505465' : '#b0adb8',
+                                            }
+                                        }}
+                                    >
+                                        Export
+                                    </Button>
                                 )}
                             </Box>
                             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: { xs: 'stretch', sm: 'center' }, width: { xs: '100%', sm: 'auto' } }}>
