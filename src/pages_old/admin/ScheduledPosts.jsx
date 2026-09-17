@@ -469,11 +469,6 @@ const ScheduledPosts = () => {
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="center">
-                                            <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-                                                {post.created_by_name || '-'}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell align="center">
                                             <Chip
                                                 label={post.status}
                                                 size="small"
@@ -485,6 +480,11 @@ const ScheduledPosts = () => {
                                                     textTransform: 'capitalize'
                                                 }}
                                             />
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                                                {post.created_by_name || '-'}
+                                            </Typography>
                                         </TableCell>
                                         <TableCell align="center">
                                             <Typography variant="body2" sx={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
