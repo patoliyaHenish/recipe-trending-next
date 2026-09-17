@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import AnnouncementIcon from '@mui/icons-material/Announcement';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import { Box } from '@mui/material';
 import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/useUser';
@@ -117,13 +118,14 @@ const adminLinks = [
   {
     label: 'System',
     icon: <Settings />,
-    permission: ['cron_logs.list', 'failed_logs.list', 'config.manage', 'payment_slip.list', 'instagram.post.list', 'unused_image.list'],
+    permission: ['cron_logs.list', 'failed_logs.list', 'config.manage', 'payment_slip.list', 'instagram.post.list', 'unused_image.list', 'instagram.schedule.list'],
     subLinks: [
       { label: 'Cron Logs', icon: <Analytics />, to: '/admin/cron-logs', permission: 'cron_logs.list' },
       { label: 'Failed Logs', icon: <AnnouncementIcon />, to: '/admin/failed-logs', permission: 'failed_logs.list' },
       { label: 'Manage Config', icon: <Settings />, to: '/admin/manage-config', permission: 'config.manage' },
       { label: 'Payroll', icon: <ReceiptLong />, to: '/admin/manage-payment-slips', permission: 'payment_slip.list' },
       { label: 'Instagram Posts', icon: <InstagramIcon />, to: '/admin/instagram-posts', permission: 'instagram.post.list' },
+      { label: 'Scheduled Posts', icon: <ScheduleIcon />, to: '/admin/scheduled-posts', permission: 'instagram.schedule.list' },
       { label: 'Unused Images', icon: <Image />, to: '/admin/unused-images', permission: 'unused_image.list' },
     ],
   },

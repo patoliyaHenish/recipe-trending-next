@@ -37,6 +37,7 @@ import SearchResults from '../../pages_old/admin/SearchResults';
 import WebAnalytics from '../../pages_old/admin/WebAnalytics';
 import MyWork from '../../pages_old/admin/MyWork';
 import InstagramPosts from '../../pages_old/admin/InstagramPosts';
+import ScheduledPosts from '../../pages_old/admin/ScheduledPosts';
 import UnusedImages from '../../pages_old/admin/UnusedImages';
 
 const checkPerm = (permission, userPermissions) => {
@@ -89,6 +90,7 @@ const routeConfig = [
   { path: 'search-results', element: <SearchResults />, permission: 'search_console.view' },
   { path: 'web-analytics', element: <WebAnalytics />, permission: 'web_analytics.view' },
   { path: 'instagram-posts', element: <InstagramPosts />, permission: 'instagram.post.list' },
+  { path: 'scheduled-posts', element: <ScheduledPosts />, permission: 'instagram.schedule.list' },
   { path: 'unused-images', element: <UnusedImages />, permission: 'unused_image.list' },
 ];
 

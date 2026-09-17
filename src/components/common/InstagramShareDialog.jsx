@@ -29,6 +29,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import ImageIcon from '@mui/icons-material/Image';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 
 import { useTheme } from '../../context/ThemeContext';
 import { getImage } from '../../utils/helper';
@@ -38,7 +39,9 @@ import {
     useCreateInstagramPostMutation,
     useGetRecipeInstagramPostsQuery,
     useDeleteInstagramPostMutation,
-    useGenerateInstagramCaptionMutation
+    useGenerateInstagramCaptionMutation,
+    useScheduleInstagramPostMutation,
+    useGetScheduledPostsByRecipeQuery,
 } from '../../features/api/instagramApi';
 
 const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
@@ -51,11 +54,17 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
     const [publishedPostUrl, setPublishedPostUrl] = useState('');
     const [copied, setCopied] = useState(false);
     const [recipeUrl, setRecipeUrl] = useState('');
+    const [scheduledAt, setScheduledAt] = useState('');
+    const [selectedPreset, setSelectedPreset] = useState(null);
 
     const [createPost, { isLoading: isPosting }] = useCreateInstagramPostMutation();
     const [deletePost, { isLoading: isDeleting }] = useDeleteInstagramPostMutation();
     const [generateCaption, { isLoading: isGeneratingCaption }] = useGenerateInstagramCaptionMutation();
+    const [schedulePost, { isLoading: isScheduling }] = useScheduleInstagramPostMutation();
     const { data: postsHistoryData, isLoading: isLoadingHistory } = useGetRecipeInstagramPostsQuery(recipe?.recipe_id, {
+        skip: !open || !recipe?.recipe_id
+    });
+    const { data: scheduledPostsData, isLoading: isLoadingScheduledPosts } = useGetScheduledPostsByRecipeQuery(recipe?.recipe_id, {
         skip: !open || !recipe?.recipe_id
     });
 
@@ -63,6 +72,7 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
     const [deletePermanent, setDeletePermanent] = useState(false);
 
     const previousPosts = postsHistoryData?.posts || [];
+    const scheduledPosts = scheduledPostsData?.data || [];
 
     useEffect(() => {
         if (recipe && open) {
@@ -79,6 +89,8 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
             }
             const recipeSlug = recipe.slug || recipe.recipe_id;
             setRecipeUrl(`${baseUrl}/${recipeSlug}`);
+            setScheduledAt('');
+            setSelectedPreset(null);
         }
     }, [recipe, open]);
 
@@ -166,6 +178,74 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
             }
         } catch (err) {
             const msg = err?.data?.message || err?.message || 'Failed to generate caption.';
+            toast.error(msg);
+        }
+    };
+
+    const getPresetDate = (preset) => {
+        const now = new Date();
+        const hours = [0, 6, 12, 18];
+
+        if (preset === 'custom') {
+            return null;
+        }
+
+        const targetHour = parseInt(preset, 10);
+        let next = new Date(now);
+        next.setHours(targetHour, 0, 0, 0);
+
+        if (next <= now) {
+            next.setDate(next.getDate() + 1);
+            next.setHours(targetHour, 0, 0, 0);
+        }
+
+        return next;
+    };
+
+    const handleSchedule = async () => {
+        if (!title.trim()) {
+            toast.error('Title is required for scheduled Instagram post.');
+            return;
+        }
+        if (!imageUrl) {
+            toast.error('Recipe Image URL is required for scheduled Instagram post.');
+            return;
+        }
+
+        let scheduledDate;
+        if (selectedPreset) {
+            scheduledDate = getPresetDate(selectedPreset);
+        }
+
+        if (!scheduledDate) {
+            toast.error('Please select a time to schedule the post.');
+            return;
+        }
+
+        if (Number.isNaN(scheduledDate.getTime())) {
+            toast.error('Invalid scheduled date/time.');
+            return;
+        }
+        if (scheduledDate <= new Date()) {
+            toast.error('Scheduled time must be in the future.');
+            return;
+        }
+
+        try {
+            const res = await schedulePost({
+                recipe_id: recipe.recipe_id,
+                title: title.trim(),
+                image_url: imageUrl,
+                caption: caption.trim(),
+                scheduled_at: scheduledDate.toISOString()
+            }).unwrap();
+
+            if (res.success) {
+                toast.success('Post scheduled successfully!');
+                setTabIndex(1);
+            }
+        } catch (err) {
+            const msg = err?.data?.userMessage || err?.data?.message || err?.message || 'Failed to schedule Instagram post.';
             toast.error(msg);
         }
     };
@@ -318,6 +398,49 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                             fontSize: '0.875rem',
                             minHeight: 40,
                             color: tabIndex === 1 ? '#E1306C' : textSecondary,
+                            '&.Mui-selected': { color: '#E1306C' }
+                        }}
+                    />
+                    <Tab
+                        icon={<ScheduleIcon sx={{ fontSize: 18 }} />}
+                        iconPosition="start"
+                        label={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <span>Schedule History</span>
+                                {scheduledPosts.length > 0 && (
+                                    <Chip
+                                        label={scheduledPosts.length}
+                                        size="small"
+                                        sx={{
+                                            height: 18,
+                                            fontSize: '0.7rem',
+                                            fontWeight: 'bold',
+                                            backgroundColor: tabIndex === 2 ? '#E1306C' : (isDarkMode ? '#3b4253' : '#e0e0e0'),
+                                            color: tabIndex === 2 ? '#ffffff' : textSecondary,
+                                        }}
+                                    />
+                                )}
+                            </Box>
+                        }
+                        sx={{
+                            textTransform: 'none',
+                            fontWeight: tabIndex === 2 ? 600 : 500,
+                            fontSize: '0.875rem',
+                            minHeight: 40,
+                            color: tabIndex === 2 ? '#E1306C' : textSecondary,
+                            '&.Mui-selected': { color: '#E1306C' }
+                        }}
+                    />
+                    <Tab
+                        icon={<ScheduleIcon sx={{ fontSize: 18 }} />}
+                        iconPosition="start"
+                        label="Schedule"
+                        sx={{
+                            textTransform: 'none',
+                            fontWeight: tabIndex === 3 ? 600 : 500,
+                            fontSize: '0.875rem',
+                            minHeight: 40,
+                            color: tabIndex === 3 ? '#E1306C' : textSecondary,
                             '&.Mui-selected': { color: '#E1306C' }
                         }}
                     />
@@ -684,6 +807,265 @@ const InstagramShareDialog = ({ open, onClose, recipe, canDelete }) => {
                                 ))}
                             </Stack>
                         )}
+                    </Box>
+                )}
+
+                {tabIndex === 2 && (
+                    <Box sx={{ minHeight: 250 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 600, color: textSecondary, textTransform: 'uppercase', display: 'block', mb: 2 }}>
+                            Scheduled Instagram Posts for this Recipe
+                        </Typography>
+
+                        {isLoadingScheduledPosts ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+                                <CircularProgress sx={{ color: '#E1306C' }} />
+                            </Box>
+                        ) : scheduledPosts.length === 0 ? (
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    p: 4,
+                                    borderRadius: '8px',
+                                    border: `1px solid ${borderColor}`,
+                                    backgroundColor: bgCard,
+                                    textAlign: 'center'
+                                }}
+                            >
+                                <Typography variant="body2" sx={{ color: textSecondary }}>
+                                    No scheduled posts for this recipe.
+                                </Typography>
+                            </Paper>
+                        ) : (
+                            <Stack spacing={2}>
+                                {scheduledPosts.map((post) => (
+                                    <Paper
+                                        key={`scheduled-${post.id}`}
+                                        elevation={0}
+                                        sx={{
+                                            p: 2,
+                                            borderRadius: '8px',
+                                            border: `1px solid ${borderColor}`,
+                                            backgroundColor: bgCard,
+                                            display: 'flex',
+                                            flexDirection: { xs: 'column', sm: 'row' },
+                                            gap: 2,
+                                            alignItems: { xs: 'stretch', sm: 'center' }
+                                        }}
+                                    >
+                                        {post.image_url ? (
+                                            <Box
+                                                sx={{
+                                                    width: { xs: '100%', sm: 56 },
+                                                    height: { xs: 180, sm: 56 },
+                                                    borderRadius: '6px',
+                                                    overflow: 'hidden',
+                                                    flexShrink: 0
+                                                }}
+                                            >
+                                                <img
+                                                    src={post.image_url}
+                                                    alt={post.title}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                />
+                                            </Box>
+                                        ) : (
+                                            <Box sx={{ width: { xs: '100%', sm: 56 }, height: { xs: 180, sm: 56 }, borderRadius: '6px', backgroundColor: isDarkMode ? '#3b4253' : '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                <InstagramIcon sx={{ color: textSecondary }} />
+                                            </Box>
+                                        )}
+                                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                            <Typography variant="subtitle2" fontWeight="600" sx={{ color: textPrimary }} noWrap>
+                                                {post.title}
+                                            </Typography>
+                                            <Box sx={{ mt: 0.3 }}>
+                                                <Chip
+                                                    label="Scheduled"
+                                                    size="small"
+                                                    sx={{
+                                                        height: 20,
+                                                        backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.1)',
+                                                        color: '#f59e0b',
+                                                        fontWeight: 500,
+                                                        fontSize: '0.65rem'
+                                                    }}
+                                                />
+                                            </Box>
+                                            {post.created_by_name && (
+                                                <Typography variant="caption" sx={{ color: textSecondary, display: 'block', mt: 0.3 }}>
+                                                    Created by: <strong>{post.created_by_name}</strong>
+                                                </Typography>
+                                            )}
+                                            <Typography variant="caption" sx={{ color: textSecondary, display: 'block', mt: 0.3 }}>
+                                                Scheduled for: <strong>{new Date(post.scheduled_at).toLocaleString()}</strong>
+                                            </Typography>
+                                        </Box>
+
+                                        <Box sx={{ 
+                                            display: 'flex', 
+                                            flexDirection: 'row',
+                                            gap: 1,
+                                            alignItems: 'center',
+                                            flexWrap: 'wrap'
+                                        }}>
+                                            {canDelete && (
+                                                <Tooltip title="Cancel Scheduled Post">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => setDeleteId(post.id)}
+                                                        sx={{
+                                                            color: textSecondary,
+                                                            '&:hover': { color: '#ea5455' },
+                                                            alignSelf: { xs: 'flex-end', sm: 'center' }
+                                                        }}
+                                                    >
+                                                        <DeleteIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            )}
+                                        </Box>
+                                    </Paper>
+                                ))}
+                            </Stack>
+                        )}
+                    </Box>
+                )}
+
+                {tabIndex === 3 && (
+                    <Box sx={{ minHeight: 250 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 600, color: textSecondary, textTransform: 'uppercase', display: 'block', mb: 2 }}>
+                            Schedule Instagram Post
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+                            <Box sx={{ flex: '0 0 280px', width: { xs: '100%', md: 280 } }}>
+                                <Typography variant="caption" sx={{ fontWeight: 600, color: textSecondary, textTransform: 'uppercase', display: 'block', mb: 1 }}>
+                                    Post Preview
+                                </Typography>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        borderRadius: '8px',
+                                        overflow: 'hidden',
+                                        border: `1px solid ${borderColor}`,
+                                        backgroundColor: bgCard,
+                                        boxShadow: 'none'
+                                    }}
+                                >
+                                    <Box sx={{ position: 'relative', width: '100%', pt: '56.25%', backgroundColor: isDarkMode ? '#1f2937' : '#e5e7eb' }}>
+                                        {imageUrl ? (
+                                            <img
+                                                src={imageUrl}
+                                                alt={title || 'Recipe Preview'}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover'
+                                                }}
+                                            />
+                                        ) : (
+                                            <Box
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: textSecondary,
+                                                    gap: 1
+                                                }}
+                                            >
+                                                <ImageIcon sx={{ fontSize: 36, opacity: 0.5 }} />
+                                                <Typography variant="caption">No Image</Typography>
+                                            </Box>
+                                        )}
+                                    </Box>
+                                    <Box sx={{ p: 2 }}>
+                                        <Typography variant="subtitle2" fontWeight="600" sx={{ color: textPrimary }} noWrap>
+                                            {title ? `Checkout ${title} - ${recipeUrl}` : 'Checkout Recipe Title - Recipe Link'}
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                mt: 0.5,
+                                                color: textSecondary,
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 3,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                                fontSize: '0.8rem',
+                                                lineHeight: 1.4
+                                            }}
+                                        >
+                                            {caption || 'Recipe caption preview will appear here.'}
+                                        </Typography>
+                                    </Box>
+                                </Paper>
+                            </Box>
+
+                            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                <Typography variant="caption" sx={{ fontWeight: 600, color: textSecondary, textTransform: 'uppercase', display: 'block' }}>
+                                    Schedule Details
+                                </Typography>
+
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                    <Typography variant="caption" sx={{ color: textSecondary }}>
+                                        Quick Select *
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                        {[
+                                            { label: '12:00 AM (00:00)', value: '0' },
+                                            { label: '06:00 AM (06:00)', value: '6' },
+                                            { label: '12:00 PM (12:00)', value: '12' },
+                                            { label: '06:00 PM (18:00)', value: '18' },
+                                        ].map((option) => (
+                                            <Button
+                                                key={option.value}
+                                                variant={selectedPreset === option.value ? 'contained' : 'outlined'}
+                                                size="small"
+                                                onClick={() => setSelectedPreset(option.value)}
+                                                sx={{
+                                                    textTransform: 'none',
+                                                    fontSize: '0.8rem',
+                                                    borderRadius: '6px',
+                                                    borderColor: selectedPreset === option.value ? '#E1306C' : (isDarkMode ? '#404656' : '#d8d6de'),
+                                                    color: selectedPreset === option.value ? '#fff' : textSecondary,
+                                                    backgroundColor: selectedPreset === option.value ? '#E1306C' : 'transparent',
+                                                    '&:hover': {
+                                                        borderColor: '#E1306C',
+                                                        backgroundColor: selectedPreset === option.value ? '#c0355e' : (isDarkMode ? 'rgba(225,48,108,0.08)' : 'rgba(225,48,108,0.04)')
+                                                    }
+                                                }}
+                                            >
+                                                {option.label}
+                                            </Button>
+                                        ))}
+                                    </Box>
+                                </Box>
+
+                                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                                    <Button
+                                        variant="contained"
+                                        onClick={handleSchedule}
+                                        disabled={isScheduling || !isRecipePublicApproved || !selectedPreset}
+                                        sx={{
+                                            backgroundColor: '#E1306C',
+                                            '&:hover': { backgroundColor: '#c0355e' },
+                                            textTransform: 'none',
+                                            fontWeight: 'bold'
+                                        }}
+                                        startIcon={isScheduling ? <CircularProgress size={18} color="inherit" /> : <ScheduleIcon />}
+                                    >
+                                        {isScheduling ? 'Scheduling...' : 'Schedule Post'}
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </Box>
                     </Box>
                 )}
             </DialogContent>
