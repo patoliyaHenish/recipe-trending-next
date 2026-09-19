@@ -763,7 +763,7 @@ const AssignedRecipes = () => {
                                 { id: 'assigned_to', label: 'Assigned to', minWidth: 200 },
                                 { id: 'category', label: 'Category', minWidth: 200 },
                                 { id: 'sub_category', label: 'Sub-category', minWidth: 200 },
-                                { id: 'created', label: 'Created', minWidth: 190 },
+                                { id: 'created', label: 'Updated', minWidth: 190 },
                                 ...(canUpdate || canDelete ? [{ id: 'actions', label: 'Actions', minWidth: 180 }] : [])
                             ].map((col, index) => (
                                 <TableCell 
@@ -872,7 +872,7 @@ const AssignedRecipes = () => {
                                     </TableCell>
 
                                     <TableCell align="center">
-                                        {row.created_at ? moment(row.created_at).format("MMM D, YYYY hh:mm A") : "-"}
+                                        {row.updated_at ? moment(row.updated_at).format("MMM D, YYYY hh:mm A") : "-"}
                                     </TableCell>
 
                                     {(canUpdate || canDelete) && (
