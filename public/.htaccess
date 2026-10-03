@@ -1,5 +1,10 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
+  
+  # Redirect non-www to www
+  RewriteCond %{HTTP_HOST} ^recipetrending\.com [NC]
+  RewriteRule ^(.*)$ https://www.recipetrending.com/$1 [L,R=301]
+
   RewriteBase /
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
